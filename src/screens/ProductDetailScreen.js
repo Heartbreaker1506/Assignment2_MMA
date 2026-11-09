@@ -154,7 +154,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         <View style={styles.infoCard}>
           <View style={styles.categoryBadgeRow}>
             <View style={styles.categoryChip}>
-              <Text style={styles.categoryChipText}>{product.category.toUpperCase()}</Text>
+              <Text style={styles.categoryChipText}>{(product.category || '').toUpperCase()}</Text>
             </View>
             <Text style={styles.brandText}>Hãng: {product.brand || 'Chính hãng'}</Text>
           </View>

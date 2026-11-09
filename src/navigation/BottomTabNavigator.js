@@ -1,5 +1,4 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { ProductListScreen } from '../screens/ProductListScreen';
@@ -17,7 +16,7 @@ export const BottomTabNavigator = () => {
 
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: COLORS.textMuted,
@@ -32,24 +31,33 @@ export const BottomTabNavigator = () => {
           fontSize: 11,
           fontWeight: '600',
         },
-      }}
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName = 'grid-outline';
+          if (route.name === 'CatalogTab') {
+            iconName = focused ? 'grid' : 'grid-outline';
+          } else if (route.name === 'WishlistTab') {
+            iconName = focused ? 'heart' : 'heart-outline';
+          } else if (route.name === 'CartTab') {
+            iconName = focused ? 'cart' : 'cart-outline';
+          } else if (route.name === 'AITab') {
+            iconName = focused ? 'sparkles' : 'sparkles-outline';
+          } else if (route.name === 'SettingsTab') {
+            iconName = focused ? 'settings' : 'settings-outline';
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+      })}
     >
       <Tab.Screen
         name="CatalogTab"
         component={ProductListScreen}
-        options={{
-          tabBarLabel: 'Sản phẩm',
-          tabBarIcon: ({ color, size }) => <Ionicons name="grid-outline" size={size} color={color} />,
-        }}
+        options={{ tabBarLabel: 'Sản phẩm' }}
       />
 
       <Tab.Screen
         name="WishlistTab"
         component={WishlistScreen}
-        options={{
-          tabBarLabel: 'Yêu thích',
-          tabBarIcon: ({ color, size }) => <Ionicons name="heart-outline" size={size} color={color} />,
-        }}
+        options={{ tabBarLabel: 'Yêu thích' }}
       />
 
       <Tab.Screen
@@ -57,34 +65,21 @@ export const BottomTabNavigator = () => {
         component={CartScreen}
         options={{
           tabBarLabel: 'Giỏ hàng',
-          tabBarBadge: itemCount > 0 ? (itemCount > 99 ? '99+' : itemCount) : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: COLORS.danger,
-            fontSize: 10,
-            fontWeight: '700',
-          },
-          tabBarIcon: ({ color, size }) => <Ionicons name="cart-outline" size={size} color={color} />,
+          ...(itemCount > 0 ? { tabBarBadge: itemCount > 99 ? '99+' : itemCount } : {}),
         }}
       />
 
       <Tab.Screen
         name="AITab"
         component={AIScreen}
-        options={{
-          tabBarLabel: 'Hỏi AI',
-          tabBarIcon: ({ color, size }) => <Ionicons name="sparkles-outline" size={size} color={color} />,
-        }}
+        options={{ tabBarLabel: 'Hỏi AI' }}
       />
 
       <Tab.Screen
         name="SettingsTab"
         component={SettingsScreen}
-        options={{
-          tabBarLabel: 'Cài đặt',
-          tabBarIcon: ({ color, size }) => <Ionicons name="settings-outline" size={size} color={color} />,
-        }}
+        options={{ tabBarLabel: 'Cài đặt' }}
       />
     </Tab.Navigator>
   );
 };
-

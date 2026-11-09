@@ -43,7 +43,7 @@ export const ProductCard = ({ product, onPress, onAddToCart, isFavorite, onToggl
 
       {/* Info */}
       <View style={styles.infoContainer}>
-        <Text style={styles.category}>{product.category.toUpperCase()}</Text>
+        <Text style={styles.category}>{(product.category || '').toUpperCase()}</Text>
         <Text style={styles.title} numberOfLines={2}>{product.title}</Text>
 
         {/* Rating & Stock */}
