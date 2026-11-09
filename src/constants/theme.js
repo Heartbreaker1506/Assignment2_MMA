@@ -1,77 +1,90 @@
 // Author: Nguyễn Minh Quân - Student ID: CE180048
 
-// Light theme palette
+// Modern Tech-Luxury Palette (Teal & Indigo Neon)
 export const lightColors = {
-  background: '#F5F7FB',
+  background: '#F8FAFC',
   surface: '#FFFFFF',
   card: '#FFFFFF',
-  text: '#1C1E21',
-  textSecondary: '#65676B',
-  primary: '#2563EB',
-  primaryLight: '#EBF2FF',
-  border: '#E4E6EB',
-  danger: '#DC3545',
-  dangerLight: '#FFEAEA',
-  success: '#16A34A',
-  successLight: '#E8F5E9',
-  warning: '#D97706',
+  text: '#0F172A',
+  textSecondary: '#64748B',
+  primary: '#0D9488',          // Deep Teal
+  primaryDark: '#0F766E',
+  primaryLight: '#CCFBF1',
+  secondary: '#6366F1',        // Electric Indigo
+  secondaryLight: '#EEF2FF',
+  border: '#E2E8F0',
+  borderLight: '#F1F5F9',
+  danger: '#EF4444',
+  dangerLight: '#FEE2E2',
+  success: '#10B981',
+  successLight: '#D1FAE5',
+  warning: '#F59E0B',
   warningLight: '#FEF3C7',
   accent: '#F59E0B',
-  purple: '#7C3AED',
+  purple: '#8B5CF6',
   purpleLight: '#F3E8FF',
+  gold: '#D97706',
+  goldLight: '#FEF3C7',
   statusBar: 'dark',
 };
 
-// Dark theme palette
+// Deep Obsidian Night Theme
 export const darkColors = {
-  background: '#121212',
-  surface: '#1E1E1E',
-  card: '#242526',
-  text: '#E4E6EB',
-  textSecondary: '#B0B3B8',
-  primary: '#3B82F6',
-  primaryLight: '#1E3A5F',
-  border: '#3A3B3C',
-  danger: '#FF6B6B',
-  dangerLight: '#3D1E1E',
-  success: '#22C55E',
-  successLight: '#1E3D24',
+  background: '#0B0F17',      // Deep Obsidian
+  surface: '#111827',
+  card: '#161F30',           // Midnight Slate
+  text: '#F8FAFC',
+  textSecondary: '#94A3B8',
+  primary: '#14B8A6',          // Neon Teal
+  primaryDark: '#0D9488',
+  primaryLight: '#134E4A',
+  secondary: '#818CF8',        // Neon Indigo
+  secondaryLight: '#1E1B4B',
+  border: '#1E293B',
+  borderLight: '#0F172A',
+  danger: '#F87171',
+  dangerLight: '#450A0A',
+  success: '#34D399',
+  successLight: '#064E3B',
   warning: '#FBBF24',
-  warningLight: '#3D2E10',
-  accent: '#FFA726',
+  warningLight: '#451A03',
+  accent: '#FBBF24',
   purple: '#A78BFA',
-  purpleLight: '#2E1F47',
+  purpleLight: '#2E1065',
+  gold: '#FBBF24',
+  goldLight: '#3D2506',
   statusBar: 'light',
 };
 
-// Student information displayed in the app
+// Student Information
 export const STUDENT_INFO = {
   name: 'Nguyễn Minh Quân',
   studentId: 'CE180048',
   email: 'QuanNMCE180048@fpt.edu.vn',
   course: 'MMA301 - Integrated E-Commerce App (Assignment 2)',
+  brandName: 'NEXUS LUXE',
 };
 
-// Pagination and cart pricing rules
+// Pricing and Shipping Rules
 export const SHOP_CONFIG = {
-  PAGE_LIMIT: 8, // Number of products per page
-  FREE_SHIPPING_THRESHOLD: 100, // Free shipping for orders >= $100
-  STANDARD_SHIPPING_FEE: 8, // Standard shipping fee ($8)
-  VIP_DISCOUNT_THRESHOLD: 300, // 5% discount for orders >= $300
+  PAGE_LIMIT: 8,
+  FREE_SHIPPING_THRESHOLD: 100,
+  STANDARD_SHIPPING_FEE: 8,
+  VIP_DISCOUNT_THRESHOLD: 300,
   VIP_DISCOUNT_RATE: 0.05,
 };
 
-// Category filter options for ProductListScreen
+// Product Categories with Icons
 export const PRODUCT_CATEGORIES = [
-  { id: 'all', label: 'Tất cả' },
-  { id: 'smartphones', label: 'Điện thoại' },
-  { id: 'laptops', label: 'Laptop' },
-  { id: 'tablets', label: 'Máy tính bảng' },
-  { id: 'mobile-accessories', label: 'Phụ kiện' },
-  { id: 'mens-watches', label: 'Đồng hồ' },
+  { id: 'all', label: 'Tất cả', icon: '✨' },
+  { id: 'smartphones', label: 'Điện thoại', icon: '📱' },
+  { id: 'laptops', label: 'Laptop', icon: '💻' },
+  { id: 'tablets', label: 'Máy tính bảng', icon: '📟' },
+  { id: 'mobile-accessories', label: 'Phụ kiện', icon: '🎧' },
+  { id: 'mens-watches', label: 'Đồng hồ', icon: '⌚' },
 ];
 
-// Offline fallback product catalog when network is unavailable
+// Fallback products with high-resolution visuals
 export const FALLBACK_PRODUCTS = [
   {
     id: 101,

@@ -1,7 +1,7 @@
 // Author: Nguyễn Minh Quân - Student ID: CE180048
 
 import React from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { CustomButton } from './CustomButton';
 
@@ -22,7 +22,7 @@ export const StateFeedback = ({
       <View style={styles.container}>
         <ActivityIndicator size="large" color={colors.primary} />
         <Text style={[styles.title, { color: colors.text, marginTop: 14 }]}>
-          {title || 'Đang tải dữ liệu...'}
+          {title || 'Đang đồng bộ dữ liệu...'}
         </Text>
         {message ? (
           <Text style={[styles.message, { color: colors.textSecondary }]}>
@@ -45,14 +45,14 @@ export const StateFeedback = ({
         },
       ]}
     >
-      <Text style={styles.iconText}>{isError ? '⚠️' : '📦'}</Text>
+      <Text style={styles.iconText}>{isError ? '⚡' : '✨'}</Text>
       <Text
         style={[
           styles.title,
           { color: isError ? colors.danger : colors.text },
         ]}
       >
-        {title || (isError ? 'Đã xảy ra lỗi kết nối' : 'Không có dữ liệu')}
+        {title || (isError ? 'Đã xảy ra sự cố kết nối' : 'Không tìm thấy dữ liệu')}
       </Text>
       {message ? (
         <Text style={[styles.message, { color: colors.textSecondary }]}>
@@ -85,43 +85,55 @@ export const StateFeedback = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 48,
+    paddingVertical: 56,
     paddingHorizontal: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cardContainer: {
-    marginVertical: 20,
+    marginVertical: 18,
     marginHorizontal: 4,
-    padding: 22,
-    borderRadius: 14,
+    padding: 24,
+    borderRadius: 18,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   iconText: {
-    fontSize: 36,
-    marginBottom: 10,
+    fontSize: 40,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     textAlign: 'center',
     marginBottom: 6,
   },
   message: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
     textAlign: 'center',
     marginBottom: 16,
   },
   actionsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: 10,
+    justifyContent: 'center',
   },
   actionBtn: {
-    minWidth: 135,
+    minWidth: 140,
   },
 });

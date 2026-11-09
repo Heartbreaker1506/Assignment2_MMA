@@ -8,6 +8,7 @@ import {
   Switch,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { STUDENT_INFO } from '../constants/theme';
 import { clearAllAppStorage } from '../utils/storage';
@@ -41,8 +42,8 @@ export const NotificationSettingsScreen = ({ navigation }) => {
       type: statusValue === 'granted' ? 'success' : 'warning',
       text:
         statusValue === 'granted'
-          ? 'Đã chuyển trạng thái quyền thông báo sang: CHO PHÉP (Granted - Case 12).'
-          : 'Đã chuyển trạng thái quyền thông báo sang: TỪ CHỐI (Denied - Case 11). App vẫn hoạt động bình thường, không crash!',
+          ? '✓ Quyền thông báo: ĐÃ CẤP (Granted - Case 12). Có thể nhận thông báo đơn hàng và yêu thích!'
+          : '✕ Quyền thông báo: TỪ CHỐI (Denied - Case 11). Hệ thống xử lý an toàn, không crash!',
     });
   };
 
@@ -79,6 +80,43 @@ export const NotificationSettingsScreen = ({ navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
+      {/* Student Author Showcase VIP Card */}
+      <View
+        style={[
+          styles.studentCard,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+        ]}
+      >
+        <View style={styles.studentTopRow}>
+          <View style={{ flex: 1 }}>
+            <View style={styles.authorBadgeRow}>
+              <Text style={[styles.authorName, { color: colors.text }]}>
+                {STUDENT_INFO.name}
+              </Text>
+              <View
+                style={[
+                  styles.authorIdBadge,
+                  { backgroundColor: colors.primaryLight },
+                ]}
+              >
+                <Text
+                  style={[styles.authorIdText, { color: colors.primary }]}
+                >
+                  {STUDENT_INFO.studentId}
+                </Text>
+              </View>
+            </View>
+            <Text style={[styles.authorEmail, { color: colors.textSecondary }]}>
+              {STUDENT_INFO.email}
+            </Text>
+            <Text style={[styles.authorCourse, { color: colors.textSecondary }]}>
+              {STUDENT_INFO.course}
+            </Text>
+          </View>
+          <Text style={{ fontSize: 32 }}>👑</Text>
+        </View>
+      </View>
+
       {/* Section 1: Notification permission and business event settings */}
       <View
         style={[
@@ -88,7 +126,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
       >
         <View style={styles.headerRow}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>
-            🔔 Quyền & Luồng Thông báo Nghiệp vụ (R09)
+            🔔 Quyền Thông báo Nghiệp vụ (R09)
           </Text>
           <View
             style={[
@@ -106,15 +144,14 @@ export const NotificationSettingsScreen = ({ navigation }) => {
                 { color: isGranted ? colors.success : colors.danger },
               ]}
             >
-              {isGranted ? 'GRANTED (Đã cấp)' : 'DENIED (Từ chối)'}
+              {isGranted ? '● GRANTED' : '▲ DENIED'}
             </Text>
           </View>
         </View>
 
         <Text style={[styles.descText, { color: colors.textSecondary }]}>
-          Kiểm thử trực tiếp Case 11 (Từ chối quyền → App không crash, hiện
-          trạng thái rõ ràng) và Case 12 (Cho phép quyền → Phát thông báo khi
-          Đặt hàng / Lưu Wishlist / Bấm nút Test).
+          Kiểm thử nhanh Case 11 (Từ chối quyền → App không crash, cảnh báo
+          rõ ràng) và Case 12 (Cho phép quyền → Phát thông báo khi Đặt hàng / Lưu Wishlist).
         </Text>
 
         {/* Quick permission status toggle buttons */}
@@ -128,6 +165,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
               },
             ]}
             onPress={() => handleSetPermission('granted')}
+            activeOpacity={0.8}
           >
             <Text
               style={[
@@ -148,6 +186,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
               },
             ]}
             onPress={() => handleSetPermission('denied')}
+            activeOpacity={0.8}
           >
             <Text
               style={[
@@ -161,7 +200,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         </View>
 
         <CustomButton
-          title="📱 Gọi hộp thoại xin quyền OS (requestPermissionsAsync)"
+          title="📱 Xin cấp quyền từ OS (requestPermissionsAsync)"
           onPress={askOsNotificationPermission}
           variant="outline"
           style={{ marginBottom: 12 }}
@@ -173,12 +212,12 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         >
           <View style={styles.settingTextCol}>
             <Text style={[styles.settingTitle, { color: colors.text }]}>
-              Thông báo xác nhận Đặt hàng (ORDER_PLACED)
+              Thông báo Đặt hàng (ORDER_PLACED)
             </Text>
             <Text
               style={[styles.settingSub, { color: colors.textSecondary }]}
             >
-              Tự động gửi khi thanh toán giỏ hàng thành công
+              Tự động gửi khi xác nhận đơn hàng thành công
             </Text>
           </View>
           <Switch
@@ -186,6 +225,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
             onValueChange={(val) =>
               changeNotificationSetting({ orderAlertsEnabled: val })
             }
+            trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
 
@@ -194,12 +234,12 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         >
           <View style={styles.settingTextCol}>
             <Text style={[styles.settingTitle, { color: colors.text }]}>
-              Thông báo đồng bộ Wishlist (WISHLIST_UPDATED)
+              Thông báo Yêu thích (WISHLIST_UPDATED)
             </Text>
             <Text
               style={[styles.settingSub, { color: colors.textSecondary }]}
             >
-              Tự động gửi khi thêm sản phẩm vào danh sách Yêu thích
+              Tự động gửi khi thêm/xóa sản phẩm Yêu thích
             </Text>
           </View>
           <Switch
@@ -207,6 +247,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
             onValueChange={(val) =>
               changeNotificationSetting({ wishlistAlertsEnabled: val })
             }
+            trackColor={{ false: colors.border, true: colors.primary }}
           />
         </View>
 
@@ -242,7 +283,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         ) : null}
 
         <CustomButton
-          title="🚀 Kích hoạt Sự kiện Thông báo Kiểm thử ngay"
+          title="🚀 Bắn thông báo Kiểm thử ngay"
           onPress={handleSendTestNotif}
           variant="primary"
           style={{ marginTop: 8 }}
@@ -257,11 +298,11 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.primary }]}>
-          🧪 Bảng Mô phỏng Lỗi & Edge Cases (Phục vụ Demo Chấm Bài)
+          🧪 Mô phỏng Lỗi & Edge Cases (Test Matrix)
         </Text>
         <Text style={[styles.descText, { color: colors.textSecondary }]}>
-          Bật các công tắc bên dưới để tái hiện ngay lập tức các tình huống lỗi
-          trong Test Matrix (Mục 5 của đề bài) mà không cần ngắt mạng thật:
+          Bật các công tắc bên dưới để tái hiện tức thì các tình huống kiểm thử
+          mà không cần ngắt mạng thật:
         </Text>
 
         <View
@@ -280,6 +321,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
           <Switch
             value={simulationFlags.simulateApiError}
             onValueChange={() => toggleSimulationFlag('simulateApiError')}
+            trackColor={{ false: colors.border, true: colors.warning }}
           />
         </View>
 
@@ -288,17 +330,18 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         >
           <View style={styles.settingTextCol}>
             <Text style={[styles.settingTitle, { color: colors.text }]}>
-              Case 10 (R08): Mô phỏng lỗi đồng bộ Firebase
+              Case 10 (R08): Mô phỏng lỗi Firebase
             </Text>
             <Text
               style={[styles.settingSub, { color: colors.textSecondary }]}
             >
-              Kiểm tra xử lý lỗi khi lưu Wishlist / Đặt hàng lên đám mây
+              Kiểm tra xử lý lỗi khi lưu Wishlist / Đặt hàng đám mây
             </Text>
           </View>
           <Switch
             value={simulationFlags.simulateFirebaseError}
             onValueChange={() => toggleSimulationFlag('simulateFirebaseError')}
+            trackColor={{ false: colors.border, true: colors.warning }}
           />
         </View>
 
@@ -312,7 +355,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
             <Text
               style={[styles.settingSub, { color: colors.textSecondary }]}
             >
-              Chèn sản phẩm giả (ID #99999) để kiểm tra bộ lọc Output Validator
+              Chèn ID #99999 để kiểm tra bộ lọc Output Validator
             </Text>
           </View>
           <Switch
@@ -320,6 +363,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
             onValueChange={() =>
               toggleSimulationFlag('simulateAiHallucination')
             }
+            trackColor={{ false: colors.border, true: colors.warning }}
           />
         </View>
       </View>
@@ -332,7 +376,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         ]}
       >
         <Text style={[styles.cardTitle, { color: colors.text }]}>
-          🎨 Giao diện & Dữ liệu Cục bộ (AsyncStorage - R07)
+          🎨 Giao diện & Bộ nhớ Cục bộ (AsyncStorage - R07)
         </Text>
 
         <View
@@ -345,14 +389,18 @@ export const NotificationSettingsScreen = ({ navigation }) => {
             <Text
               style={[styles.settingSub, { color: colors.textSecondary }]}
             >
-              Tự động lưu vào AsyncStorage và giữ nguyên sau khi mở lại app
+              Tự động lưu vào AsyncStorage và đồng bộ toàn ứng dụng
             </Text>
           </View>
-          <Switch value={isDarkMode} onValueChange={toggleTheme} />
+          <Switch
+            value={isDarkMode}
+            onValueChange={toggleTheme}
+            trackColor={{ false: colors.border, true: colors.primary }}
+          />
         </View>
 
         <CustomButton
-          title="🗑️ Xóa toàn bộ Cache & Đặt lại Ứng dụng"
+          title="🗑️ Xóa sạch AsyncStorage & Đặt lại Ứng dụng"
           onPress={handleResetAllLocalData}
           variant="danger"
           style={{ marginTop: 8 }}
@@ -368,7 +416,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
       >
         <View style={styles.headerRow}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>
-            📋 Nhật ký Sự kiện Thông báo ({notificationLogs.length})
+            📋 Nhật ký Thông báo ({notificationLogs.length})
           </Text>
           {notificationLogs.length > 0 ? (
             <TouchableOpacity onPress={handleClearNotificationLogs}>
@@ -387,8 +435,8 @@ export const NotificationSettingsScreen = ({ navigation }) => {
 
         {notificationLogs.length === 0 ? (
           <Text style={[styles.emptyLogsText, { color: colors.textSecondary }]}>
-            Chưa có sự kiện thông báo nào được ghi nhận. Hãy bấm nút "Kích hoạt
-            Sự kiện Thông báo Kiểm thử" hoặc Đặt hàng để xem kết quả.
+            Chưa có sự kiện thông báo nào được ghi nhận. Bấm nút "Bắn thông báo
+            Kiểm thử" hoặc tiến hành Đặt hàng để xem nhật ký.
           </Text>
         ) : (
           notificationLogs.slice(0, 8).map((log) => {
@@ -436,30 +484,6 @@ export const NotificationSettingsScreen = ({ navigation }) => {
           })
         )}
       </View>
-
-      {/* Student author information */}
-      <View
-        style={[
-          styles.studentCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Text style={[styles.studentHeader, { color: colors.primary }]}>
-          Thông tin Sinh viên Thực hiện
-        </Text>
-        <Text style={[styles.studentLine, { color: colors.text }]}>
-          • Họ và tên: {STUDENT_INFO.name}
-        </Text>
-        <Text style={[styles.studentLine, { color: colors.text }]}>
-          • Mã số sinh viên: {STUDENT_INFO.studentId}
-        </Text>
-        <Text style={[styles.studentLine, { color: colors.text }]}>
-          • Email: {STUDENT_INFO.email}
-        </Text>
-        <Text style={[styles.studentLine, { color: colors.textSecondary }]}>
-          • Học phần: {STUDENT_INFO.course}
-        </Text>
-      </View>
     </ScrollView>
   );
 };
@@ -470,44 +494,104 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 14,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
-  card: {
-    borderRadius: 14,
+  studentCard: {
+    borderRadius: 18,
     borderWidth: 1,
     padding: 14,
-    marginBottom: 14,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
+  },
+  studentTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  authorBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 2,
+  },
+  authorName: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  authorIdBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  authorIdText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  authorEmail: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  authorCourse: {
+    fontSize: 11,
+    marginTop: 1,
+  },
+  card: {
+    borderRadius: 18,
+    borderWidth: 1,
+    padding: 14,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
-    gap: 8,
   },
   cardTitle: {
-    flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
   },
   permBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 3,
     borderRadius: 6,
   },
   permBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
   },
   descText: {
     fontSize: 12,
-    lineHeight: 18,
+    lineHeight: 17,
     marginBottom: 12,
   },
   permSwitchRow: {
     flexDirection: 'row',
-    gap: 10,
-    marginBottom: 10,
+    gap: 8,
+    marginBottom: 12,
   },
   permOptionBtn: {
     flex: 1,
@@ -517,13 +601,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   permOptionText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   settingRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 10,
     borderTopWidth: 1,
   },
@@ -540,55 +624,41 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   feedbackBanner: {
+    marginVertical: 10,
     padding: 10,
     borderRadius: 10,
     borderWidth: 1,
-    marginTop: 6,
-    marginBottom: 4,
   },
   emptyLogsText: {
     fontSize: 12,
     lineHeight: 18,
-    fontStyle: 'italic',
+    paddingVertical: 8,
   },
   logItem: {
-    borderRadius: 10,
-    borderLeftWidth: 4,
     padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
     marginBottom: 8,
   },
   logTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 3,
+    alignItems: 'center',
+    marginBottom: 4,
   },
   logStatus: {
     fontSize: 11,
     fontWeight: '800',
   },
   logTime: {
-    fontSize: 11,
+    fontSize: 10,
   },
   logTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   logBody: {
-    fontSize: 12,
+    fontSize: 11,
     marginTop: 2,
-  },
-  studentCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-  },
-  studentHeader: {
-    fontSize: 14,
-    fontWeight: '800',
-    marginBottom: 6,
-  },
-  studentLine: {
-    fontSize: 13,
-    marginBottom: 3,
   },
 });

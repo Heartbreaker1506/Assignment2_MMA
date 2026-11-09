@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import {
   PRODUCT_CATEGORIES,
@@ -28,7 +29,7 @@ import { ProductCard } from '../components/ProductCard';
 import { StateFeedback } from '../components/StateFeedback';
 
 export const ProductListScreen = ({ navigation }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const { cartSummary, addToCart, getProductQuantityInCart } = useCart();
   const {
     wishlist,
@@ -194,25 +195,39 @@ export const ProductListScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Student summary and quick navigation shortcuts */}
+      {/* Luxury Brand & Author Showcase Card */}
       <View
         style={[
-          styles.heroCard,
+          styles.brandCard,
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
           },
         ]}
       >
-        <View style={styles.heroTopRow}>
+        <View style={styles.brandTopRow}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.appTitle, { color: colors.primary }]}>
-              SmartShop E-Commerce
-            </Text>
-            <Text style={[styles.studentMeta, { color: colors.textSecondary }]}>
-              SV: {STUDENT_INFO.name} • MSSV: {STUDENT_INFO.studentId}
+            <View style={styles.brandTitleRow}>
+              <Text style={[styles.brandTitle, { color: colors.primary }]}>
+                {STUDENT_INFO.brandName}
+              </Text>
+              <View
+                style={[
+                  styles.authorPill,
+                  { backgroundColor: colors.primaryLight },
+                ]}
+              >
+                <Text style={[styles.authorPillText, { color: colors.primary }]}>
+                  {STUDENT_INFO.studentId}
+                </Text>
+              </View>
+            </View>
+            <Text style={[styles.brandSubtitle, { color: colors.textSecondary }]}>
+              {STUDENT_INFO.name} • {STUDENT_INFO.course}
             </Text>
           </View>
+
+          {/* Data source live indicator */}
           <View
             style={[
               styles.sourceBadge,
@@ -235,63 +250,99 @@ export const ProductListScreen = ({ navigation }) => {
                 },
               ]}
             >
-              {dataSource === 'remote_api' ? '🌐 Remote API' : '📦 Offline Mode'}
+              {dataSource === 'remote_api' ? '● Online API' : '▲ Offline'}
             </Text>
           </View>
         </View>
 
-        {/* Quick navigation chips to Cart, SavedOrders, AiAssistant, and Settings */}
-        <View style={styles.quickNavRow}>
+        {/* 4 Quick Nav Shortcut Pills */}
+        <View style={styles.quickNavGrid}>
           <TouchableOpacity
             style={[
-              styles.navChip,
-              { backgroundColor: colors.primaryLight },
-            ]}
-            onPress={() => navigation.navigate('Cart')}
-          >
-            <Text style={[styles.navChipText, { color: colors.primary }]}>
-              🛒 Giỏ ({cartSummary.totalItems})
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.navChip,
-              { backgroundColor: colors.dangerLight },
-            ]}
-            onPress={() => navigation.navigate('SavedOrders')}
-          >
-            <Text style={[styles.navChipText, { color: colors.danger }]}>
-              ❤️ Lưu ({wishlist.length}) • Đơn ({orders.length})
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.navChip,
-              { backgroundColor: colors.purpleLight },
-            ]}
-            onPress={() => navigation.navigate('AiAssistant')}
-          >
-            <Text style={[styles.navChipText, { color: colors.purple }]}>
-              🤖 Gemini AI
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.navChip,
+              styles.navCardBtn,
               {
                 backgroundColor: colors.background,
-                borderWidth: 1,
+                borderColor: colors.primaryLight,
+              },
+            ]}
+            onPress={() => navigation.navigate('Cart')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navCardIcon}>🛍️</Text>
+            <View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+                Giỏ hàng
+              </Text>
+              <Text style={[styles.navCardBadge, { color: colors.primary }]}>
+                {cartSummary.totalItems} món
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navCardBtn,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.dangerLight,
+              },
+            ]}
+            onPress={() => navigation.navigate('SavedOrders', { initialTab: 'wishlist' })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navCardIcon}>❤️</Text>
+            <View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+                Yêu thích
+              </Text>
+              <Text style={[styles.navCardBadge, { color: colors.danger }]}>
+                {wishlist.length} đã lưu
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navCardBtn,
+              {
+                backgroundColor: colors.background,
+                borderColor: colors.purpleLight,
+              },
+            ]}
+            onPress={() => navigation.navigate('AiAssistant')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.navCardIcon}>🤖</Text>
+            <View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+                Gemini AI
+              </Text>
+              <Text style={[styles.navCardBadge, { color: colors.purple }]}>
+                Tư vấn VIP
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navCardBtn,
+              {
+                backgroundColor: colors.background,
                 borderColor: colors.border,
               },
             ]}
             onPress={() => navigation.navigate('NotificationSettings')}
+            activeOpacity={0.7}
           >
-            <Text style={[styles.navChipText, { color: colors.text }]}>
-              ⚙️ Cài đặt & Test
-            </Text>
+            <Text style={styles.navCardIcon}>⚡</Text>
+            <View>
+              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+                Cài đặt
+              </Text>
+              <Text style={[styles.navCardBadge, { color: colors.textSecondary }]}>
+                Test Matrix
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -308,22 +359,22 @@ export const ProductListScreen = ({ navigation }) => {
           ]}
         >
           <Text style={[styles.simAlertText, { color: colors.warning }]}>
-            🧪 Đang bật chế độ Mô phỏng Lỗi API (Test Case 2).
+            🧪 Mô phỏng lỗi API đang kích hoạt (Test Case 2).
           </Text>
           <TouchableOpacity
             onPress={() => toggleSimulationFlag('simulateApiError')}
           >
             <Text style={[styles.simAlertLink, { color: colors.primary }]}>
-              Tắt mô phỏng & Tải lại
+              Tắt lỗi & Tải lại
             </Text>
           </TouchableOpacity>
         </View>
       ) : null}
 
-      {/* Keyword search bar */}
+      {/* Floating Modern Search Input */}
       <View
         style={[
-          styles.searchBar,
+          styles.searchBox,
           {
             backgroundColor: colors.surface,
             borderColor: colors.border,
@@ -333,7 +384,7 @@ export const ProductListScreen = ({ navigation }) => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Tìm theo tên sản phẩm, hãng (VD: iPhone, Laptop...)"
+          placeholder="Tìm sản phẩm, thương hiệu (iPhone, Laptop, Watch...)"
           placeholderTextColor={colors.textSecondary}
           value={searchText}
           onChangeText={setSearchText}
@@ -344,18 +395,18 @@ export const ProductListScreen = ({ navigation }) => {
             style={styles.clearSearchBtn}
             onPress={() => setSearchText('')}
           >
-            <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>
+            <Text style={[styles.clearSearchIcon, { color: colors.textSecondary }]}>
               ✕
             </Text>
           </TouchableOpacity>
         ) : null}
       </View>
 
-      {/* Horizontal category filter chips */}
+      {/* Horizontal Category Carousel Chips */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoriesScroll}
+        contentContainerStyle={styles.categoryScrollContainer}
       >
         {PRODUCT_CATEGORIES.map((cat) => {
           const isSelected = selectedCategory === cat.id;
@@ -363,18 +414,23 @@ export const ProductListScreen = ({ navigation }) => {
             <TouchableOpacity
               key={cat.id}
               style={[
-                styles.categoryChip,
+                styles.categoryPill,
                 {
                   backgroundColor: isSelected ? colors.primary : colors.surface,
                   borderColor: isSelected ? colors.primary : colors.border,
                 },
               ]}
               onPress={() => setSelectedCategory(cat.id)}
+              activeOpacity={0.8}
             >
+              <Text style={styles.categoryIcon}>{cat.icon || '📦'}</Text>
               <Text
                 style={[
-                  styles.categoryChipText,
-                  { color: isSelected ? '#FFFFFF' : colors.textSecondary },
+                  styles.categoryLabel,
+                  {
+                    color: isSelected ? '#FFFFFF' : colors.text,
+                    fontWeight: isSelected ? '700' : '500',
+                  },
                 ]}
               >
                 {cat.label}
@@ -384,19 +440,21 @@ export const ProductListScreen = ({ navigation }) => {
         })}
       </ScrollView>
 
-      {/* Pagination statistics and filter reset link */}
-      <View style={styles.statsRow}>
-        <Text style={[styles.statsText, { color: colors.textSecondary }]}>
-          Hiển thị {products.length} / {totalCount} sản phẩm (Trang:{' '}
-          {Math.ceil(products.length / SHOP_CONFIG.PAGE_LIMIT) || 1})
+      {/* Results Count & Quick Reset Filter Row */}
+      <View style={styles.resultsInfoRow}>
+        <Text style={[styles.resultsCountText, { color: colors.textSecondary }]}>
+          Tìm thấy <Text style={{ color: colors.primary, fontWeight: '700' }}>{products.length}</Text> / {totalCount} sản phẩm
         </Text>
-        {(searchText.length > 0 || selectedCategory !== 'all') && (
-          <TouchableOpacity onPress={handleResetFilters}>
-            <Text style={[styles.resetFilterLink, { color: colors.primary }]}>
-              Xóa bộ lọc
+        {(searchText.length > 0 || selectedCategory !== 'all') ? (
+          <TouchableOpacity
+            style={[styles.resetFilterBtn, { backgroundColor: colors.dangerLight }]}
+            onPress={handleResetFilters}
+          >
+            <Text style={[styles.resetFilterText, { color: colors.danger }]}>
+              ✕ Xóa bộ lọc
             </Text>
           </TouchableOpacity>
-        )}
+        ) : null}
       </View>
     </View>
   );
@@ -406,11 +464,10 @@ export const ProductListScreen = ({ navigation }) => {
 
     if (isLoadingMore) {
       return (
-        <View style={styles.footerBox}>
+        <View style={styles.footerContainer}>
           <ActivityIndicator size="small" color={colors.primary} />
           <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            Đang tải thêm sản phẩm (limit={SHOP_CONFIG.PAGE_LIMIT}, skip={skip}
-            )...
+            Đang tải thêm sản phẩm mới...
           </Text>
         </View>
       );
@@ -418,10 +475,12 @@ export const ProductListScreen = ({ navigation }) => {
 
     if (!hasMore) {
       return (
-        <View style={styles.footerBox}>
-          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-            ✓ Đã hiển thị toàn bộ {products.length} sản phẩm trong danh mục.
-          </Text>
+        <View style={styles.footerContainer}>
+          <View style={[styles.endOfListBadge, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.endOfListText, { color: colors.textSecondary }]}>
+              ✓ Bạn đã xem toàn bộ {products.length} sản phẩm
+            </Text>
+          </View>
         </View>
       );
     }
@@ -429,16 +488,17 @@ export const ProductListScreen = ({ navigation }) => {
     return (
       <TouchableOpacity
         style={[
-          styles.loadMoreBtn,
+          styles.loadMorePill,
           {
             backgroundColor: colors.surface,
             borderColor: colors.primary,
           },
         ]}
         onPress={handleLoadMore}
+        activeOpacity={0.8}
       >
-        <Text style={[styles.loadMoreBtnText, { color: colors.primary }]}>
-          ↓ Tải thêm sản phẩm ({products.length}/{totalCount})
+        <Text style={[styles.loadMoreText, { color: colors.primary }]}>
+          ↓ Xem thêm ({products.length}/{totalCount})
         </Text>
       </TouchableOpacity>
     );
@@ -449,6 +509,8 @@ export const ProductListScreen = ({ navigation }) => {
       <FlatList
         data={errorMessage ? [] : products}
         keyExtractor={(item) => String(item.id)}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
         ListHeaderComponent={renderHeader()}
         renderItem={({ item }) => (
           <ProductCard
@@ -466,13 +528,13 @@ export const ProductListScreen = ({ navigation }) => {
           isLoadingInitial ? (
             <StateFeedback
               type="loading"
-              title="Đang tải danh mục sản phẩm từ API..."
-              message="Đang đồng bộ dữ liệu Catalog về thiết bị"
+              title="Đang đồng bộ dữ liệu Catalog..."
+              message="Đang kết nối API DummyJSON & chuẩn bị giao diện"
             />
           ) : errorMessage ? (
             <StateFeedback
               type="error"
-              title="Không thể tải danh mục sản phẩm (R01)"
+              title="Lỗi tải danh mục sản phẩm (R01)"
               message={errorMessage}
               actionLabel="Thử lại (Retry API)"
               onAction={() =>
@@ -487,7 +549,7 @@ export const ProductListScreen = ({ navigation }) => {
             <StateFeedback
               type="empty"
               title="Không tìm thấy sản phẩm phù hợp (R02)"
-              message={`Không có sản phẩm nào khớp với từ khóa "${searchText}" trong danh mục đã chọn.`}
+              message={`Không có kết quả nào khớp với "${searchText}" trong danh mục đã chọn.`}
               actionLabel="Xóa bộ lọc tìm kiếm"
               onAction={handleResetFilters}
             />
@@ -495,7 +557,7 @@ export const ProductListScreen = ({ navigation }) => {
         }
         ListFooterComponent={renderFooter()}
         onEndReached={handleLoadMore}
-        onEndReachedThreshold={0.3}
+        onEndReachedThreshold={0.4}
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -504,7 +566,7 @@ export const ProductListScreen = ({ navigation }) => {
             tintColor={colors.primary}
           />
         }
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={styles.flatListContent}
       />
     </View>
   );
@@ -514,32 +576,62 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  listContent: {
-    paddingHorizontal: 14,
+  flatListContent: {
+    paddingHorizontal: 10,
     paddingTop: 10,
-    paddingBottom: 28,
+    paddingBottom: 32,
+  },
+  columnWrapper: {
+    justifyContent: 'space-between',
   },
   headerContainer: {
-    marginBottom: 10,
+    marginBottom: 8,
   },
-  heroCard: {
-    borderRadius: 14,
+  brandCard: {
+    borderRadius: 18,
     borderWidth: 1,
-    padding: 12,
+    padding: 14,
     marginBottom: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
-  heroTopRow: {
+  brandTopRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    alignItems: 'flex-start',
+    marginBottom: 12,
   },
-  appTitle: {
-    fontSize: 18,
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  brandTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  authorPill: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  authorPillText: {
+    fontSize: 10,
     fontWeight: '800',
   },
-  studentMeta: {
-    fontSize: 12,
+  brandSubtitle: {
+    fontSize: 11,
     marginTop: 2,
   },
   sourceBadge: {
@@ -551,26 +643,37 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
   },
-  quickNavRow: {
+  quickNavGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    gap: 8,
+  },
+  navCardBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+    borderWidth: 1,
     gap: 6,
   },
-  navChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 8,
+  navCardIcon: {
+    fontSize: 16,
   },
-  navChipText: {
-    fontSize: 12,
+  navCardTitle: {
+    fontSize: 11,
     fontWeight: '700',
+  },
+  navCardBadge: {
+    fontSize: 10,
+    fontWeight: '600',
   },
   simAlertBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     marginBottom: 10,
   },
@@ -585,58 +688,73 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textDecorationLine: 'underline',
   },
-  searchBar: {
+  searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 12,
-    height: 44,
+    height: 46,
     marginBottom: 10,
   },
   searchIcon: {
-    fontSize: 15,
+    fontSize: 16,
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    paddingVertical: 6,
+    fontSize: 13,
+    paddingVertical: 8,
   },
   clearSearchBtn: {
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    padding: 6,
   },
-  categoriesScroll: {
-    paddingBottom: 8,
+  clearSearchIcon: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  categoryScrollContainer: {
+    paddingBottom: 6,
     gap: 8,
   },
-  categoryChip: {
+  categoryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
     marginRight: 8,
+    gap: 6,
   },
-  categoryChipText: {
+  categoryIcon: {
     fontSize: 13,
-    fontWeight: '600',
   },
-  statsRow: {
+  categoryLabel: {
+    fontSize: 12,
+  },
+  resultsInfoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 2,
+    paddingHorizontal: 4,
+    marginTop: 4,
+    marginBottom: 6,
   },
-  statsText: {
+  resultsCountText: {
     fontSize: 12,
   },
-  resetFilterLink: {
-    fontSize: 12,
+  resetFilterBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  resetFilterText: {
+    fontSize: 11,
     fontWeight: '700',
   },
-  footerBox: {
-    paddingVertical: 16,
+  footerContainer: {
+    paddingVertical: 18,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
@@ -645,14 +763,25 @@ const styles = StyleSheet.create({
   footerText: {
     fontSize: 12,
   },
-  loadMoreBtn: {
-    marginVertical: 10,
+  endOfListBadge: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+  },
+  endOfListText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  loadMorePill: {
+    marginVertical: 12,
+    marginHorizontal: 16,
     paddingVertical: 11,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1.5,
     alignItems: 'center',
   },
-  loadMoreBtnText: {
+  loadMoreText: {
     fontSize: 13,
     fontWeight: '700',
   },

@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { SHOP_CONFIG, STUDENT_INFO } from '../constants/theme';
 import { useTheme } from '../context/ThemeContext';
@@ -41,6 +42,16 @@ export const CartScreen = ({ navigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutStatus, setCheckoutStatus] = useState(null);
 
+  // Calculate free shipping progress percentage
+  const freeShippingProgress = Math.min(
+    100,
+    Math.round((cartSummary.subtotal / SHOP_CONFIG.FREE_SHIPPING_THRESHOLD) * 100)
+  );
+  const remainingForFreeShip = Math.max(
+    0,
+    SHOP_CONFIG.FREE_SHIPPING_THRESHOLD - cartSummary.subtotal
+  );
+
   // Submit order to Firebase and trigger order confirmation notification
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
@@ -60,7 +71,7 @@ export const CartScreen = ({ navigation }) => {
       // Keep cart items intact if Firebase sync fails
       setCheckoutStatus({
         type: 'error',
-        title: 'Đặt hàng thất bại (Lỗi đồng bộ Firebase - Case 10)',
+        title: 'Đặt hàng thất bại (Lỗi Firebase - Case 10)',
         message:
           res.error ||
           'Không thể lưu đơn hàng lên Firebase. Giỏ hàng của bạn vẫn được giữ an toàn.',
@@ -71,8 +82,8 @@ export const CartScreen = ({ navigation }) => {
     // Clear cart after successful order placement
     await clearCart();
     const notifNote = res.notificationResult?.sent
-      ? '🔔 Đã phát thông báo đẩy xác nhận đơn hàng (Permission Granted - Case 12).'
-      : `🔕 Không phát thông báo đẩy: ${
+      ? '🔔 Đã phát thông báo xác nhận đơn hàng thành công (Case 12).'
+      : `🔕 Không phát thông báo: ${
           res.notificationResult?.reason ||
           'Quyền thông báo đang bị từ chối (Case 11).'
         }`;
@@ -155,21 +166,58 @@ export const CartScreen = ({ navigation }) => {
         <StateFeedback
           type="empty"
           title="Giỏ hàng của bạn đang trống"
-          message="Hãy khám phá danh mục sản phẩm hoặc nhờ Trợ lý Gemini AI gợi ý món đồ phù hợp với ngân sách của bạn nhé!"
-          actionLabel="Khám phá Sản phẩm"
+          message="Khám phá các sản phẩm công nghệ cao cấp hoặc trò chuyện cùng Trợ lý Gemini AI để nhận tư vấn phù hợp nhất!"
+          actionLabel="Khám phá Danh mục"
           onAction={() => navigation.navigate('ProductList')}
-          secondaryActionLabel="Hỏi Gemini AI"
+          secondaryActionLabel="Tư vấn cùng Gemini AI"
           onSecondaryAction={() => navigation.navigate('AiAssistant')}
         />
       ) : (
         <>
+          {/* Shipping Threshold Progress Bar Card */}
+          <View
+            style={[
+              styles.shippingProgressCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <View style={styles.shippingHeaderRow}>
+              <Text style={[styles.shippingTitle, { color: colors.text }]}>
+                {remainingForFreeShip > 0
+                  ? `🚚 Mua thêm ${formatPrice(remainingForFreeShip)} để Freeship`
+                  : '🎉 Đơn hàng được Miễn phí giao hàng!'}
+              </Text>
+              <Text style={[styles.shippingPercent, { color: colors.primary }]}>
+                {freeShippingProgress}%
+              </Text>
+            </View>
+
+            <View style={[styles.progressBarBg, { backgroundColor: colors.borderLight }]}>
+              <View
+                style={[
+                  styles.progressBarFill,
+                  {
+                    width: `${freeShippingProgress}%`,
+                    backgroundColor:
+                      freeShippingProgress === 100
+                        ? colors.success
+                        : colors.primary,
+                  },
+                ]}
+              />
+            </View>
+          </View>
+
           {/* Cart items header and clear all button */}
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Danh sách sản phẩm ({cartSummary.uniqueItemsCount} loại •{' '}
+              Mặt hàng trong giỏ ({cartSummary.uniqueItemsCount} sản phẩm •{' '}
               {cartSummary.totalItems} món)
             </Text>
-            <TouchableOpacity onPress={clearCart}>
+            <TouchableOpacity onPress={clearCart} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
               <Text style={[styles.clearAllText, { color: colors.danger }]}>
                 Xóa tất cả
               </Text>
@@ -203,7 +251,7 @@ export const CartScreen = ({ navigation }) => {
           >
             <View style={styles.summaryTitleRow}>
               <Text style={[styles.summaryTitle, { color: colors.text }]}>
-                Chi tiết Thanh toán (Derived Totals - R06)
+                Chi tiết Đơn hàng & Thanh toán
               </Text>
               <View
                 style={[
@@ -214,14 +262,14 @@ export const CartScreen = ({ navigation }) => {
                 <Text
                   style={[styles.persistBadgeText, { color: colors.primary }]}
                 >
-                  💾 Tự động lưu AsyncStorage
+                  ⚡ Lưu tự động
                 </Text>
               </View>
             </View>
 
             <View style={styles.lineRow}>
               <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
-                Tổng số lượng mặt hàng:
+                Tổng số lượng:
               </Text>
               <Text style={[styles.lineValue, { color: colors.text }]}>
                 {cartSummary.totalItems} sản phẩm
@@ -239,7 +287,7 @@ export const CartScreen = ({ navigation }) => {
 
             <View style={styles.lineRow}>
               <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
-                Ưu đãi đơn từ ${SHOP_CONFIG.VIP_DISCOUNT_THRESHOLD} (-5%):
+                VIP 5% (Đơn từ ${SHOP_CONFIG.VIP_DISCOUNT_THRESHOLD}):
               </Text>
               <Text
                 style={[
@@ -249,6 +297,7 @@ export const CartScreen = ({ navigation }) => {
                       cartSummary.discountAmount > 0
                         ? colors.success
                         : colors.textSecondary,
+                    fontWeight: cartSummary.discountAmount > 0 ? '700' : '500',
                   },
                 ]}
               >
@@ -258,8 +307,7 @@ export const CartScreen = ({ navigation }) => {
 
             <View style={styles.lineRow}>
               <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
-                Phí vận chuyển (Miễn phí từ ${SHOP_CONFIG.FREE_SHIPPING_THRESHOLD}
-                ):
+                Phí giao hàng:
               </Text>
               <Text
                 style={[
@@ -269,6 +317,7 @@ export const CartScreen = ({ navigation }) => {
                       cartSummary.shippingFee === 0
                         ? colors.success
                         : colors.text,
+                    fontWeight: cartSummary.shippingFee === 0 ? '700' : '500',
                   },
                 ]}
               >
@@ -282,9 +331,9 @@ export const CartScreen = ({ navigation }) => {
               style={[styles.divider, { backgroundColor: colors.border }]}
             />
 
-            <View style={styles.lineRow}>
+            <View style={styles.totalRow}>
               <Text style={[styles.totalLabel, { color: colors.text }]}>
-                Tổng cộng thanh toán:
+                Tổng thanh toán:
               </Text>
               <Text style={[styles.totalValue, { color: colors.primary }]}>
                 {formatPrice(cartSummary.finalTotal)}
@@ -293,7 +342,7 @@ export const CartScreen = ({ navigation }) => {
 
             {/* Customer delivery note input */}
             <Text style={[styles.noteHeader, { color: colors.text }]}>
-              Thông tin & Ghi chú giao hàng (Lưu lên Firebase Orders):
+              📍 Thông tin người nhận & Địa chỉ giao hàng:
             </Text>
             <TextInput
               style={[
@@ -304,19 +353,45 @@ export const CartScreen = ({ navigation }) => {
                   borderColor: colors.border,
                 },
               ]}
-              placeholder="Nhập địa chỉ nhận hàng hoặc ghi chú..."
+              placeholder="Nhập tên người nhận và địa chỉ giao hàng..."
               placeholderTextColor={colors.textSecondary}
               value={customerNote}
               onChangeText={setCustomerNote}
+              multiline
             />
 
+            {/* Warning when Firebase error simulation is on */}
+            {simulationFlags.simulateFirebaseError ? (
+              <View
+                style={[
+                  styles.simErrorWarning,
+                  {
+                    backgroundColor: colors.dangerLight,
+                    borderColor: colors.danger,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.simErrorWarningText, { color: colors.danger }]}
+                >
+                  ⚠️ Test Case 10: Mô phỏng lỗi Firebase đang BẬT. Khi bấm đặt
+                  hàng sẽ báo lỗi đồng bộ đám mây và bảo vệ giỏ hàng.
+                </Text>
+              </View>
+            ) : null}
+
+            {/* Checkout Action Button */}
             <CustomButton
-              title="✅ Đặt hàng & Đồng bộ Firebase + Gửi Thông báo"
+              title={`Xác nhận Đặt hàng • ${formatPrice(cartSummary.finalTotal)}`}
               onPress={handleCheckout}
               loading={isSubmitting}
               variant="primary"
               style={styles.checkoutBtn}
             />
+
+            <Text style={[styles.secureNote, { color: colors.textSecondary }]}>
+              🔒 Đơn hàng đồng bộ bảo mật lên Google Cloud Firestore & Firebase Realtime.
+            </Text>
           </View>
         </>
       )}
@@ -330,7 +405,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 14,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   statusBanner: {
     padding: 14,
@@ -341,42 +416,95 @@ const styles = StyleSheet.create({
   statusTitle: {
     fontSize: 15,
     fontWeight: '800',
-    marginBottom: 6,
+    marginBottom: 4,
   },
   statusMessage: {
     fontSize: 13,
-    lineHeight: 19,
+    lineHeight: 18,
+    marginBottom: 10,
   },
   statusActions: {
-    marginTop: 12,
+    marginTop: 4,
+  },
+  shippingProgressCard: {
+    padding: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 14,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+      default: {},
+    }),
+  },
+  shippingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  shippingTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  shippingPercent: {
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  progressBarBg: {
+    height: 7,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: 4,
   },
   sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 10,
+    paddingHorizontal: 2,
   },
   sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
   },
   clearAllText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   summaryCard: {
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 16,
-    marginTop: 4,
+    marginTop: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
   },
   summaryTitleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: 12,
-    gap: 6,
+    marginBottom: 14,
   },
   summaryTitle: {
     fontSize: 15,
@@ -388,7 +516,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   persistBadgeText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
   },
   lineRow: {
@@ -399,40 +527,63 @@ const styles = StyleSheet.create({
   },
   lineLabel: {
     fontSize: 13,
-    flex: 1,
-    marginRight: 8,
   },
   lineValue: {
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '600',
   },
   divider: {
     height: 1,
     marginVertical: 10,
+  },
+  totalRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+    marginBottom: 16,
   },
   totalLabel: {
     fontSize: 16,
     fontWeight: '800',
   },
   totalValue: {
-    fontSize: 20,
-    fontWeight: '800',
+    fontSize: 22,
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   noteHeader: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
-    marginTop: 12,
     marginBottom: 6,
   },
   checkoutInput: {
     borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    borderRadius: 12,
+    padding: 10,
     fontSize: 13,
-    marginBottom: 14,
+    minHeight: 56,
+    textAlignVertical: 'top',
+    marginBottom: 12,
+  },
+  simErrorWarning: {
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 12,
+  },
+  simErrorWarningText: {
+    fontSize: 12,
+    fontWeight: '600',
+    lineHeight: 16,
   },
   checkoutBtn: {
-    paddingVertical: 13,
+    paddingVertical: 14,
+    borderRadius: 14,
+    marginBottom: 10,
+  },
+  secureNote: {
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 2,
   },
 });

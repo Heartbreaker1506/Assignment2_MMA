@@ -8,11 +8,12 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { formatPrice } from '../utils/storage';
 
-// Cart item card component with quantity increment/decrement, remove button, and custom note input
+// Modern Luxury Cart Item Card Component
 export const CartItemCard = ({
   item,
   onIncrement,
@@ -36,7 +37,8 @@ export const CartItemCard = ({
         },
       ]}
     >
-      <View style={styles.topRow}>
+      <View style={styles.mainRow}>
+        {/* Product Thumbnail */}
         <TouchableOpacity
           onPress={() => onPressProduct && onPressProduct(product)}
           activeOpacity={0.8}
@@ -44,75 +46,77 @@ export const CartItemCard = ({
           <Image
             source={{ uri: product.thumbnail }}
             style={[styles.image, { backgroundColor: colors.background }]}
+            resizeMode="cover"
           />
         </TouchableOpacity>
 
-        <View style={styles.detailsCol}>
-          <View style={styles.headerRow}>
+        {/* Product Details & Stepper */}
+        <View style={styles.infoCol}>
+          <View style={styles.titleRow}>
             <Text
               style={[styles.title, { color: colors.text }]}
-              numberOfLines={2}
+              numberOfLines={1}
             >
               {product.title}
             </Text>
+            {/* Delete button */}
             <TouchableOpacity
               style={[
-                styles.removeBtn,
+                styles.deleteBtn,
                 { backgroundColor: colors.dangerLight },
               ]}
               onPress={() => onRemove(product.id)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             >
-              <Text style={[styles.removeBtnText, { color: colors.danger }]}>
-                Xóa
-              </Text>
+              <Text style={[styles.deleteIcon, { color: colors.danger }]}>✕</Text>
             </TouchableOpacity>
           </View>
 
           <Text style={[styles.unitPrice, { color: colors.textSecondary }]}>
-            Đơn giá: {formatPrice(product.price)} / sp
+            {formatPrice(product.price)} / sản phẩm
           </Text>
 
-          <View style={styles.quantityAndSubtotalRow}>
-            {/* Quantity step controls */}
+          {/* Stepper & Line Subtotal Row */}
+          <View style={styles.actionRow}>
+            {/* Quantity Stepper */}
             <View
               style={[
-                styles.qtyControls,
+                styles.stepperContainer,
                 {
-                  borderColor: colors.border,
                   backgroundColor: colors.background,
+                  borderColor: colors.border,
                 },
               ]}
             >
               <TouchableOpacity
-                style={styles.qtyBtn}
+                style={styles.stepperBtn}
                 onPress={() => onDecrement(product.id)}
               >
-                <Text style={[styles.qtyBtnText, { color: colors.text }]}>
+                <Text style={[styles.stepperText, { color: colors.text }]}>
                   {quantity === 1 ? '🗑️' : '−'}
                 </Text>
               </TouchableOpacity>
 
-              <Text style={[styles.qtyValue, { color: colors.text }]}>
+              <Text style={[styles.stepperValue, { color: colors.text }]}>
                 {quantity}
               </Text>
 
               <TouchableOpacity
-                style={styles.qtyBtn}
+                style={styles.stepperBtn}
                 onPress={() => onIncrement(product.id)}
               >
-                <Text style={[styles.qtyBtnText, { color: colors.primary }]}>
+                <Text style={[styles.stepperText, { color: colors.primary }]}>
                   +
                 </Text>
               </TouchableOpacity>
             </View>
 
-            <View style={styles.subtotalCol}>
-              <Text
-                style={[styles.subtotalLabel, { color: colors.textSecondary }]}
-              >
+            {/* Line Subtotal */}
+            <View style={styles.subtotalWrap}>
+              <Text style={[styles.subtotalLabel, { color: colors.textSecondary }]}>
                 Thành tiền
               </Text>
-              <Text style={[styles.subtotalValue, { color: colors.primary }]}>
+              <Text style={[styles.subtotalAmount, { color: colors.primary }]}>
                 {formatPrice(lineSubtotal)}
               </Text>
             </View>
@@ -120,112 +124,145 @@ export const CartItemCard = ({
         </View>
       </View>
 
-      {/* Optional note input for this specific cart item */}
-      <TextInput
+      {/* Item Note Input */}
+      <View
         style={[
-          styles.noteInput,
+          styles.noteWrapper,
           {
             backgroundColor: colors.background,
-            color: colors.text,
             borderColor: colors.border,
           },
         ]}
-        placeholder="Ghi chú cho mặt hàng này (VD: Màu đen, giao giờ hành chính...)"
-        placeholderTextColor={colors.textSecondary}
-        value={note || ''}
-        onChangeText={(text) => onUpdateNote(product.id, text)}
-      />
+      >
+        <Text style={styles.noteIcon}>✏️</Text>
+        <TextInput
+          style={[styles.noteInput, { color: colors.text }]}
+          placeholder="Thêm ghi chú cho mặt hàng này (màu sắc, size...)"
+          placeholderTextColor={colors.textSecondary}
+          value={note || ''}
+          onChangeText={(text) => onUpdateNote(product.id, text)}
+        />
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
-  topRow: {
+  mainRow: {
     flexDirection: 'row',
+    alignItems: 'center',
   },
   image: {
-    width: 82,
-    height: 82,
-    borderRadius: 10,
+    width: 74,
+    height: 74,
+    borderRadius: 12,
     marginRight: 12,
   },
-  detailsCol: {
+  infoCol: {
     flex: 1,
+    justifyContent: 'space-between',
   },
-  headerRow: {
+  titleRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   title: {
-    flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
+    flex: 1,
     marginRight: 8,
   },
-  removeBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  removeBtnText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  unitPrice: {
-    fontSize: 12,
-    marginTop: 3,
-    marginBottom: 8,
-  },
-  quantityAndSubtotalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  qtyControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  qtyBtn: {
-    width: 34,
-    height: 32,
+  deleteBtn: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyBtnText: {
+  deleteIcon: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  unitPrice: {
+    fontSize: 12,
+    marginTop: 2,
+    marginBottom: 6,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  stepperContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+  },
+  stepperBtn: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepperText: {
     fontSize: 16,
     fontWeight: '700',
   },
-  qtyValue: {
-    minWidth: 28,
-    textAlign: 'center',
-    fontSize: 14,
+  stepperValue: {
+    fontSize: 13,
     fontWeight: '700',
+    paddingHorizontal: 8,
+    minWidth: 24,
+    textAlign: 'center',
   },
-  subtotalCol: {
+  subtotalWrap: {
     alignItems: 'flex-end',
   },
   subtotalLabel: {
-    fontSize: 11,
+    fontSize: 10,
   },
-  subtotalValue: {
-    fontSize: 15,
+  subtotalAmount: {
+    fontSize: 14,
     fontWeight: '800',
   },
-  noteInput: {
-    marginTop: 10,
+  noteWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
     borderWidth: 1,
-    borderRadius: 8,
     paddingHorizontal: 10,
-    paddingVertical: 7,
+    marginTop: 10,
+    height: 36,
+  },
+  noteIcon: {
     fontSize: 12,
+    marginRight: 6,
+  },
+  noteInput: {
+    flex: 1,
+    fontSize: 12,
+    paddingVertical: 4,
   },
 });

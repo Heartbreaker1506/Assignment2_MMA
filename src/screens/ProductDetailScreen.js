@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
@@ -43,6 +44,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
 
   const inCartQty = getProductQuantityInCart(product.id);
   const isSaved = isProductInWishlist(product.id);
+  const discount = Math.round(Number(product.discountPercentage) || 0);
 
   const handleDecrease = () => {
     setSelectedQty((prev) => Math.max(1, prev - 1));
@@ -58,7 +60,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     await addToCart(product, selectedQty, customNote);
     setFeedbackMsg({
       type: 'success',
-      text: `Đã thêm ${selectedQty} x "${product.title}" vào giỏ hàng thành công!`,
+      text: `✓ Đã thêm ${selectedQty} x "${product.title}" vào giỏ hàng!`,
     });
     setCustomNote('');
   };
@@ -75,10 +77,18 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       setFeedbackMsg({
         type: 'success',
         text: res.added
-          ? 'Đã đồng bộ sản phẩm vào danh sách Yêu thích (Firebase Wishlist)!'
-          : 'Đã xóa sản phẩm khỏi danh sách Yêu thích.',
+          ? '❤️ Đã lưu vào danh sách Yêu thích (Firebase Wishlist)!'
+          : '🤍 Đã xóa khỏi danh sách Yêu thích.',
       });
     }
+  };
+
+  // Open Gemini AI Assistant pre-populated with this product
+  const handleAskGeminiAboutThis = () => {
+    navigation.navigate('AiAssistant', {
+      initialPrompt: `Tư vấn chi tiết về ${product.title} (${product.brand}), phân tích ưu nhược điểm và xem có phù hợp với tầm giá ${formatPrice(product.price)} không?`,
+      initialBudget: product.price,
+    });
   };
 
   return (
@@ -86,149 +96,224 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Main product image and discount badge */}
+      {/* Feedback banner */}
+      {feedbackMsg ? (
+        <View
+          style={[
+            styles.feedbackBanner,
+            {
+              backgroundColor:
+                feedbackMsg.type === 'error'
+                  ? colors.dangerLight
+                  : colors.successLight,
+              borderColor:
+                feedbackMsg.type === 'error'
+                  ? colors.danger
+                  : colors.success,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.feedbackText,
+              {
+                color:
+                  feedbackMsg.type === 'error'
+                    ? colors.danger
+                    : colors.success,
+              },
+            ]}
+          >
+            {feedbackMsg.text}
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Hero Media Showcase Container */}
       <View
         style={[
-          styles.imageContainer,
-          { backgroundColor: colors.surface, borderColor: colors.border },
+          styles.mediaShowcase,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
         ]}
       >
         <Image
           source={{ uri: product.thumbnail }}
-          style={styles.mainImage}
+          style={styles.heroImage}
           resizeMode="contain"
         />
-        {product.discountPercentage > 0 ? (
-          <View
-            style={[styles.discountBadge, { backgroundColor: colors.danger }]}
-          >
-            <Text style={styles.discountBadgeText}>
-              -{Number(product.discountPercentage).toFixed(0)}%
-            </Text>
+
+        {/* Floating Discount Tag */}
+        {discount > 0 ? (
+          <View style={[styles.discountTag, { backgroundColor: colors.danger }]}>
+            <Text style={styles.discountTagText}>GIẢM {discount}%</Text>
           </View>
         ) : null}
+
+        {/* Floating Wishlist Heart */}
+        <TouchableOpacity
+          style={[
+            styles.wishlistFloatBtn,
+            {
+              backgroundColor: isSaved ? colors.dangerLight : 'rgba(255,255,255,0.92)',
+              borderColor: isSaved ? colors.danger : colors.border,
+            },
+          ]}
+          onPress={handleToggleWishlist}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.wishlistFloatIcon}>{isSaved ? '❤️' : '🤍'}</Text>
+        </TouchableOpacity>
       </View>
 
-      {/* Product information card */}
+      {/* Product Details Main Card */}
       <View
         style={[
-          styles.infoCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
+          styles.detailCard,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
         ]}
       >
-        <View style={styles.tagRow}>
+        {/* Meta badges row */}
+        <View style={styles.metaRow}>
           <View
             style={[
-              styles.categoryBadge,
+              styles.categoryPill,
               { backgroundColor: colors.primaryLight },
             ]}
           >
-            <Text style={[styles.categoryText, { color: colors.primary }]}>
+            <Text style={[styles.categoryPillText, { color: colors.primary }]}>
               {product.category}
             </Text>
           </View>
 
-          <Text style={[styles.brandText, { color: colors.textSecondary }]}>
-            Thương hiệu: {product.brand}
-          </Text>
+          <View
+            style={[
+              styles.brandPill,
+              { backgroundColor: colors.secondaryLight },
+            ]}
+          >
+            <Text style={[styles.brandPillText, { color: colors.secondary }]}>
+              {product.brand}
+            </Text>
+          </View>
 
-          <Text style={[styles.ratingText, { color: colors.accent }]}>
-            ★ {Number(product.rating || 4.5).toFixed(1)} / 5.0
-          </Text>
+          <View style={styles.ratingBadge}>
+            <Text style={[styles.ratingText, { color: colors.accent }]}>
+              ★ {Number(product.rating || 4.8).toFixed(1)} / 5.0
+            </Text>
+          </View>
         </View>
 
+        {/* Product Title */}
         <Text style={[styles.title, { color: colors.text }]}>
           {product.title}
         </Text>
 
-        <View style={styles.priceRow}>
-          <Text style={[styles.price, { color: colors.primary }]}>
+        {/* Price & Stock Line */}
+        <View style={styles.priceStockRow}>
+          <Text style={[styles.priceAmount, { color: colors.primary }]}>
             {formatPrice(product.price)}
           </Text>
-          <Text style={[styles.stockBadge, { color: colors.success }]}>
-            • Còn {product.stock} sản phẩm trong kho
-          </Text>
-        </View>
-
-        {inCartQty > 0 ? (
           <View
             style={[
-              styles.inCartBanner,
+              styles.stockBadge,
               {
-                backgroundColor: colors.successLight,
-                borderColor: colors.success,
+                backgroundColor:
+                  product.stock > 0 ? colors.successLight : colors.dangerLight,
               },
             ]}
           >
-            <Text style={[styles.inCartBannerText, { color: colors.success }]}>
-              🛒 Hiện đang có {inCartQty} sản phẩm này trong Giỏ hàng của bạn.
+            <Text
+              style={[
+                styles.stockBadgeText,
+                { color: product.stock > 0 ? colors.success : colors.danger },
+              ]}
+            >
+              {product.stock > 0
+                ? `● Còn hàng (${product.stock} sp)`
+                : '▲ Tạm hết hàng'}
             </Text>
           </View>
-        ) : null}
+        </View>
 
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Mô tả chi tiết sản phẩm
+        {/* Description section */}
+        <Text style={[styles.sectionHeading, { color: colors.text }]}>
+          Mô tả sản phẩm
         </Text>
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
+        <Text style={[styles.descriptionText, { color: colors.textSecondary }]}>
           {product.description}
         </Text>
-      </View>
 
-      {/* Quantity selector, note input, and purchase actions */}
-      <View
-        style={[
-          styles.actionCard,
-          { backgroundColor: colors.surface, borderColor: colors.border },
-        ]}
-      >
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          Tùy chọn mua hàng
-        </Text>
+        {/* Gemini AI Consultation Shortcut Card */}
+        <TouchableOpacity
+          style={[
+            styles.aiCard,
+            {
+              backgroundColor: colors.purpleLight,
+              borderColor: colors.purple,
+            },
+          ]}
+          onPress={handleAskGeminiAboutThis}
+          activeOpacity={0.8}
+        >
+          <View style={styles.aiCardHeader}>
+            <Text style={[styles.aiCardTitle, { color: colors.purple }]}>
+              🤖 Hỏi Trợ lý Gemini AI về sản phẩm này
+            </Text>
+            <Text style={{ fontSize: 14 }}>→</Text>
+          </View>
+          <Text style={[styles.aiCardBody, { color: colors.text }]}>
+            Nhận phân tích ưu nhược điểm, so sánh trong tầm giá và xem sản phẩm
+            này có phù hợp với nhu cầu của bạn không.
+          </Text>
+        </TouchableOpacity>
 
-        <View style={styles.qtySelectorRow}>
-          <Text style={[styles.qtyLabel, { color: colors.textSecondary }]}>
-            Số lượng cần mua:
+        {/* Stepper & Note Row */}
+        <View style={styles.stepperSection}>
+          <Text style={[styles.stepperLabel, { color: colors.text }]}>
+            Số lượng mua:
           </Text>
           <View
             style={[
-              styles.qtyBox,
+              styles.stepperControls,
               {
-                borderColor: colors.border,
                 backgroundColor: colors.background,
+                borderColor: colors.border,
               },
             ]}
           >
             <TouchableOpacity
-              style={styles.qtyStepBtn}
+              style={styles.stepperBtn}
               onPress={handleDecrease}
+              disabled={selectedQty <= 1}
             >
-              <Text style={[styles.qtyStepText, { color: colors.text }]}>
+              <Text style={[styles.stepperBtnText, { color: colors.text }]}>
                 −
               </Text>
             </TouchableOpacity>
 
-            <Text style={[styles.qtyNumber, { color: colors.text }]}>
+            <Text style={[styles.stepperValueText, { color: colors.text }]}>
               {selectedQty}
             </Text>
 
             <TouchableOpacity
-              style={styles.qtyStepBtn}
+              style={styles.stepperBtn}
               onPress={handleIncrease}
+              disabled={selectedQty >= (Number(product.stock) || 20)}
             >
-              <Text style={[styles.qtyStepText, { color: colors.primary }]}>
+              <Text style={[styles.stepperBtnText, { color: colors.primary }]}>
                 +
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        <Text style={[styles.subtotalPreview, { color: colors.textSecondary }]}>
-          Tạm tính mục này:{' '}
-          <Text style={{ color: colors.primary, fontWeight: '700' }}>
-            {formatPrice(product.price * selectedQty)}
-          </Text>
-        </Text>
-
+        {/* Custom Note input */}
         <TextInput
           style={[
             styles.noteInput,
@@ -238,76 +323,53 @@ export const ProductDetailScreen = ({ route, navigation }) => {
               borderColor: colors.border,
             },
           ]}
-          placeholder="Ghi chú khi thêm vào giỏ (VD: Gói quà, chọn màu...)"
+          placeholder="Thêm yêu cầu hoặc ghi chú (màu sắc, cấu hình...)"
           placeholderTextColor={colors.textSecondary}
           value={customNote}
           onChangeText={setCustomNote}
         />
 
-        {feedbackMsg ? (
-          <View
+        {/* Dual Action Buttons */}
+        <View style={styles.actionButtonsRow}>
+          <CustomButton
+            title={
+              inCartQty > 0
+                ? `+ Thêm tiếp (Hiện có ${inCartQty} trong giỏ)`
+                : `+ Thêm vào Giỏ hàng • ${formatPrice(product.price * selectedQty)}`
+            }
+            onPress={handleAddProductToCart}
+            variant="primary"
+            style={{ flex: 1 }}
+          />
+
+          <TouchableOpacity
             style={[
-              styles.feedbackBox,
+              styles.wishlistToggleBtn,
               {
-                backgroundColor:
-                  feedbackMsg.type === 'error'
-                    ? colors.dangerLight
-                    : colors.successLight,
-                borderColor:
-                  feedbackMsg.type === 'error' ? colors.danger : colors.success,
+                backgroundColor: isSaved ? colors.dangerLight : colors.background,
+                borderColor: isSaved ? colors.danger : colors.border,
               },
             ]}
-          >
-            <Text
-              style={{
-                color:
-                  feedbackMsg.type === 'error' ? colors.danger : colors.success,
-                fontSize: 13,
-                fontWeight: '600',
-              }}
-            >
-              {feedbackMsg.text}
-            </Text>
-          </View>
-        ) : null}
-
-        <CustomButton
-          title={`🛒 Thêm ${selectedQty} vào Giỏ hàng (${formatPrice(
-            product.price * selectedQty
-          )})`}
-          onPress={handleAddProductToCart}
-          variant="primary"
-          style={styles.mainBtn}
-        />
-
-        <View style={styles.secondaryBtnsRow}>
-          <CustomButton
-            title={isSaved ? '❤️ Đã lưu Wishlist' : '🤍 Lưu vào Wishlist'}
             onPress={handleToggleWishlist}
-            variant={isSaved ? 'danger' : 'outline'}
-            style={styles.halfBtn}
-          />
-          <CustomButton
-            title="Đi tới Giỏ hàng →"
-            onPress={() => navigation.navigate('Cart')}
-            variant="secondary"
-            style={styles.halfBtn}
-          />
+            activeOpacity={0.8}
+          >
+            <Text style={styles.wishlistToggleIcon}>
+              {isSaved ? '❤️' : '🤍'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* Shortcut to ask Gemini AI about this product */}
-        <CustomButton
-          title="🤖 Nhờ Gemini AI đánh giá / So sánh sản phẩm này"
-          onPress={() =>
-            navigation.navigate('AiAssistant', {
-              initialPrompt: `Đánh giá sản phẩm "${product.title}" giá $${product.price} và so sánh với các sản phẩm cùng tầm giá trong Catalog.`,
-              initialBudget: Math.ceil(product.price * 1.2),
-            })
-          }
-          variant="outline"
-          style={{ marginTop: 10, borderColor: colors.purple }}
-          textStyle={{ color: colors.purple }}
-        />
+        {/* Shortcut to Cart if items present */}
+        {inCartQty > 0 ? (
+          <TouchableOpacity
+            style={styles.viewCartShortcut}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <Text style={[styles.viewCartText, { color: colors.primary }]}>
+              → Xem giỏ hàng & Tiến hành thanh toán
+            </Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -319,168 +381,255 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 14,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
-  imageContainer: {
+  feedbackBanner: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  feedbackText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  mediaShowcase: {
     position: 'relative',
-    height: 230,
-    borderRadius: 16,
+    height: 240,
+    borderRadius: 20,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 12,
-    marginBottom: 14,
+    padding: 16,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
-  mainImage: {
+  heroImage: {
     width: '100%',
     height: '100%',
   },
-  discountBadge: {
+  discountTag: {
     position: 'absolute',
     top: 12,
     left: 12,
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 5,
+    borderRadius: 10,
   },
-  discountBadgeText: {
+  discountTagText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
   },
-  infoCard: {
-    borderRadius: 16,
+  wishlistFloatBtn: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
+  },
+  wishlistFloatIcon: {
+    fontSize: 16,
+  },
+  detailCard: {
+    borderRadius: 20,
     borderWidth: 1,
     padding: 16,
-    marginBottom: 14,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
-  tagRow: {
+  metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 10,
   },
-  categoryBadge: {
-    paddingHorizontal: 10,
+  categoryPill: {
+    paddingHorizontal: 9,
     paddingVertical: 4,
     borderRadius: 8,
   },
-  categoryText: {
+  categoryPillText: {
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
   },
-  brandText: {
-    fontSize: 12,
-    fontWeight: '600',
+  brandPill: {
+    paddingHorizontal: 9,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  brandPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  ratingBadge: {
+    marginLeft: 'auto',
   },
   ratingText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    marginBottom: 8,
+    lineHeight: 24,
+    marginBottom: 10,
   },
-  priceRow: {
+  priceStockRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 10,
+    justifyContent: 'space-between',
+    marginBottom: 14,
   },
-  price: {
+  priceAmount: {
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: '900',
+    letterSpacing: -0.5,
   },
   stockBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  stockBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  sectionHeading: {
     fontSize: 13,
-    fontWeight: '600',
-  },
-  inCartBanner: {
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginBottom: 12,
-  },
-  inCartBannerText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
     marginBottom: 6,
   },
-  description: {
-    fontSize: 14,
-    lineHeight: 21,
+  descriptionText: {
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 16,
   },
-  actionCard: {
-    borderRadius: 16,
+  aiCard: {
     borderWidth: 1,
-    padding: 16,
+    borderRadius: 14,
+    padding: 12,
+    marginBottom: 16,
   },
-  qtySelectorRow: {
+  aiCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  qtyLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+  aiCardTitle: {
+    fontSize: 13,
+    fontWeight: '800',
   },
-  qtyBox: {
+  aiCardBody: {
+    fontSize: 12,
+    lineHeight: 17,
+  },
+  stepperSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  stepperLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  stepperControls: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderRadius: 12,
     borderWidth: 1,
-    borderRadius: 10,
+    paddingHorizontal: 4,
+    paddingVertical: 2,
   },
-  qtyStepBtn: {
-    width: 40,
-    height: 36,
+  stepperBtn: {
+    width: 32,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyStepText: {
+  stepperBtnText: {
     fontSize: 18,
     fontWeight: '700',
   },
-  qtyNumber: {
-    minWidth: 36,
+  stepperValueText: {
+    fontSize: 14,
+    fontWeight: '800',
+    paddingHorizontal: 12,
+    minWidth: 32,
     textAlign: 'center',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  subtotalPreview: {
-    fontSize: 13,
-    marginBottom: 10,
   },
   noteInput: {
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 13,
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  feedbackBox: {
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    marginBottom: 12,
-  },
-  mainBtn: {
-    marginBottom: 10,
-  },
-  secondaryBtnsRow: {
+  actionButtonsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
-  halfBtn: {
-    flex: 1,
+  wishlistToggleBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  wishlistToggleIcon: {
+    fontSize: 20,
+  },
+  viewCartShortcut: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  viewCartText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });

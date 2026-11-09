@@ -6,10 +6,11 @@ import {
   Text,
   ActivityIndicator,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-// Reusable button component supporting multiple style variants and loading state
+// Reusable Modern Luxury Button Component
 export const CustomButton = ({
   title,
   onPress,
@@ -76,7 +77,7 @@ export const CustomButton = ({
       ]}
       onPress={onPress}
       disabled={isDisabled}
-      activeOpacity={0.75}
+      activeOpacity={0.8}
     >
       {loading ? (
         <ActivityIndicator
@@ -94,18 +95,31 @@ export const CustomButton = ({
 
 const styles = StyleSheet.create({
   button: {
-    paddingVertical: 11,
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+      default: {},
+    }),
   },
   spinner: {
     marginRight: 8,
   },
   text: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

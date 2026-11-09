@@ -42,8 +42,9 @@ const AppNavigator = () => {
             },
             headerTintColor: colors.text,
             headerTitleStyle: {
-              fontWeight: '700',
-              fontSize: 17,
+              fontWeight: '800',
+              fontSize: 16,
+              letterSpacing: 0.3,
             },
             headerShadowVisible: false,
             contentStyle: {
@@ -55,7 +56,7 @@ const AppNavigator = () => {
           <Stack.Screen
             name="ProductList"
             component={ProductListScreen}
-            options={{ title: 'SmartShop - Danh Mục Sản Phẩm' }}
+            options={{ title: 'NEXUS LUXE • Tech Store' }}
           />
 
           {/* Screen 2: Product Detail */}
@@ -76,21 +77,21 @@ const AppNavigator = () => {
           <Stack.Screen
             name="SavedOrders"
             component={SavedOrdersScreen}
-            options={{ title: 'Firebase Wishlist & Đơn Hàng' }}
+            options={{ title: 'Firebase Cloud Storage' }}
           />
 
           {/* Screen 5: Gemini AI Product Assistant */}
           <Stack.Screen
             name="AiAssistant"
             component={AiAssistantScreen}
-            options={{ title: 'Trợ Lý Mua Sắm Gemini AI' }}
+            options={{ title: 'Trợ Lý Gemini AI' }}
           />
 
           {/* Screen 6: Notification Settings & Test Simulator */}
           <Stack.Screen
             name="NotificationSettings"
             component={NotificationSettingsScreen}
-            options={{ title: 'Thông Báo & Kiểm Thử Hệ Thống' }}
+            options={{ title: 'Cài Đặt & Test Matrix' }}
           />
         </Stack.Navigator>
       </NavigationContainer>
@@ -98,6 +99,7 @@ const AppNavigator = () => {
   );
 };
 
+// Root entry point wrapping all contexts
 export default function App() {
   return (
     <SafeAreaProvider>

@@ -7,11 +7,12 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { formatPrice } from '../utils/storage';
 
-// Product card component displayed in the catalog FlatList
+// Modern Luxury 2-Column Vertical Product Card Component
 export const ProductCard = ({
   product,
   inCartQty = 0,
@@ -24,6 +25,8 @@ export const ProductCard = ({
 
   if (!product) return null;
 
+  const discount = Math.round(Number(product.discountPercentage) || 0);
+
   return (
     <TouchableOpacity
       style={[
@@ -34,47 +37,66 @@ export const ProductCard = ({
         },
       ]}
       onPress={() => onPressDetail && onPressDetail(product)}
-      activeOpacity={0.85}
+      activeOpacity={0.88}
     >
-      {/* Product thumbnail and wishlist toggle button */}
-      <View style={styles.imageWrapper}>
+      {/* Top Media Section with Floating Action Badges */}
+      <View
+        style={[
+          styles.imageContainer,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <Image
           source={{ uri: product.thumbnail }}
-          style={[styles.thumbnail, { backgroundColor: colors.background }]}
+          style={styles.thumbnail}
           resizeMode="cover"
         />
+
+        {/* Discount Badge */}
+        {discount > 0 ? (
+          <View
+            style={[
+              styles.discountTag,
+              { backgroundColor: colors.danger },
+            ]}
+          >
+            <Text style={styles.discountText}>-{discount}%</Text>
+          </View>
+        ) : null}
+
+        {/* Floating Wishlist Heart */}
         <TouchableOpacity
           style={[
-            styles.wishlistBadge,
+            styles.wishlistBtn,
             {
-              backgroundColor: isSaved ? colors.dangerLight : colors.surface,
+              backgroundColor: isSaved ? colors.dangerLight : 'rgba(255,255,255,0.92)',
               borderColor: isSaved ? colors.danger : colors.border,
             },
           ]}
           onPress={() => onToggleWishlist && onToggleWishlist(product)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          activeOpacity={0.7}
         >
-          <Text style={styles.heartIcon}>{isSaved ? '❤️' : '🤍'}</Text>
+          <Text style={styles.wishlistIcon}>{isSaved ? '❤️' : '🤍'}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Product details and quick add-to-cart action */}
+      {/* Information Body */}
       <View style={styles.infoContainer}>
+        {/* Category & Brand Micro-tag */}
         <View style={styles.metaRow}>
-          <View
-            style={[
-              styles.categoryTag,
-              { backgroundColor: colors.primaryLight },
-            ]}
+          <Text
+            style={[styles.brandTag, { color: colors.secondary }]}
+            numberOfLines={1}
           >
-            <Text style={[styles.categoryText, { color: colors.primary }]}>
-              {product.category}
-            </Text>
-          </View>
-          <Text style={[styles.ratingText, { color: colors.accent }]}>
-            ★ {Number(product.rating || 4.5).toFixed(1)}
+            {(product.brand || product.category || 'NEXUS').toUpperCase()}
+          </Text>
+          <Text style={[styles.ratingBadge, { color: colors.accent }]}>
+            ★ {Number(product.rating || 4.8).toFixed(1)}
           </Text>
         </View>
 
+        {/* Product Title */}
         <Text
           style={[styles.title, { color: colors.text }]}
           numberOfLines={2}
@@ -82,38 +104,39 @@ export const ProductCard = ({
           {product.title}
         </Text>
 
+        {/* Price & Stock Line */}
+        <View style={styles.priceRow}>
+          <Text style={[styles.priceText, { color: colors.primary }]}>
+            {formatPrice(product.price)}
+          </Text>
+        </View>
+
         <Text
-          style={[styles.description, { color: colors.textSecondary }]}
-          numberOfLines={2}
+          style={[styles.stockInfo, { color: colors.textSecondary }]}
+          numberOfLines={1}
         >
-          {product.description}
+          {product.stock > 0
+            ? `Còn lại ${product.stock} sp`
+            : 'Tạm hết hàng'}
         </Text>
 
-        <View style={styles.footerRow}>
-          <View>
-            <Text style={[styles.price, { color: colors.primary }]}>
-              {formatPrice(product.price)}
-            </Text>
-            <Text style={[styles.stockText, { color: colors.textSecondary }]}>
-              Kho: {product.stock} | {product.brand}
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.addCartBtn,
-              {
-                backgroundColor:
-                  inCartQty > 0 ? colors.success : colors.primary,
-              },
-            ]}
-            onPress={() => onAddToCart && onAddToCart(product)}
-          >
-            <Text style={styles.addCartBtnText}>
-              {inCartQty > 0 ? `+ Giỏ (${inCartQty})` : '+ Thêm giỏ'}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Add to Cart Modern Action Button */}
+        <TouchableOpacity
+          style={[
+            styles.addCartBtn,
+            {
+              backgroundColor:
+                inCartQty > 0 ? colors.success : colors.primary,
+              shadowColor: inCartQty > 0 ? colors.success : colors.primary,
+            },
+          ]}
+          onPress={() => onAddToCart && onAddToCart(product)}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.addCartBtnText}>
+            {inCartQty > 0 ? `✓ Trong giỏ (${inCartQty})` : '+ Thêm giỏ'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
@@ -121,92 +144,143 @@ export const ProductCard = ({
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    borderRadius: 14,
+    flex: 1,
+    margin: 6,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 12,
-    marginBottom: 12,
+    overflow: 'hidden',
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.08,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
   },
-  imageWrapper: {
+  imageContainer: {
     position: 'relative',
-    width: 100,
-    height: 112,
-    marginRight: 12,
+    width: '100%',
+    height: 136,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   thumbnail: {
-    width: 100,
-    height: 112,
-    borderRadius: 10,
+    width: '100%',
+    height: '100%',
   },
-  wishlistBadge: {
+  discountTag: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    top: 8,
+    left: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  discountText: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  wishlistBtn: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 3,
+      },
+      default: {},
+    }),
   },
-  heartIcon: {
+  wishlistIcon: {
     fontSize: 14,
   },
   infoContainer: {
+    padding: 10,
     flex: 1,
     justifyContent: 'space-between',
   },
   metaRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
   },
-  categoryTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
+  brandTag: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    flex: 1,
   },
-  categoryText: {
+  ratingBadge: {
     fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  ratingText: {
-    fontSize: 12,
     fontWeight: '700',
   },
   title: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
-    marginBottom: 3,
+    lineHeight: 18,
+    minHeight: 36,
+    marginBottom: 6,
   },
-  description: {
-    fontSize: 12,
-    lineHeight: 17,
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    marginBottom: 2,
+  },
+  priceText: {
+    fontSize: 15,
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  stockInfo: {
+    fontSize: 10,
+    fontWeight: '500',
     marginBottom: 8,
   },
-  footerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: '800',
-  },
-  stockText: {
-    fontSize: 11,
-    marginTop: 1,
-  },
   addCartBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   addCartBtnText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

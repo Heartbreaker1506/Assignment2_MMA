@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { askGeminiProductAssistant } from '../services/aiService';
 import { useTheme } from '../context/ThemeContext';
@@ -20,20 +21,20 @@ import { CustomButton } from '../components/CustomButton';
 // Preset prompts for quick testing
 const QUICK_PROMPTS = [
   {
-    label: '📱 Điện thoại đáng mua',
-    prompt: 'Tư vấn điện thoại hiệu năng cao, pin khỏe và camera sắc nét.',
+    label: '📱 Điện thoại Flagship',
+    prompt: 'Tư vấn điện thoại cấu hình mạnh, pin trâu và camera chụp sắc nét nhất.',
     budget: '',
     mode: 'recommend',
   },
   {
-    label: '💻 So sánh Laptop SV',
+    label: '💻 Laptop SV CNTT',
     prompt: 'So sánh các mẫu laptop mỏng nhẹ phù hợp cho sinh viên lập trình.',
     budget: '1500',
     mode: 'compare',
   },
   {
     label: '🎧 Phụ kiện dưới $300',
-    prompt: 'Gợi ý tai nghe hoặc phụ kiện di động chính hãng dưới $300.',
+    prompt: 'Gợi ý phụ kiện công nghệ hoặc âm thanh chất lượng tốt dưới $300.',
     budget: '300',
     mode: 'recommend',
   },
@@ -112,18 +113,16 @@ export const AiAssistantScreen = ({ route, navigation }) => {
         ]}
       >
         <Text style={[styles.contextTitle, { color: colors.purple }]}>
-          🤖 Trợ lý Mua sắm Gemini AI (R10 - Validated Catalog Context)
+          🤖 Gemini AI Smart Advisor (Anti-Hallucination Guard)
         </Text>
         <Text style={[styles.contextDesc, { color: colors.text }]}>
-          Ngữ cảnh hiện tại: Đã nạp{' '}
+          Ngữ cảnh thiết bị: Đã nạp{' '}
           <Text style={{ fontWeight: '800' }}>{knownCatalog.length}</Text> sản
-          phẩm thật từ Catalog &{' '}
-          <Text style={{ fontWeight: '800' }}>{cartItems.length}</Text> mặt hàng
-          trong giỏ. Mọi kết quả AI trả về đều đi qua bộ lọc{' '}
-          <Text style={{ fontWeight: '800' }}>
-            validateAiOutputAgainstCatalog()
-          </Text>{' '}
-          để chặn sản phẩm ảo giác (Hallucination).
+          phẩm thực từ Catalog &{' '}
+          <Text style={{ fontWeight: '800' }}>{cartItems.length}</Text> món trong giỏ.
+          Mọi kết quả đều được kiểm chứng qua{' '}
+          <Text style={{ fontWeight: '800' }}>validateAiOutputAgainstCatalog()</Text>{' '}
+          để ngăn chặn sản phẩm ảo giác (Test Case 14).
         </Text>
       </View>
 
@@ -147,6 +146,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
               },
             ]}
             onPress={() => setMode('recommend')}
+            activeOpacity={0.8}
           >
             <Text
               style={[
@@ -169,6 +169,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
               },
             ]}
             onPress={() => setMode('compare')}
+            activeOpacity={0.8}
           >
             <Text
               style={[
@@ -176,14 +177,14 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                 { color: mode === 'compare' ? '#FFFFFF' : colors.text },
               ]}
             >
-              ⚖️ So sánh Sản phẩm
+              ⚖️ So sánh Thông minh
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Quick prompt chips */}
         <Text style={[styles.label, { color: colors.textSecondary }]}>
-          Mẫu câu hỏi nhanh:
+          Gợi ý nhanh theo chủ đề:
         </Text>
         <View style={styles.presetsRow}>
           {QUICK_PROMPTS.map((item, idx) => (
@@ -197,6 +198,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                 },
               ]}
               onPress={() => applyQuickPreset(item)}
+              activeOpacity={0.7}
             >
               <Text style={[styles.presetText, { color: colors.primary }]}>
                 {item.label}
@@ -206,7 +208,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
         </View>
 
         <Text style={[styles.label, { color: colors.text }]}>
-          Nhu cầu mua sắm của bạn:
+          Câu hỏi hoặc nhu cầu của bạn:
         </Text>
         <TextInput
           style={[
@@ -227,7 +229,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
 
         <View style={styles.budgetRow}>
           <Text style={[styles.label, { color: colors.text, marginBottom: 0 }]}>
-            Ngân sách tối đa ($ USD - Tùy chọn):
+            Ngân sách tối đa ($ USD):
           </Text>
           <TextInput
             style={[
@@ -260,6 +262,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             },
           ]}
           onPress={() => toggleSimulationFlag('simulateAiHallucination')}
+          activeOpacity={0.8}
         >
           <Text
             style={[
@@ -272,17 +275,17 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             ]}
           >
             {simulationFlags.simulateAiHallucination
-              ? '🧪 [ĐANG BẬT] Mô phỏng Case 14: Giả lập AI trả kèm sản phẩm ảo giác (ID #99999) để test bộ lọc R10'
-              : '☑️ [ĐANG TẮT] Bấm vào đây nếu muốn giả lập AI trả về sản phẩm ảo giác (Test Case 14)'}
+              ? '🧪 [ĐANG BẬT] Mô phỏng Case 14: Giả lập AI trả sản phẩm ảo giác (ID #99999) để test bộ lọc R10'
+              : '☑️ [ĐANG TẮT] Chạm vào đây để giả lập AI trả về sản phẩm ảo giác (Test Case 14)'}
           </Text>
         </TouchableOpacity>
 
         <CustomButton
-          title="✨ Gửi yêu cầu tới Gemini AI & Kiểm chứng kết quả"
+          title="✨ Gửi câu hỏi tới Gemini AI"
           onPress={() => handleAskAi()}
           loading={isLoading}
           variant="primary"
-          style={{ marginTop: 10 }}
+          style={{ marginTop: 10, paddingVertical: 14 }}
         />
       </View>
 
@@ -303,12 +306,12 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             ]}
           >
             <Text style={[styles.validationTitle, { color: colors.text }]}>
-              🛡️ Báo cáo Kiểm chứng Kết quả AI (Output Validator - R10)
+              🛡️ Báo cáo Kiểm chứng AI (Anti-Hallucination - R10)
             </Text>
             <Text
               style={[styles.validationSource, { color: colors.textSecondary }]}
             >
-              Nguồn xử lý: {aiResult.source}
+              Cơ chế: {aiResult.source}
             </Text>
 
             <View style={styles.metricsRow}>
@@ -324,7 +327,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                 <Text
                   style={[styles.metricLabel, { color: colors.textSecondary }]}
                 >
-                  Gợi ý thô từ AI
+                  Gợi ý thô
                 </Text>
               </View>
 
@@ -338,7 +341,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                   {aiResult.validationReport.validCount}
                 </Text>
                 <Text style={[styles.metricLabel, { color: colors.success }]}>
-                  Khớp Catalog thật
+                  Khớp thật
                 </Text>
               </View>
 
@@ -377,7 +380,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                     },
                   ]}
                 >
-                  Đã chặn (Ảo giác)
+                  Đã chặn (Ảo)
                 </Text>
               </View>
             </View>
@@ -394,7 +397,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                 ]}
               >
                 <Text style={[styles.rejectedHeader, { color: colors.danger }]}>
-                  🚫 Đã phát hiện và loại bỏ sản phẩm không khớp Catalog thật:
+                  🚫 Đã phát hiện và loại bỏ sản phẩm không có trong Catalog:
                 </Text>
                 {aiResult.rejectedItems.map((rej, idx) => (
                   <Text
@@ -417,7 +420,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             ]}
           >
             <Text style={[styles.summaryHeader, { color: colors.primary }]}>
-              💬 Phân tích & Lời khuyên từ Trợ lý AI
+              💬 Lời khuyên từ Gemini AI
             </Text>
             <Text style={[styles.summaryBody, { color: colors.text }]}>
               {aiResult.summary}
@@ -429,14 +432,14 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                   { color: colors.textSecondary },
                 ]}
               >
-                📌 Ghi chú so sánh: {aiResult.comparisonNote}
+                📌 So sánh: {aiResult.comparisonNote}
               </Text>
             ) : null}
           </View>
 
           {/* List of validated catalog products */}
           <Text style={[styles.recListHeader, { color: colors.text }]}>
-            ✅ Sản phẩm Đề xuất Hợp lệ ({aiResult.validRecommendations.length})
+            ✅ Sản phẩm Đề xuất Đã kiểm chứng ({aiResult.validRecommendations.length})
           </Text>
 
           {aiResult.validRecommendations.map((rec) => {
@@ -456,6 +459,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                       styles.recImage,
                       { backgroundColor: colors.background },
                     ]}
+                    resizeMode="cover"
                   />
                   <View style={styles.recInfo}>
                     <View style={styles.verifiedTag}>
@@ -465,7 +469,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                           { color: colors.success },
                         ]}
                       >
-                        ✓ Khớp Catalog ID #{prod.id}
+                        ✓ Khớp Catalog #{prod.id}
                       </Text>
                     </View>
                     <Text style={[styles.recTitle, { color: colors.text }]}>
@@ -480,7 +484,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                 <Text
                   style={[styles.recReason, { color: colors.textSecondary }]}
                 >
-                  💡 Lý do đề xuất: {rec.reason}
+                  💡 {rec.reason}
                 </Text>
 
                 <View style={styles.recActions}>
@@ -493,7 +497,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
                     style={styles.recBtn}
                   />
                   <CustomButton
-                    title="+ Thêm vào giỏ"
+                    title="+ Thêm giỏ"
                     onPress={() => addToCart(prod, 1)}
                     variant="primary"
                     style={styles.recBtn}
@@ -514,16 +518,16 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 14,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   contextBanner: {
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   contextTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     marginBottom: 4,
   },
@@ -532,98 +536,111 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   formCard: {
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1,
     padding: 14,
-    marginBottom: 16,
+    marginBottom: 14,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   modeRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
     marginBottom: 12,
   },
   modeBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1,
     alignItems: 'center',
   },
   modeBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
   },
   label: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     marginBottom: 6,
   },
   presetsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
     marginBottom: 12,
   },
   presetChip: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: 20,
     borderWidth: 1,
   },
   presetText: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   promptInput: {
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 10,
     fontSize: 13,
-    minHeight: 72,
+    minHeight: 64,
     textAlignVertical: 'top',
     marginBottom: 12,
   },
   budgetRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   budgetInput: {
-    width: 120,
     borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
+    borderRadius: 10,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     fontSize: 13,
+    width: 130,
     textAlign: 'right',
   },
   simToggleBox: {
-    padding: 10,
-    borderRadius: 10,
     borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 6,
   },
   simToggleText: {
-    fontSize: 12,
-    fontWeight: '700',
-    lineHeight: 17,
+    fontSize: 11,
+    fontWeight: '600',
+    lineHeight: 16,
   },
   resultSection: {
-    marginTop: 2,
+    marginTop: 6,
   },
   validationCard: {
-    borderRadius: 14,
-    borderWidth: 1.5,
+    borderRadius: 16,
+    borderWidth: 1,
     padding: 14,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   validationTitle: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
+    marginBottom: 2,
   },
   validationSource: {
-    fontSize: 12,
-    marginTop: 2,
+    fontSize: 11,
     marginBottom: 10,
   },
   metricsRow: {
@@ -632,107 +649,121 @@ const styles = StyleSheet.create({
   },
   metricBox: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 6,
     borderRadius: 10,
     alignItems: 'center',
   },
   metricNum: {
     fontSize: 18,
-    fontWeight: '800',
+    fontWeight: '900',
   },
   metricLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    textAlign: 'center',
+    fontSize: 10,
+    fontWeight: '700',
     marginTop: 2,
   },
   rejectedBox: {
-    marginTop: 12,
+    marginTop: 10,
     padding: 10,
     borderRadius: 10,
     borderWidth: 1,
   },
   rejectedHeader: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '800',
     marginBottom: 4,
   },
   rejectedItemText: {
-    fontSize: 12,
-    lineHeight: 17,
+    fontSize: 11,
+    lineHeight: 16,
   },
   summaryCard: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 14,
     marginBottom: 14,
   },
   summaryHeader: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     marginBottom: 6,
   },
   summaryBody: {
-    fontSize: 14,
+    fontSize: 13,
     lineHeight: 20,
   },
   comparisonText: {
     fontSize: 12,
-    marginTop: 8,
     fontStyle: 'italic',
+    marginTop: 8,
   },
   recListHeader: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     marginBottom: 10,
   },
   recCard: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+      default: {},
+    }),
   },
   recTopRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 8,
   },
   recImage: {
-    width: 72,
-    height: 72,
+    width: 68,
+    height: 68,
     borderRadius: 10,
-    marginRight: 12,
+    marginRight: 10,
   },
   recInfo: {
     flex: 1,
-    justifyContent: 'center',
   },
   verifiedTag: {
     marginBottom: 2,
   },
   verifiedTagText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
   },
   recTitle: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
+    lineHeight: 18,
   },
   recPrice: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '800',
     marginTop: 2,
   },
   recReason: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 12,
+    lineHeight: 17,
     marginBottom: 10,
   },
   recActions: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   recBtn: {
     flex: 1,
+    paddingVertical: 8,
+    borderRadius: 10,
   },
 });

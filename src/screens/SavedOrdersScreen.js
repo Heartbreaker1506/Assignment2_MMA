@@ -8,6 +8,7 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  Platform,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
@@ -58,14 +59,41 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
       >
         <View style={styles.fbHeaderRow}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.fbTitle, { color: colors.primary }]}>
-              🔥 Trạng thái Đồng bộ Firebase (R08)
-            </Text>
+            <View style={styles.fbTitleRow}>
+              <Text style={[styles.fbTitle, { color: colors.primary }]}>
+                🔥 Firebase Realtime Cloud
+              </Text>
+              <View
+                style={[
+                  styles.statusPill,
+                  {
+                    backgroundColor:
+                      firebaseSyncInfo.syncMode === 'realtime_active'
+                        ? colors.successLight
+                        : colors.warningLight,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusPillText,
+                    {
+                      color:
+                        firebaseSyncInfo.syncMode === 'realtime_active'
+                          ? colors.success
+                          : colors.warning,
+                    },
+                  ]}
+                >
+                  {firebaseSyncInfo.syncMode === 'realtime_active'
+                    ? '● Connected'
+                    : '▲ Cached'}
+                </Text>
+              </View>
+            </View>
+
             <Text style={[styles.fbMeta, { color: colors.textSecondary }]}>
-              Chế độ: {firebaseSyncInfo.syncMode}
-            </Text>
-            <Text style={[styles.fbMeta, { color: colors.textSecondary }]}>
-              Cập nhật cuối:{' '}
+              Cập nhật:{' '}
               {firebaseSyncInfo.lastSyncedAt
                 ? new Date(firebaseSyncInfo.lastSyncedAt).toLocaleTimeString()
                 : 'Chưa đồng bộ'}
@@ -73,10 +101,11 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
           </View>
 
           <CustomButton
-            title="🔄 Đồng bộ ngay"
+            title="🔄 Đồng bộ"
             onPress={handleManualSync}
             loading={firebaseSyncInfo.isSyncing}
             variant="secondary"
+            style={styles.syncBtn}
           />
         </View>
 
@@ -96,7 +125,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
             </Text>
             <Text style={[styles.fbErrorText, { color: colors.text }]}>
               {firebaseSyncInfo.error ||
-                'Đang bật công tắc Mô phỏng lỗi Firebase. Các thao tác đọc/ghi đám mây sẽ báo lỗi nhưng dữ liệu cục bộ vẫn an toàn.'}
+                'Đang bật công tắc Mô phỏng lỗi Firebase. Thao tác ghi đám mây sẽ báo lỗi nhưng dữ liệu cục bộ vẫn an toàn.'}
             </Text>
             {simulationFlags.simulateFirebaseError ? (
               <TouchableOpacity
@@ -128,12 +157,14 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
             activeTab === 'wishlist' && { backgroundColor: colors.primary },
           ]}
           onPress={() => setActiveTab('wishlist')}
+          activeOpacity={0.8}
         >
           <Text
             style={[
               styles.tabBtnText,
               {
                 color: activeTab === 'wishlist' ? '#FFFFFF' : colors.text,
+                fontWeight: activeTab === 'wishlist' ? '800' : '600',
               },
             ]}
           >
@@ -147,12 +178,14 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
             activeTab === 'orders' && { backgroundColor: colors.primary },
           ]}
           onPress={() => setActiveTab('orders')}
+          activeOpacity={0.8}
         >
           <Text
             style={[
               styles.tabBtnText,
               {
                 color: activeTab === 'orders' ? '#FFFFFF' : colors.text,
+                fontWeight: activeTab === 'orders' ? '800' : '600',
               },
             ]}
           >
@@ -167,8 +200,8 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
           <StateFeedback
             type="empty"
             title="Chưa có sản phẩm yêu thích nào"
-            message="Hãy bấm vào biểu tượng trái tim ❤️ trên sản phẩm để lưu vào Firebase Wishlist (Case 9)."
-            actionLabel="Xem Danh mục Sản phẩm"
+            message="Chạm vào biểu tượng trái tim ❤️ trên bất kỳ sản phẩm nào để lưu vào Firebase Wishlist."
+            actionLabel="Khám phá Danh mục"
             onAction={() => navigation.navigate('ProductList')}
           />
         ) : (
@@ -184,6 +217,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                 onPress={() =>
                   navigation.navigate('ProductDetail', { product: item })
                 }
+                activeOpacity={0.8}
               >
                 <Image
                   source={{ uri: item.thumbnail }}
@@ -191,6 +225,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                     styles.wishlistThumb,
                     { backgroundColor: colors.background },
                   ]}
+                  resizeMode="cover"
                 />
               </TouchableOpacity>
 
@@ -212,10 +247,10 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                     { color: colors.textSecondary },
                   ]}
                 >
-                  Đã lưu:{' '}
+                  Lưu lúc:{' '}
                   {item.savedAt
-                    ? new Date(item.savedAt).toLocaleString()
-                    : 'Vừa xong'}
+                    ? new Date(item.savedAt).toLocaleDateString()
+                    : 'Hôm nay'}
                 </Text>
 
                 <View style={styles.wishlistActions}>
@@ -225,6 +260,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                       { backgroundColor: colors.primary },
                     ]}
                     onPress={() => addToCart(item, 1)}
+                    activeOpacity={0.8}
                   >
                     <Text style={styles.smallActionText}>+ Thêm vào giỏ</Text>
                   </TouchableOpacity>
@@ -235,6 +271,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                       { backgroundColor: colors.dangerLight },
                     ]}
                     onPress={() => toggleWishlistProduct(item)}
+                    activeOpacity={0.8}
                   >
                     <Text
                       style={[
@@ -258,7 +295,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
           <StateFeedback
             type="empty"
             title="Chưa có đơn hàng nào trên Firebase"
-            message="Khi bạn bấm Đặt hàng ở màn hình Giỏ hàng, thông tin đơn hàng sẽ được đồng bộ về đây."
+            message="Khi bạn tiến hành Đặt hàng tại Giỏ hàng, lịch sử đơn hàng sẽ tự động đồng bộ về đây."
             actionLabel="Đi tới Giỏ hàng"
             onAction={() => navigation.navigate('Cart')}
           />
@@ -272,9 +309,15 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
               ]}
             >
               <View style={styles.orderHeaderRow}>
-                <Text style={[styles.orderId, { color: colors.primary }]}>
-                  🧾 Mã đơn: {order.id}
-                </Text>
+                <View>
+                  <Text style={[styles.orderId, { color: colors.primary }]}>
+                    #{order.id}
+                  </Text>
+                  <Text style={[styles.orderMeta, { color: colors.textSecondary }]}>
+                    {new Date(order.createdAt).toLocaleString()}
+                  </Text>
+                </View>
+
                 <View
                   style={[
                     styles.statusTag,
@@ -284,20 +327,17 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                   <Text
                     style={[styles.statusTagText, { color: colors.success }]}
                   >
-                    {order.status}
+                    {order.status || 'Đã xác nhận'}
                   </Text>
                 </View>
               </View>
 
-              <Text style={[styles.orderMeta, { color: colors.textSecondary }]}>
-                Thời gian: {new Date(order.createdAt).toLocaleString()}
-              </Text>
-              <Text style={[styles.orderMeta, { color: colors.textSecondary }]}>
-                Nguồn lưu trữ: {order.syncSource}
+              <Text style={[styles.orderSource, { color: colors.textSecondary }]}>
+                Đồng bộ: {order.syncSource || 'Firebase Cloud'}
               </Text>
               {order.customerNote ? (
                 <Text style={[styles.orderNote, { color: colors.text }]}>
-                  📍 Ghi chú: {order.customerNote}
+                  📍 Giao hàng: {order.customerNote}
                 </Text>
               ) : null}
 
@@ -336,11 +376,10 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                 <Text
                   style={[styles.orderTotalLabel, { color: colors.textSecondary }]}
                 >
-                  Tổng cộng ({order.totalItems} sản phẩm):
+                  Tổng thanh toán ({order.totalItems} món):
                 </Text>
                 <Text
-                  style={[styles.orderTotalValue, { color: colors.primary }]}
-                >
+                  style={[styles.orderTotalValue, { color: colors.primary }]}>
                   {formatPrice(order.finalTotal)}
                 </Text>
               </View>
@@ -358,13 +397,25 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 14,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
   firebaseCard: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 14,
-    marginBottom: 14,
+    marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   fbHeaderRow: {
     flexDirection: 'row',
@@ -372,110 +423,154 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  fbTitle: {
-    fontSize: 15,
-    fontWeight: '800',
+  fbTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginBottom: 4,
   },
+  fbTitle: {
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  statusPill: {
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  statusPillText: {
+    fontSize: 10,
+    fontWeight: '800',
+  },
   fbMeta: {
-    fontSize: 12,
-    marginTop: 1,
+    fontSize: 11,
+  },
+  syncBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 10,
   },
   fbErrorBanner: {
-    marginTop: 12,
+    marginTop: 10,
     padding: 12,
     borderRadius: 10,
     borderWidth: 1,
   },
   fbErrorTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   fbErrorText: {
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 11,
+    lineHeight: 16,
   },
   disableSimBtn: {
-    marginTop: 8,
+    marginTop: 6,
   },
   tabBar: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
     padding: 4,
-    marginBottom: 14,
+    marginBottom: 12,
   },
   tabBtn: {
     flex: 1,
     paddingVertical: 10,
-    borderRadius: 9,
     alignItems: 'center',
+    borderRadius: 10,
   },
   tabBtnText: {
     fontSize: 13,
-    fontWeight: '700',
   },
   wishlistCard: {
     flexDirection: 'row',
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
-    padding: 12,
-    marginBottom: 12,
+    padding: 10,
+    marginBottom: 10,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 1,
+      },
+      default: {},
+    }),
   },
   wishlistThumb: {
-    width: 84,
-    height: 84,
-    borderRadius: 10,
-    marginRight: 12,
+    width: 80,
+    height: 80,
+    borderRadius: 12,
+    marginRight: 10,
   },
   wishlistInfo: {
     flex: 1,
     justifyContent: 'space-between',
   },
   wishlistTitle: {
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: '700',
+    lineHeight: 18,
   },
   wishlistPrice: {
     fontSize: 15,
     fontWeight: '800',
-    marginTop: 2,
   },
   wishlistSavedAt: {
-    fontSize: 11,
-    marginTop: 2,
-    marginBottom: 8,
+    fontSize: 10,
   },
   wishlistActions: {
     flexDirection: 'row',
     gap: 8,
+    marginTop: 4,
   },
   smallActionBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
     borderRadius: 8,
   },
   smallActionText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
   },
   orderCard: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     padding: 14,
     marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 2,
+      },
+      default: {},
+    }),
   },
   orderHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 6,
   },
   orderId: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
+  },
+  orderMeta: {
+    fontSize: 11,
+    marginTop: 2,
   },
   statusTag: {
     paddingHorizontal: 8,
@@ -484,16 +579,16 @@ const styles = StyleSheet.create({
   },
   statusTagText: {
     fontSize: 11,
-    fontWeight: '700',
+    fontWeight: '800',
   },
-  orderMeta: {
-    fontSize: 12,
-    marginTop: 2,
+  orderSource: {
+    fontSize: 11,
+    marginBottom: 2,
   },
   orderNote: {
     fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
+    fontStyle: 'italic',
+    marginTop: 2,
   },
   orderDivider: {
     height: 1,
@@ -502,28 +597,29 @@ const styles = StyleSheet.create({
   orderItemRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'center',
+    paddingVertical: 3,
   },
   orderItemTitle: {
+    fontSize: 12,
     flex: 1,
-    fontSize: 13,
     marginRight: 8,
   },
   orderItemPrice: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   orderTotalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    marginTop: 2,
   },
   orderTotalLabel: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: 12,
   },
   orderTotalValue: {
-    fontSize: 17,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '900',
   },
 });

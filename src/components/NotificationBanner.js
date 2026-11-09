@@ -1,7 +1,7 @@
 // Author: Nguyễn Minh Quân - Student ID: CE180048
 
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useShop } from '../context/ShopContext';
 
@@ -17,23 +17,31 @@ export const NotificationBanner = () => {
       style={[
         styles.bannerContainer,
         {
-          backgroundColor: colors.primary,
-          borderColor: colors.primaryLight,
+          backgroundColor: colors.surface,
+          borderColor: colors.primary,
         },
       ]}
     >
       <View style={styles.textCol}>
-        <Text style={styles.badgeText}>🔔 THÔNG BÁO HỆ THỐNG (R09)</Text>
-        <Text style={styles.titleText} numberOfLines={1}>
+        <View style={styles.badgeRow}>
+          <Text style={[styles.badgeText, { color: colors.primary }]}>
+            🔔 THÔNG BÁO HỆ THỐNG
+          </Text>
+        </View>
+        <Text style={[styles.titleText, { color: colors.text }]} numberOfLines={1}>
           {inAppBanner.title}
         </Text>
-        <Text style={styles.bodyText} numberOfLines={2}>
+        <Text style={[styles.bodyText, { color: colors.textSecondary }]} numberOfLines={2}>
           {inAppBanner.body}
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.closeBtn} onPress={dismissBanner}>
-        <Text style={styles.closeBtnText}>Đóng</Text>
+      <TouchableOpacity
+        style={[styles.closeBtn, { backgroundColor: colors.primaryLight }]}
+        onPress={dismissBanner}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <Text style={[styles.closeBtnText, { color: colors.primary }]}>Đóng</Text>
       </TouchableOpacity>
     </View>
   );
@@ -47,41 +55,51 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
     marginTop: 6,
     marginBottom: 4,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    elevation: 4,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    ...Platform.select({
+      ios: {
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+      default: {},
+    }),
   },
   textCol: {
     flex: 1,
     marginRight: 10,
   },
-  badgeText: {
-    color: '#DBEAFE',
-    fontSize: 10,
-    fontWeight: '800',
+  badgeRow: {
     marginBottom: 2,
   },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
   titleText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 13,
+    fontWeight: '800',
   },
   bodyText: {
-    color: '#EFF6FF',
-    fontSize: 12,
+    fontSize: 11,
+    lineHeight: 15,
     marginTop: 2,
   },
   closeBtn: {
-    backgroundColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
   },
   closeBtnText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
   },
 });
