@@ -1,7 +1,7 @@
 # Bảng Truy Vết Yêu Cầu (RTM), Phân Tích Bài Toán & Quyết Định Thiết Kế (DDR)
 
-- **Sinh viên thực hiện:** Trần Minh Quân (`CE181730`)
-- **Email:** `minhquan15062004@gmail.com`
+- **Sinh viên thực hiện:** Nguyễn Minh Quân (`CE180048`)
+- **Email:** `QuanNMCE180048@fpt.edu.vn`
 - **Học phần:** MMA301 – Assignment 2 (Integrated E-Commerce Mobile App)
 
 ---
@@ -20,7 +20,7 @@
 | **R08** | Tích hợp Firebase cho nghiệp vụ thương mại điện tử (Wishlist & Lịch sử Đơn hàng) kèm xử lý lỗi | `SavedOrdersScreen`, `CartScreen`, `ProductDetailScreen` | `src/services/firebaseService.js` (`fetchFirebaseWishlist`, `saveFirebaseWishlist`, `createFirebaseOrder`)<br>`src/context/ShopContext.js` | **Case 9:** Lưu sản phẩm yêu thích & Đặt hàng -> Đồng bộ thành công.<br>**Case 10:** Bật mô phỏng lỗi Firebase -> Hiện cảnh báo lỗi rõ ràng, không mất dữ liệu giỏ hàng. | Hoàn thành |
 | **R09** | Xử lý xin quyền và phát thông báo (`Notification`) gắn với sự kiện nghiệp vụ hợp lý | `NotificationSettingsScreen`, `CartScreen` | `src/services/notificationService.js` (`requestNotificationPermission`, `triggerBusinessNotification`)<br>`src/components/NotificationBanner.js` | **Case 11:** Đặt quyền `Denied` -> App không crash, ghi nhật ký đã chặn.<br>**Case 12:** Đặt quyền `Granted` & Đặt hàng / Bấm nút Test -> Hiện banner thông báo & lưu lịch sử. | Hoàn thành |
 | **R10** | Tích hợp Gemini AI nhận ngữ cảnh Catalog/Giỏ hàng/Ngân sách, **validate output** và có fallback | `AiAssistantScreen` | `src/services/aiService.js` (`buildShoppingPrompt`, `validateAiOutputAgainstCatalog`, `askGeminiProductAssistant`) | **Case 13:** Gửi yêu cầu tư vấn hợp lệ -> Gợi ý đúng sản phẩm trong Catalog.<br>**Case 14:** Mô phỏng AI trả kèm sản phẩm ảo giác `ID #99999` -> Bộ lọc tự động chặn và báo cáo. | Hoàn thành |
-| **R11** | Cấu hình chuẩn bị phát hành Android Release Build (`app.json`, `eas.json`, không lộ secret) | Cấu hình dự án | `app.json`, `eas.json`, `.gitignore`, `.env.example`, `docs/RELEASE_BUILD_EVIDENCE.md` | **Case 15:** Kiểm tra cấu hình package `com.ce181730.assignment2`, `versionCode: 1`, build profile APK và không có API key trong Git. | Hoàn thành |
+| **R11** | Cấu hình chuẩn bị phát hành Android Release Build (`app.json`, `eas.json`, không lộ secret) | Cấu hình dự án | `app.json`, `eas.json`, `.gitignore`, `.env.example`, `docs/RELEASE_BUILD_EVIDENCE.md` | **Case 15:** Kiểm tra cấu hình package `com.ce180048.assignment2`, `versionCode: 1`, build profile APK và không có API key trong Git. | Hoàn thành |
 | **R12** | Bộ hồ sơ kỹ thuật đầy đủ (`README`, `RTM`, `DDR`, `Test Matrix`, `Debug Logs`, `AI Usage Log`) | Thư mục `docs/` & `README.md` | `README.md` và 5 file tài liệu trong `docs/` | Đối chiếu đầy đủ các mục từ Mục 2 đến Mục 12 của đề bài Assignment 2. | Hoàn thành |
 
 ---
@@ -62,7 +62,7 @@
 
 ### 2.6. Dữ liệu nào cần đồng bộ qua dịch vụ ngoài (API / Firebase / Gemini)?
 - **Remote Product API (`DummyJSON`):** Danh mục sản phẩm thương mại điện tử, kết quả tìm kiếm và phân trang.
-- **Firebase (`Firestore REST / Sync Service`):** Danh sách sản phẩm yêu thích (`mma301_wishlists`) và lịch sử đơn hàng đã đặt (`mma301_orders`) gắn với mã sinh viên `CE181730`.
+- **Firebase (`Firestore REST / Sync Service`):** Danh sách sản phẩm yêu thích (`mma301_wishlists`) và lịch sử đơn hàng đã đặt (`mma301_orders`) gắn với mã sinh viên `CE180048`.
 - **Google Gemini AI API:** Phân tích nhu cầu mua sắm, so sánh ưu/nhược điểm và đề xuất mã sản phẩm (`productId`) dựa trên ngữ cảnh Catalog thật.
 
 ### 2.7. Những chỗ nào có thể lỗi: mạng, rỗng, hết trang, lưu trữ lỗi, quyền bị từ chối, AI trả dữ liệu sai?
@@ -124,7 +124,7 @@ flowchart TD
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Remote Product API (`DummyJSON`)** | Tải danh mục sản phẩm, tìm kiếm theo từ khóa, lọc theo danh mục và phân trang | `src/config/env.js`<br>`src/services/productService.js` | `limit`, `skip`, `searchQuery`, `category` | `{ products, total, skip, limit, hasMore, source }` | Bắt lỗi HTTP/Network, hiện UI Error kèm nút `Thử lại` và nút chuyển sang `FALLBACK_PRODUCTS` (Offline Mode). |
 | **AsyncStorage** | Lưu giỏ hàng, chế độ Sáng/Tối, cài đặt thông báo và cache dữ liệu Firebase | `src/utils/storage.js` | `key` (`STORAGE_KEYS`), `value` (Object/Array) | Dữ liệu đã parse JSON hoặc `fallbackValue` | Bọc `try/catch` quanh `JSON.parse` và `AsyncStorage`; nếu dữ liệu hỏng sẽ trả về giá trị mặc định, không crash app. |
-| **Firebase (`Firestore REST / Sync`)** | Lưu trữ và đồng bộ danh sách Yêu thích (`Wishlist`) & Lịch sử Đơn hàng (`Order History`) | `src/config/env.js`<br>`src/services/firebaseService.js` | `studentId` (`CE181730`), mảng `wishlistItems` hoặc đối tượng `orderData` | Danh sách `items` / `orders`, `syncMode`, `lastSyncedAt` | Luôn lưu bản sao vào `AsyncStorage` trước; nếu lỗi mạng hoặc chưa cấu hình cloud key sẽ dùng `Local Sync Adapter` và báo trạng thái rõ ràng. |
+| **Firebase (`Firestore REST / Sync`)** | Lưu trữ và đồng bộ danh sách Yêu thích (`Wishlist`) & Lịch sử Đơn hàng (`Order History`) | `src/config/env.js`<br>`src/services/firebaseService.js` | `studentId` (`CE180048`), mảng `wishlistItems` hoặc đối tượng `orderData` | Danh sách `items` / `orders`, `syncMode`, `lastSyncedAt` | Luôn lưu bản sao vào `AsyncStorage` trước; nếu lỗi mạng hoặc chưa cấu hình cloud key sẽ dùng `Local Sync Adapter` và báo trạng thái rõ ràng. |
 | **Notification (`expo-notifications`)** | Xin quyền và phát thông báo khi Đặt hàng thành công, Lưu Wishlist hoặc bấm Test | `src/services/notificationService.js`<br>`src/components/NotificationBanner.js` | `{ title, body, eventType }` và `permissionStatus` | `{ sent, permissionStatus, record, logs }` | Nếu quyền là `denied` (Case 11) hoặc chạy trên môi trường không hỗ trợ native push, không crash app mà ghi log `BLOCKED_PERMISSION_DENIED` và báo lý do. |
 | **Gemini AI (`gemini-2.5-flash`)** | Tư vấn chọn mua và so sánh sản phẩm theo nhu cầu, ngân sách và giỏ hàng | `src/config/env.js`<br>`src/services/aiService.js` | `userPrompt`, `budgetLimit`, `catalogProducts`, `cartItems`, `mode` | `{ summary, comparisonNote, validRecommendations, rejectedItems, validationReport }` | Kiểm증 bằng `validateAiOutputAgainstCatalog()` để loại bỏ ID ảo giác; nếu thiếu API key hoặc mất mạng sẽ chuyển sang `Catalog Context Fallback Engine`. |
 

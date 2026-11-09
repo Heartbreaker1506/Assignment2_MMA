@@ -1,4 +1,4 @@
-// Author: Trần Minh Quân - Student ID: CE181730
+// Author: Nguyễn Minh Quân - Student ID: CE180048
 
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';

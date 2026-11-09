@@ -1,4 +1,4 @@
-// Author: Trần Minh Quân - Student ID: CE181730
+// Author: Nguyễn Minh Quân - Student ID: CE180048
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

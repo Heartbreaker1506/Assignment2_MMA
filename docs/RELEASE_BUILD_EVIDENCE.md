@@ -1,7 +1,7 @@
 # Hồ Sơ Cấu Hình & Bằng Chứng Chuẩn Bị Phát Hành Android Release (R11 - Milestone M8)
 
-- **Sinh viên thực hiện:** Trần Minh Quân (`CE181730`)
-- **Email:** `minhquan15062004@gmail.com`
+- **Sinh viên thực hiện:** Nguyễn Minh Quân (`CE180048`)
+- **Email:** `QuanNMCE180048@fpt.edu.vn`
 - **Học phần:** MMA301 – Assignment 2 (Integrated E-Commerce Mobile App)
 
 ---
@@ -10,10 +10,10 @@
 
 | Hạng mục kiểm tra | Giá trị cấu hình trong dự án | File cấu hình | Trạng thái |
 | :--- | :--- | :--- | :---: |
-| **Tên hiển thị ứng dụng (`expo.name`)** | `"SmartShop MMA301 - CE181730"` | [`app.json`](../app.json) | Đạt |
-| **Slug dự án (`expo.slug`)** | `"assignment2-ce181730"` | [`app.json`](../app.json) | Đạt |
+| **Tên hiển thị ứng dụng (`expo.name`)** | `"SmartShop MMA301 - CE180048"` | [`app.json`](../app.json) | Đạt |
+| **Slug dự án (`expo.slug`)** | `"assignment2-ce180048"` | [`app.json`](../app.json) | Đạt |
 | **Phiên bản ứng dụng (`version` / `versionCode`)** | `version: "1.0.0"`, `android.versionCode: 1` | [`app.json`](../app.json) | Đạt |
-| **Định danh gói Android (`android.package`)** | `"com.ce181730.assignment2"` | [`app.json`](../app.json) | Đạt |
+| **Định danh gói Android (`android.package`)** | `"com.ce180048.assignment2"` | [`app.json`](../app.json) | Đạt |
 | **Icon, Adaptive Icon & Splash Screen** | Cấu hình đầy đủ trong thư mục `./assets/` | [`app.json`](../app.json) | Đạt |
 | **Cấu hình EAS Build xuất file APK** | Profile `preview` & `production` đặt `"buildType": "apk"` | [`eas.json`](../eas.json) | Đạt |
 | **Bảo mật khóa & Biến môi trường (Mục 9.1)** | `.env`, `*.keystore`, `*.jks`, `google-services.json` đã nằm trong `.gitignore`; có `.env.example` mẫu | [`.gitignore`](../.gitignore), [`.env.example`](../.env.example) | Đạt |
@@ -26,11 +26,11 @@
 ```json
 {
   "expo": {
-    "name": "SmartShop MMA301 - CE181730",
-    "slug": "assignment2-ce181730",
+    "name": "SmartShop MMA301 - CE180048",
+    "slug": "assignment2-ce180048",
     "version": "1.0.0",
     "android": {
-      "package": "com.ce181730.assignment2",
+      "package": "com.ce180048.assignment2",
       "versionCode": 1,
       "permissions": [
         "INTERNET",
@@ -105,7 +105,7 @@ cd android
    - Vì nếu đẩy API key thật (như `EXPO_PUBLIC_GEMINI_API_KEY`, `firebaseConfig` quản trị) hoặc file `*.keystore` lên kho Git, người khác có thể trích xuất khóa để gọi API trái phép làm hết hạn mức (quota)/phát sinh chi phí, hoặc giả mạo chữ ký ứng dụng khi phát hành. Do đó phải đưa `.env` và `*.keystore` vào `.gitignore` và chỉ chia sẻ `.env.example`.
 2. **Sự khác nhau giữa bản chạy trong Expo Go (Development) và bản Android Release (APK/AAB) là gì?**
    - **Bản chạy trong Expo Go:** Mã nguồn JavaScript được Metro Bundler biên dịch tức thời (JIT) qua mạng LAN, bật sẵn công cụ gỡ lỗi (`__DEV__ = true`), kích thước lớn và phụ thuộc vào ứng dụng khung Expo Go.
-   - **Bản Android Release:** Toàn bộ mã JavaScript và tài nguyên ảnh được đóng gói tĩnh (Hermes bytecode bundle), rút gọn dung lượng (minify), tắt chế độ debug, được gắn định danh độc lập (`com.ce181730.assignment2`) và ký số bằng Keystore để cài đặt độc lập như một ứng dụng thương mại hoàn chỉnh.
+   - **Bản Android Release:** Toàn bộ mã JavaScript và tài nguyên ảnh được đóng gói tĩnh (Hermes bytecode bundle), rút gọn dung lượng (minify), tắt chế độ debug, được gắn định danh độc lập (`com.ce180048.assignment2`) và ký số bằng Keystore để cài đặt độc lập như một ứng dụng thương mại hoàn chỉnh.
 3. **Trước khi tạo bản release, em cần kiểm tra những cấu hình nào?**
    - Kiểm tra `name`, `slug`, `version`, `android.package`, `android.versionCode`, đường dẫn `icon`/`splash` trong `app.json`; kiểm tra `buildType` trong `eas.json`; kiểm tra các biến môi trường trong `.env` và đảm bảo ứng dụng có cơ chế fallback an toàn nếu dịch vụ mạng gặp sự cố.
 

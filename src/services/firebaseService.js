@@ -1,4 +1,4 @@
-// Author: Trần Minh Quân - Student ID: CE181730
+// Author: Nguyễn Minh Quân - Student ID: CE180048
 
 import { ENV_CONFIG, isFirebaseCloudConfigured } from '../config/env';
 import { STUDENT_INFO } from '../constants/theme';

@@ -1,8 +1,8 @@
 # MMA301 - Assignment 2: Integrated E-Commerce Mobile App (SmartShop)
 
-- **Sinh viên thực hiện:** Trần Minh Quân
-- **Mã số sinh viên (MSSV):** `CE181730`
-- **Email:** `minhquan15062004@gmail.com`
+- **Sinh viên thực hiện:** Nguyễn Minh Quân
+- **Mã số sinh viên (MSSV):** `CE180048`
+- **Email:** `QuanNMCE180048@fpt.edu.vn`
 - **Học phần:** MMA301 – Lập trình Di động Đa nền tảng (React Native & Expo)
 - **Trường:** Đại học FPT (FPT University)
 
@@ -30,7 +30,7 @@
 ### Các bước cài đặt
 ```bash
 # Bước 1: Di chuyển vào thư mục dự án
-cd assignment2_ce181730
+cd assignment2_ce180048
 
 # Bước 2: Cài đặt các gói thư viện phụ thuộc
 npm install
@@ -49,10 +49,10 @@ npx expo start
 ## 3. Kiến trúc thư mục và Quản lý State
 
 ```text
-assignment2_ce181730/
+assignment2_ce180048/
 ├── App.js                                  # Cấu hình Providers & Stack Navigator (6 màn hình)
 ├── index.js                                # Điểm khởi chạy ứng dụng Expo
-├── app.json                                # Cấu hình ứng dụng & package Android (com.ce181730.assignment2)
+├── app.json                                # Cấu hình ứng dụng & package Android (com.ce180048.assignment2)
 ├── eas.json                                # Cấu hình hồ sơ đóng gói Android Release APK (R11)
 ├── .env.example                            # Mẫu cấu hình biến môi trường (không chứa secret)
 ├── src/
@@ -99,7 +99,7 @@ assignment2_ce181730/
 1. **Remote Product API (`EXPO_PUBLIC_API_BASE_URL`):** Mặc định kết nối tới `https://dummyjson.com` để tải danh sách sản phẩm phân trang (`/products?limit=8&skip=0`), tìm kiếm (`/products/search?q=...`) và lọc theo danh mục (`/products/category/...`).
 2. **Firebase (`src/services/firebaseService.js`):**
    - Điền `EXPO_PUBLIC_FIREBASE_API_KEY` và `EXPO_PUBLIC_FIREBASE_PROJECT_ID` trong file `.env`.
-   - Service tự động đồng bộ hai bộ sưu tập `mma301_wishlists` và `mma301_orders` theo mã sinh viên `CE181730`, đồng thời lưu bản sao vào `AsyncStorage` để chống mất dữ liệu khi rớt mạng.
+   - Service tự động đồng bộ hai bộ sưu tập `mma301_wishlists` và `mma301_orders` theo mã sinh viên `CE180048`, đồng thời lưu bản sao vào `AsyncStorage` để chống mất dữ liệu khi rớt mạng.
 3. **Notification (`src/services/notificationService.js`):**
    - Sử dụng `expo-notifications` kết hợp thanh `NotificationBanner` và nhật ký sự kiện trong ứng dụng.
    - Kiểm tra chặt chẽ `permissionStatus` (`granted` / `denied`) trước khi phát thông báo cho các sự kiện: Đặt hàng thành công (`ORDER_PLACED`), Lưu sản phẩm yêu thích (`WISHLIST_UPDATED`), và Kiểm thử thông báo (`TEST_EVENT`).
@@ -124,8 +124,8 @@ Toàn bộ **15 Test Cases** bắt buộc trong Mục 5 của đề bài đã đ
 ## 6. Chuẩn bị phát hành Android Release Build (R11)
 
 Dự án đã được cấu hình đầy đủ định danh ứng dụng và hồ sơ đóng gói Android trong [`app.json`](./app.json) và [`eas.json`](./eas.json):
-- **Tên ứng dụng:** `SmartShop MMA301 - CE181730`
-- **Android Package ID:** `com.ce181730.assignment2`
+- **Tên ứng dụng:** `SmartShop MMA301 - CE180048`
+- **Android Package ID:** `com.ce180048.assignment2`
 - **Version:** `1.0.0` (`versionCode: 1`)
 - **Lệnh đóng gói APK qua EAS:** `eas build -p android --profile preview`
 - **Lệnh đóng gói APK cục bộ qua Gradle:** `npx expo prebuild --platform android && cd android && ./gradlew assembleRelease`

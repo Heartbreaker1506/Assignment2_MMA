@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "SmartShop MMA301 - CE181730",
-    "slug": "assignment2-ce181730",
+    "name": "SmartShop MMA301 - CE180048",
+    "slug": "assignment2-ce180048",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -13,10 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ce181730.assignment2"
+      "bundleIdentifier": "com.ce180048.assignment2"
     },
     "android": {
-      "package": "com.ce181730.assignment2",
+      "package": "com.ce180048.assignment2",
       "versionCode": 1,
       "permissions": [
         "INTERNET",
@@ -34,8 +34,8 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "studentId": "CE181730",
-      "studentName": "Trần Minh Quân",
+      "studentId": "CE180048",
+      "studentName": "Nguyễn Minh Quân",
       "course": "MMA301"
     }
   }

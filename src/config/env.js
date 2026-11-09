@@ -1,4 +1,4 @@
-// Author: Trần Minh Quân - Student ID: CE181730
+// Author: Nguyễn Minh Quân - Student ID: CE180048
 
 // Helper to clean environment variable strings and fallback if empty or placeholder
 const cleanEnvValue = (value, defaultValue = '') => {
@@ -26,15 +26,15 @@ export const ENV_CONFIG = {
     apiKey: cleanEnvValue(process.env.EXPO_PUBLIC_FIREBASE_API_KEY, ''),
     authDomain: cleanEnvValue(
       process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
-      'mma301-ecommerce-ce181730.firebaseapp.com'
+      'mma301-ecommerce-ce180048.firebaseapp.com'
     ),
     projectId: cleanEnvValue(
       process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
-      'mma301-ecommerce-ce181730'
+      'mma301-ecommerce-ce180048'
     ),
     storageBucket: cleanEnvValue(
       process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
-      'mma301-ecommerce-ce181730.appspot.com'
+      'mma301-ecommerce-ce180048.appspot.com'
     ),
     messagingSenderId: cleanEnvValue(
       process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,

@@ -1,4 +1,4 @@
-// Author: Trần Minh Quân - Student ID: CE181730
+// Author: Nguyễn Minh Quân - Student ID: CE180048
 
 // Light theme palette
 export const lightColors = {
@@ -46,9 +46,9 @@ export const darkColors = {
 
 // Student information displayed in the app
 export const STUDENT_INFO = {
-  name: 'Trần Minh Quân',
-  studentId: 'CE181730',
-  email: 'minhquan15062004@gmail.com',
+  name: 'Nguyễn Minh Quân',
+  studentId: 'CE180048',
+  email: 'QuanNMCE180048@fpt.edu.vn',
   course: 'MMA301 - Integrated E-Commerce App (Assignment 2)',
 };
 

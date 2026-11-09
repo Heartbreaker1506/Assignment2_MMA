@@ -1,7 +1,7 @@
 # Hướng Dẫn Giải Thích Code 5 Tầng, Diễn Tập Vấn Đáp & Bài Toán Mở Rộng (Transfer Task)
 
-- **Sinh viên thực hiện:** Trần Minh Quân (`CE181730`)
-- **Email:** `minhquan15062004@gmail.com`
+- **Sinh viên thực hiện:** Nguyễn Minh Quân (`CE180048`)
+- **Email:** `QuanNMCE180048@fpt.edu.vn`
 - **Học phần:** MMA301 – Assignment 2 (Integrated E-Commerce Mobile App)
 
 ---
@@ -91,7 +91,7 @@ Khi giảng viên hỏi bất kỳ câu nào trong 7 câu dưới đây, em mở
 | **2** | *"Chỉ chỗ quản lý `pagination` và giải thích cách tránh gọi lặp request"* | `src/screens/ProductListScreen.js` | • Biến `const isFetchingMoreRef = useRef(false);` và hàm `handleLoadMore`.<br>• Giải thích: Kiểm tra `if (isFetchingMoreRef.current || !hasMore || ...) return;` ngay đầu hàm để chặn đồng bộ khi `FlatList.onEndReached` bắn liên tiếp, kết hợp `new Set(prevProducts.map(i => i.id))` để lọc trùng. |
 | **3** | *"Chỉ nơi tính tổng tiền giỏ hàng và giải thích vì sao thiết kế như vậy"* | `src/context/CartContext.js` | • Biến `const cartSummary = useMemo(() => { ... }, [cartItems]);`.<br>• Giải thích: Dùng **Derived State** tính trực tiếp từ `cartItems` thay vì lưu vào `useState` riêng để đảm bảo Single Source of Truth, không bao giờ bị lệch tổng tiền khi thêm/sửa/xóa. |
 | **4** | *"Chỉ chỗ đọc/ghi `AsyncStorage` và xử lý dữ liệu lỗi"* | `src/utils/storage.js` | • Hàm `getStoredItem(key, fallbackValue)` và `setStoredItem(key, value)`.<br>• Giải thích: Bọc `AsyncStorage.getItem` và `JSON.parse` trong `try/catch`; nếu dữ liệu `null` hoặc chuỗi JSON bị hỏng thì trả về `fallbackValue` mặc định, không làm crash app. |
-| **5** | *"Chỉ nơi tích hợp Firebase và dữ liệu nào đang được đồng bộ"* | `src/services/firebaseService.js` & `src/context/ShopContext.js` | • Tại `firebaseService.js`: Các hàm `fetchFirebaseWishlist`, `saveFirebaseWishlist`, `fetchFirebaseOrders`, `createFirebaseOrder`.<br>• Đồng bộ 2 nghiệp vụ: Danh sách Yêu thích (`mma301_wishlists`) và Lịch sử Đơn hàng (`mma301_orders`) gắn với MSSV `CE181730`. |
+| **5** | *"Chỉ nơi tích hợp Firebase và dữ liệu nào đang được đồng bộ"* | `src/services/firebaseService.js` & `src/context/ShopContext.js` | • Tại `firebaseService.js`: Các hàm `fetchFirebaseWishlist`, `saveFirebaseWishlist`, `fetchFirebaseOrders`, `createFirebaseOrder`.<br>• Đồng bộ 2 nghiệp vụ: Danh sách Yêu thích (`mma301_wishlists`) và Lịch sử Đơn hàng (`mma301_orders`) gắn với MSSV `CE180048`. |
 | **6** | *"Chỉ nơi xin quyền `Notification` và sự kiện nào kích hoạt thông báo"* | `src/services/notificationService.js` | • Hàm `requestNotificationPermission()` và hàm `triggerBusinessNotification({ title, body, eventType })`.<br>• Giải thích: Kiểm tra `if (settings.permissionStatus !== 'granted')` trước tiên (Case 11); được kích hoạt khi Đặt hàng thành công (`ORDER_PLACED`), Lưu Wishlist (`WISHLIST_UPDATED`) hoặc bấm nút Test (`TEST_EVENT`). |
 | **7** | *"Chỉ nơi gọi Gemini AI, dữ liệu ngữ cảnh truyền vào và cách validate output"* | `src/services/aiService.js` | • Hàm `buildShoppingPrompt` (truyền `catalogProducts`, `cartItems`, `budgetLimit`, `userPrompt`).<br>• Hàm `validateAiOutputAgainstCatalog(rawAiOutput, catalogProducts)` dùng `Map` đối chiếu `productId`/`title` với Catalog thật, đẩy các sản phẩm ảo giác vào `rejectedItems`. |
 

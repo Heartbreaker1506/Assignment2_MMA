@@ -1,7 +1,7 @@
 # Ma Trận Kiểm Thử 15 Ca (Test Matrix) & Nhật Ký Gỡ Lỗi (Debug Logs)
 
-- **Sinh viên thực hiện:** Trần Minh Quân (`CE181730`)
-- **Email:** `minhquan15062004@gmail.com`
+- **Sinh viên thực hiện:** Nguyễn Minh Quân (`CE180048`)
+- **Email:** `QuanNMCE180048@fpt.edu.vn`
 - **Học phần:** MMA301 – Assignment 2 (Integrated E-Commerce Mobile App)
 
 ---
@@ -24,7 +24,7 @@
 | **12** | **Notification allowed / test flow (`R09`)** | Chọn trạng thái **`✓ Cho phép (Case 12)`** rồi bấm `Kích hoạt Sự kiện Thông báo Kiểm thử` hoặc thực hiện Đặt hàng tại `CartScreen`. | Luồng thông báo hoạt động đúng thiết kế: phát thông báo đẩy và hiển thị thanh thông báo nổi trên màn hình. | Xuất hiện ngay thanh `NotificationBanner` màu xanh ở đầu màn hình kèm tiêu đề & nội dung sự kiện, đồng thời lưu bản ghi `DELIVERED` vào Nhật ký thông báo. | **PASS** |
 | **13** | **Gemini valid request (`R10`)** | Mở `AiAssistantScreen`, chọn mẫu câu hỏi `"Tư vấn điện thoại..."` hoặc `"So sánh Laptop SV"`, tắt mô phỏng lỗi và bấm `Gửi yêu cầu tới Gemini AI`. | Nhận được phản hồi tư vấn/so sánh hợp lý, các sản phẩm đề xuất đều khớp 100% với dữ liệu `Catalog` thật và có thể bấm `Xem chi tiết` hoặc `+ Thêm vào giỏ`. | Báo cáo kiểm증 hiển thị `Gợi ý thô: 3 | Khớp Catalog thật: 3 | Đã chặn: 0`. Cả 3 thẻ sản phẩm đều có nhãn `✓ Khớp Catalog ID #...` và thêm vào giỏ hàng thành công. | **PASS** |
 | **14** | **Gemini invalid / error / hallucination (`R10`)** | Tại `AiAssistantScreen`, bật công tắc **Mô phỏng Case 14 (Giả lập AI trả về sản phẩm ảo giác ID #99999)** rồi bấm `Gửi yêu cầu tới Gemini AI`. | Bộ lọc `validateAiOutputAgainstCatalog()` phát hiện và chặn sản phẩm không tồn tại trong Catalog thật; không hiển thị gợi ý sai như dữ liệu thật. | Báo cáo kiểm증 báo `Đã chặn (Ảo giác): 1`, hiển thị khung cảnh báo đỏ chỉ rõ `[ID: 99999] "Quantum Hologram Phone Z99" -> Đã chặn bởi Output Validator`, chỉ render các sản phẩm có thật bên dưới. | **PASS** |
-| **15** | **Release readiness (`R11`)** | Kiểm tra cấu hình `app.json`, `eas.json`, `.gitignore`, `.env.example` và tài liệu `docs/RELEASE_BUILD_EVIDENCE.md`. | Cấu hình package `com.ce181730.assignment2`, `versionCode: 1`, build profile APK đầy đủ; không có API key hay file keystore nhạy cảm bị commit trong repo. | Kiểm tra toàn bộ mã nguồn không chứa secret thật; `app.json` và `eas.json` hợp lệ sẵn sàng cho lệnh `eas build -p android --profile preview` hoặc `./gradlew assembleRelease`. | **PASS** |
+| **15** | **Release readiness (`R11`)** | Kiểm tra cấu hình `app.json`, `eas.json`, `.gitignore`, `.env.example` và tài liệu `docs/RELEASE_BUILD_EVIDENCE.md`. | Cấu hình package `com.ce180048.assignment2`, `versionCode: 1`, build profile APK đầy đủ; không có API key hay file keystore nhạy cảm bị commit trong repo. | Kiểm tra toàn bộ mã nguồn không chứa secret thật; `app.json` và `eas.json` hợp lệ sẵn sàng cho lệnh `eas build -p android --profile preview` hoặc `./gradlew assembleRelease`. | **PASS** |
 
 ---
 
