@@ -1,4 +1,5 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// Tác giả: Nguyễn Minh Quân - MSSV: CE180048 - Lớp: MMA301
+// Điểm khởi đầu cấu hình Navigation và Provider cho toàn bộ ứng dụng SmartStore
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -7,25 +8,27 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-// Context Providers
+// Các Context Providers quản lý trạng thái toàn cục
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { CartProvider } from './src/context/CartContext';
 import { ShopProvider } from './src/context/ShopContext';
 
-// In-app notification banner component
+// Thành phần hiển thị thông báo nội bộ ứng dụng (In-app notification banner)
 import { NotificationBanner } from './src/components/NotificationBanner';
 
-// App Screens
-import { ProductListScreen } from './src/screens/ProductListScreen';
-import { ProductDetailScreen } from './src/screens/ProductDetailScreen';
-import { CartScreen } from './src/screens/CartScreen';
-import { SavedOrdersScreen } from './src/screens/SavedOrdersScreen';
-import { AiAssistantScreen } from './src/screens/AiAssistantScreen';
-import { NotificationSettingsScreen } from './src/screens/NotificationSettingsScreen';
+// Các màn hình được phân loại theo từng phân hệ tính năng (Feature Modules)
+import {
+  ProductListScreen,
+  ProductDetailScreen,
+  CartScreen,
+  SavedOrdersScreen,
+  AiAssistantScreen,
+  NotificationSettingsScreen,
+} from './src/screens';
 
 const Stack = createNativeStackNavigator();
 
-// Main navigator wrapped inside ThemeProvider to support light/dark mode headers
+// Điều hướng chính được bao bọc bởi ThemeProvider để hỗ trợ giao diện Sáng / Tối linh hoạt
 const AppNavigator = () => {
   const { colors, isDarkMode } = useTheme();
 
@@ -52,42 +55,42 @@ const AppNavigator = () => {
             },
           }}
         >
-          {/* Screen 1: Product Catalog */}
+          {/* Màn hình 1: Danh mục sản phẩm (Catalog) */}
           <Stack.Screen
             name="ProductList"
             component={ProductListScreen}
             options={{ title: 'SmartStore' }}
           />
 
-          {/* Screen 2: Product Detail */}
+          {/* Màn hình 2: Chi tiết sản phẩm */}
           <Stack.Screen
             name="ProductDetail"
             component={ProductDetailScreen}
             options={{ title: 'Chi Tiết Sản Phẩm' }}
           />
 
-          {/* Screen 3: Shopping Cart & Checkout */}
+          {/* Màn hình 3: Giỏ hàng & Tiến trình đặt hàng */}
           <Stack.Screen
             name="Cart"
             component={CartScreen}
             options={{ title: 'Giỏ Hàng & Thanh Toán' }}
           />
 
-          {/* Screen 4: Saved Wishlist & Order History (Firebase) */}
+          {/* Màn hình 4: Đồng bộ Firebase Cloud (Yêu thích & Đơn hàng đã lưu) */}
           <Stack.Screen
             name="SavedOrders"
             component={SavedOrdersScreen}
             options={{ title: 'Firebase Cloud Storage' }}
           />
 
-          {/* Screen 5: Gemini AI Product Assistant */}
+          {/* Màn hình 5: Trợ lý tư vấn AI Gemini */}
           <Stack.Screen
             name="AiAssistant"
             component={AiAssistantScreen}
             options={{ title: 'Trợ Lý Gemini AI' }}
           />
 
-          {/* Screen 6: Notification Settings & Test Simulator */}
+          {/* Màn hình 6: Cài đặt thông báo & Bảng điều khiển kiểm thử (Test Matrix) */}
           <Stack.Screen
             name="NotificationSettings"
             component={NotificationSettingsScreen}
@@ -99,7 +102,7 @@ const AppNavigator = () => {
   );
 };
 
-// Root entry point wrapping all contexts
+// Điểm xuất gốc bao bọc tất cả Provider
 export default function App() {
   return (
     <SafeAreaProvider>

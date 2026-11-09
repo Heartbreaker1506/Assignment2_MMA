@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/components/CartItemCard.js - Thẻ mặt hàng trong giỏ kèm stepper & ghi chú (R05)
+// =========================================================================
 
 import React from 'react';
 import {
@@ -13,7 +17,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import { formatPrice } from '../utils/storage';
 
-// Modern Luxury Cart Item Card Component
+// Thẻ mặt hàng trong giỏ hàng hỗ trợ tăng giảm số lượng, xóa và thêm ghi chú riêng
 export const CartItemCard = ({
   item,
   onIncrement,
@@ -38,7 +42,7 @@ export const CartItemCard = ({
       ]}
     >
       <View style={styles.mainRow}>
-        {/* Product Thumbnail */}
+        {/* Hình thu nhỏ của sản phẩm */}
         <TouchableOpacity
           onPress={() => onPressProduct && onPressProduct(product)}
           activeOpacity={0.8}
@@ -50,7 +54,7 @@ export const CartItemCard = ({
           />
         </TouchableOpacity>
 
-        {/* Product Details & Stepper */}
+        {/* Thông tin sản phẩm và bộ tăng giảm số lượng */}
         <View style={styles.infoCol}>
           <View style={styles.titleRow}>
             <Text
@@ -59,7 +63,7 @@ export const CartItemCard = ({
             >
               {product.title}
             </Text>
-            {/* Delete button */}
+            {/* Nút xóa nhanh sản phẩm khỏi giỏ */}
             <TouchableOpacity
               style={[
                 styles.deleteBtn,
@@ -76,9 +80,9 @@ export const CartItemCard = ({
             {formatPrice(product.price)} / sản phẩm
           </Text>
 
-          {/* Stepper & Line Subtotal Row */}
+          {/* Hàng điều khiển Stepper và Thành tiền */}
           <View style={styles.actionRow}>
-            {/* Quantity Stepper */}
+            {/* Bộ điều khiển tăng giảm số lượng (Stepper) */}
             <View
               style={[
                 styles.stepperContainer,
@@ -111,7 +115,7 @@ export const CartItemCard = ({
               </TouchableOpacity>
             </View>
 
-            {/* Line Subtotal */}
+            {/* Thành tiền của riêng dòng sản phẩm này */}
             <View style={styles.subtotalWrap}>
               <Text style={[styles.subtotalLabel, { color: colors.textSecondary }]}>
                 Thành tiền
@@ -124,7 +128,7 @@ export const CartItemCard = ({
         </View>
       </View>
 
-      {/* Item Note Input */}
+      {/* Ô nhập ghi chú riêng cho mặt hàng này */}
       <View
         style={[
           styles.noteWrapper,

@@ -1,6 +1,10 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/constants/theme.js - Bảng màu, cấu hình định giá & dữ liệu dự phòng
+// =========================================================================
 
-// Modern Tech-Luxury Palette (Teal & Indigo Neon)
+// Bảng màu giao diện Sáng (Light Theme - Phong cách Tech-Luxury)
 export const lightColors = {
   background: '#F8FAFC',
   surface: '#FFFFFF',
@@ -28,17 +32,17 @@ export const lightColors = {
   statusBar: 'dark',
 };
 
-// Deep Obsidian Night Theme
+// Bảng màu giao diện Tối (Dark Theme - Phong cách Deep Obsidian)
 export const darkColors = {
-  background: '#0B0F17',      // Deep Obsidian
+  background: '#0B0F17',      // Nền đen Obsidian
   surface: '#111827',
-  card: '#161F30',           // Midnight Slate
+  card: '#161F30',           // Thẻ Midnight Slate
   text: '#F8FAFC',
   textSecondary: '#94A3B8',
-  primary: '#14B8A6',          // Neon Teal
+  primary: '#14B8A6',          // Teal Neon
   primaryDark: '#0D9488',
   primaryLight: '#134E4A',
-  secondary: '#818CF8',        // Neon Indigo
+  secondary: '#818CF8',        // Indigo Neon
   secondaryLight: '#1E1B4B',
   border: '#1E293B',
   borderLight: '#0F172A',
@@ -56,7 +60,7 @@ export const darkColors = {
   statusBar: 'light',
 };
 
-// Student Information
+// Thông tin sinh viên thực hiện đồ án
 export const STUDENT_INFO = {
   name: 'Nguyễn Minh Quân',
   studentId: 'CE180048',
@@ -65,7 +69,7 @@ export const STUDENT_INFO = {
   brandName: 'SmartStore',
 };
 
-// Pricing and Shipping Rules
+// Quy tắc định giá, phân trang và ngưỡng miễn phí vận chuyển
 export const SHOP_CONFIG = {
   PAGE_LIMIT: 8,
   FREE_SHIPPING_THRESHOLD: 100,
@@ -74,7 +78,7 @@ export const SHOP_CONFIG = {
   VIP_DISCOUNT_RATE: 0.05,
 };
 
-// Product Categories with Icons
+// Danh mục sản phẩm có gắn icon trực quan
 export const PRODUCT_CATEGORIES = [
   { id: 'all', label: 'Tất cả', icon: '✨' },
   { id: 'smartphones', label: 'Điện thoại', icon: '📱' },
@@ -84,7 +88,7 @@ export const PRODUCT_CATEGORIES = [
   { id: 'mens-watches', label: 'Đồng hồ', icon: '⌚' },
 ];
 
-// Fallback products with high-resolution visuals
+// Danh sách sản phẩm dự phòng ngoại tuyến (Offline Fallback Catalog)
 export const FALLBACK_PRODUCTS = [
   {
     id: 101,

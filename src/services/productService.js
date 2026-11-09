@@ -1,9 +1,13 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/services/productService.js - Gọi API sản phẩm, phân trang & dự phòng
+// =========================================================================
 
 import { ENV_CONFIG } from '../config/env';
 import { FALLBACK_PRODUCTS, SHOP_CONFIG } from '../constants/theme';
 
-// Normalize raw product data from API to prevent missing field crashes
+// Chuẩn hóa dữ liệu sản phẩm từ API để tránh lỗi crash do thiếu trường
 export const normalizeProduct = (raw) => {
   if (!raw || typeof raw !== 'object') {
     return null;
@@ -19,7 +23,7 @@ export const normalizeProduct = (raw) => {
     discountPercentage: Number(raw.discountPercentage) || 0,
     rating: Number(raw.rating) || 4.5,
     stock: Number.isFinite(Number(raw.stock)) ? Number(raw.stock) : 10,
-    brand: String(raw.brand || 'SmartShop').trim(),
+    brand: String(raw.brand || 'SmartStore').trim(),
     category: String(raw.category || 'general').trim(),
     thumbnail:
       raw.thumbnail ||
@@ -35,7 +39,7 @@ export const normalizeProduct = (raw) => {
   };
 };
 
-// Fetch paginated products from Remote API with search and category filter support
+// Tải danh sách sản phẩm phân trang từ Remote API (DummyJSON) kèm tìm kiếm và lọc danh mục
 export const fetchProductsPage = async ({
   limit = SHOP_CONFIG.PAGE_LIMIT,
   skip = 0,
@@ -43,7 +47,7 @@ export const fetchProductsPage = async ({
   category = 'all',
   simulateError = false,
 } = {}) => {
-  // Simulate network failure for testing error and retry UI state
+  // Mô phỏng sự cố mạng để kiểm thử giao diện lỗi và nút Thử lại (Test Case 2)
   if (simulateError) {
     await new Promise((resolve) => setTimeout(resolve, 450));
     throw new Error(
@@ -55,7 +59,7 @@ export const fetchProductsPage = async ({
   const trimmedSearch = String(searchQuery || '').trim();
   let endpoint = '';
 
-  // Build API endpoint based on search query and selected category
+  // Xây dựng endpoint tương ứng theo từ khóa tìm kiếm hoặc danh mục đã chọn
   if (trimmedSearch.length > 0) {
     endpoint = `${baseUrl}/products/search?q=${encodeURIComponent(
       trimmedSearch
@@ -87,7 +91,7 @@ export const fetchProductsPage = async ({
     .map((item) => normalizeProduct(item))
     .filter(Boolean);
 
-  // Filter by category on client side if both search and category are active
+  // Lọc thêm theo danh mục phía máy khách nếu người dùng vừa tìm kiếm vừa chọn danh mục
   const finalProducts =
     trimmedSearch.length > 0 && category && category !== 'all'
       ? normalizedList.filter(
@@ -112,7 +116,7 @@ export const fetchProductsPage = async ({
   };
 };
 
-// Return paginated products from local fallback catalog when offline
+// Trả về danh sách sản phẩm từ kho dự phòng ngoại tuyến khi mất kết nối mạng
 export const getFallbackProductsPage = ({
   limit = SHOP_CONFIG.PAGE_LIMIT,
   skip = 0,

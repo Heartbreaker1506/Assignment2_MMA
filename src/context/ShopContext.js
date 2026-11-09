@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/context/ShopContext.js - Quản lý Wishlist, Đơn hàng, Thông báo & Cờ mô phỏng Test
+// =========================================================================
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { FALLBACK_PRODUCTS } from '../constants/theme';
@@ -21,10 +25,10 @@ import { formatPrice } from '../utils/storage';
 const ShopContext = createContext();
 
 export const ShopProvider = ({ children }) => {
-  // Known catalog products shared with the AI Assistant context
+  // Danh mục sản phẩm đã biết, chia sẻ làm ngữ cảnh cho Gemini AI (R10)
   const [knownCatalog, setKnownCatalog] = useState(FALLBACK_PRODUCTS);
 
-  // Firebase-synced business state (Wishlist & Orders)
+  // Trạng thái dữ liệu nghiệp vụ đồng bộ Firebase (Wishlist & Đơn hàng)
   const [wishlist, setWishlist] = useState([]);
   const [orders, setOrders] = useState([]);
   const [firebaseSyncInfo, setFirebaseSyncInfo] = useState({
@@ -34,7 +38,7 @@ export const ShopProvider = ({ children }) => {
     error: null,
   });
 
-  // Notification permission settings, logs, and active banner state
+  // Cài đặt quyền thông báo, nhật ký sự kiện và thanh thông báo nổi
   const [notificationSettings, setNotificationSettings] = useState({
     permissionStatus: 'granted',
     orderAlertsEnabled: true,
@@ -44,14 +48,14 @@ export const ShopProvider = ({ children }) => {
   const [notificationLogs, setNotificationLogs] = useState([]);
   const [inAppBanner, setInAppBanner] = useState(null);
 
-  // Simulation flags for testing error and edge cases during demo
+  // Cờ mô phỏng kiểm thử (Test Matrix Simulation Flags phục vụ chấm bài)
   const [simulationFlags, setSimulationFlags] = useState({
     simulateApiError: false,
     simulateFirebaseError: false,
     simulateAiHallucination: false,
   });
 
-  // Load initial Firebase and Notification data on startup
+  // Tải dữ liệu ban đầu từ Firebase và Cài đặt thông báo khi khởi chạy ứng dụng
   useEffect(() => {
     const initShopData = async () => {
       try {
@@ -74,14 +78,14 @@ export const ShopProvider = ({ children }) => {
           error: null,
         });
       } catch (err) {
-        console.warn('[ShopContext] Initialization warning:', err);
+        console.warn('[ShopContext] Cảnh báo khởi tạo dữ liệu Shop:', err);
       }
     };
 
     initShopData();
   }, []);
 
-  // Show floating in-app notification banner for 4 seconds
+  // Hiển thị thanh thông báo nổi trên đầu màn hình trong 4 giây rồi tự đóng
   const showBanner = (bannerData) => {
     setInAppBanner(bannerData);
     setTimeout(() => {
@@ -91,7 +95,7 @@ export const ShopProvider = ({ children }) => {
     }, 4000);
   };
 
-  // Merge newly fetched API products into knownCatalog for AI context
+  // Ghi nhận các sản phẩm mới tải từ API vào knownCatalog làm ngữ cảnh cho Gemini AI
   const registerCatalogProducts = (newProducts = []) => {
     if (!Array.isArray(newProducts) || newProducts.length === 0) return;
     setKnownCatalog((prev) => {
@@ -106,12 +110,12 @@ export const ShopProvider = ({ children }) => {
     });
   };
 
-  // Check if a product is currently saved in the wishlist
+  // Kiểm tra xem sản phẩm có nằm trong danh sách Yêu thích hay không
   const isProductInWishlist = (productId) => {
     return wishlist.some((item) => Number(item.id) === Number(productId));
   };
 
-  // Add or remove a product from wishlist and sync with Firebase
+  // Thêm hoặc xóa sản phẩm khỏi Wishlist và đồng bộ đám mây Firebase
   const toggleWishlistProduct = async (product) => {
     if (!product || product.id === undefined) return { success: false };
 
@@ -141,7 +145,7 @@ export const ShopProvider = ({ children }) => {
         error: null,
       });
 
-      // Trigger business notification when a product is added to wishlist
+      // Phát thông báo nghiệp vụ khi thêm mới sản phẩm vào Yêu thích
       if (!exists) {
         const notifRes = await triggerBusinessNotification({
           title: 'Đã lưu vào Wishlist Firebase',
@@ -167,7 +171,7 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  // Place an order: save to Firebase and send confirmation notification
+  // Tiến hành đặt hàng: lưu đơn lên Firebase và kích hoạt thông báo đẩy
   const submitOrderToFirebase = async ({
     items,
     cartSummary,
@@ -229,7 +233,7 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  // Manually sync wishlist and orders from Firebase
+  // Đồng bộ thủ công dữ liệu Wishlist và Đơn hàng từ Firebase
   const syncAllFromFirebase = async () => {
     setFirebaseSyncInfo((prev) => ({ ...prev, isSyncing: true, error: null }));
     try {
@@ -261,23 +265,24 @@ export const ShopProvider = ({ children }) => {
     }
   };
 
-  // Update notification preferences or permission status
+  // Cập nhật tùy chọn thông báo hoặc trạng thái quyền
   const changeNotificationSetting = async (partial) => {
     const updated = await updateNotificationSettings(partial);
     setNotificationSettings(updated);
     return updated;
   };
 
+  // Gọi hộp thoại yêu cầu cấp quyền thông báo từ hệ điều hành
   const askOsNotificationPermission = async () => {
     const updated = await requestNotificationPermission();
     setNotificationSettings(updated);
     return updated;
   };
 
-  // Trigger a test notification event
+  // Kích hoạt một sự kiện thông báo kiểm thử
   const triggerTestNotification = async () => {
     const res = await triggerBusinessNotification({
-      title: 'Kiểm thử Thông báo SmartShop (R09)',
+      title: 'Kiểm thử Thông báo SmartStore (R09)',
       body: 'Khuyến mãi sinh viên FPT: Giảm thêm 5% cho đơn hàng công nghệ từ $300 trở lên!',
       eventType: 'TEST_EVENT',
     });
@@ -288,12 +293,13 @@ export const ShopProvider = ({ children }) => {
     return res;
   };
 
+  // Xóa toàn bộ lịch sử thông báo
   const handleClearNotificationLogs = async () => {
     await clearNotificationLogs();
     setNotificationLogs([]);
   };
 
-  // Toggle error simulation flags for testing
+  // Bật/tắt cờ mô phỏng lỗi (Test Matrix)
   const toggleSimulationFlag = (flagName) => {
     setSimulationFlags((prev) => ({
       ...prev,
@@ -301,6 +307,7 @@ export const ShopProvider = ({ children }) => {
     }));
   };
 
+  // Đóng thanh thông báo nổi
   const dismissBanner = () => setInAppBanner(null);
 
   return (
@@ -332,10 +339,11 @@ export const ShopProvider = ({ children }) => {
   );
 };
 
+// Hook tiện ích để sử dụng ShopContext
 export const useShop = () => {
   const context = useContext(ShopContext);
   if (!context) {
-    throw new Error('useShop must be used within a ShopProvider');
+    throw new Error('useShop phải được sử dụng bên trong ShopProvider');
   }
   return context;
 };

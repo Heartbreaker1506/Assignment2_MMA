@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/settings/NotificationSettingsScreen.js - Màn hình 6: Quyền Thông báo, Theme & Mô phỏng Test Matrix (R07, R09)
+// =========================================================================
 
 import React, { useState } from 'react';
 import {
@@ -10,12 +14,12 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { STUDENT_INFO } from '../constants/theme';
-import { clearAllAppStorage } from '../utils/storage';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { CustomButton } from '../components/CustomButton';
+import { STUDENT_INFO } from '../../constants/theme';
+import { clearAllAppStorage } from '../../utils/storage';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { CustomButton } from '../../components/CustomButton';
 
 export const NotificationSettingsScreen = ({ navigation }) => {
   const { isDarkMode, colors, toggleTheme, resetTheme } = useTheme();
@@ -35,7 +39,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
 
   const isGranted = notificationSettings.permissionStatus === 'granted';
 
-  // Switch notification permission status between granted and denied
+  // Chuyển đổi trạng thái quyền thông báo giữa Cho phép và Từ chối phục vụ chấm bài
   const handleSetPermission = async (statusValue) => {
     await changeNotificationSetting({ permissionStatus: statusValue });
     setTestFeedback({
@@ -47,7 +51,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
     });
   };
 
-  // Trigger a test business notification event
+  // Kích hoạt một sự kiện thông báo kiểm thử
   const handleSendTestNotif = async () => {
     const res = await triggerTestNotification();
     if (res.sent) {
@@ -63,7 +67,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
     }
   };
 
-  // Clear all local AsyncStorage data and reset app state
+  // Xóa toàn bộ dữ liệu AsyncStorage và đặt lại app về mặc định
   const handleResetAllLocalData = async () => {
     await clearAllAppStorage();
     await clearCart();
@@ -80,7 +84,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Student Author Showcase VIP Card */}
+      {/* Thẻ thông tin sinh viên thực hiện đồ án */}
       <View
         style={[
           styles.studentCard,
@@ -117,7 +121,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Section 1: Notification permission and business event settings */}
+      {/* Phần 1: Quản lý quyền thông báo và sự kiện nghiệp vụ (R09) */}
       <View
         style={[
           styles.card,
@@ -154,7 +158,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
           rõ ràng) và Case 12 (Cho phép quyền → Phát thông báo khi Đặt hàng / Lưu Wishlist).
         </Text>
 
-        {/* Quick permission status toggle buttons */}
+        {/* 2 nút chuyển nhanh trạng thái quyền phục vụ người chấm */}
         <View style={styles.permSwitchRow}>
           <TouchableOpacity
             style={[
@@ -206,7 +210,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
           style={{ marginBottom: 12 }}
         />
 
-        {/* Event-specific notification switches */}
+        {/* Công tắc bật/tắt từng loại thông báo cụ thể */}
         <View
           style={[styles.settingRow, { borderTopColor: colors.border }]}
         >
@@ -290,7 +294,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Section 2: Test Matrix error simulation controls */}
+      {/* Phần 2: Bảng công tắc Mô phỏng Lỗi phục vụ chấm thi (Test Matrix Simulator) */}
       <View
         style={[
           styles.card,
@@ -368,7 +372,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Section 3: Theme and local storage settings */}
+      {/* Phần 3: Giao diện Sáng/Tối và Xóa bộ nhớ cục bộ (R07) */}
       <View
         style={[
           styles.card,
@@ -407,7 +411,7 @@ export const NotificationSettingsScreen = ({ navigation }) => {
         />
       </View>
 
-      {/* Section 4: Notification event logs */}
+      {/* Phần 4: Danh sách Nhật ký Sự kiện Thông báo */}
       <View
         style={[
           styles.card,
@@ -662,3 +666,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+

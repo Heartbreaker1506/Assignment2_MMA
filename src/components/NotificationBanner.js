@@ -1,11 +1,15 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/components/NotificationBanner.js - Thanh thông báo nổi tức thì (R09)
+// =========================================================================
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useShop } from '../context/ShopContext';
 
-// Floating in-app notification banner displayed when a business event triggers
+// Thanh thông báo nổi trong ứng dụng hiển thị tức thì khi sự kiện nghiệp vụ phát sinh
 export const NotificationBanner = () => {
   const { colors } = useTheme();
   const { inAppBanner, dismissBanner } = useShop();

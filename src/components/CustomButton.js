@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/components/CustomButton.js - Nút bấm tái sử dụng hỗ trợ loading & variants
+// =========================================================================
 
 import React from 'react';
 import {
@@ -10,7 +14,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 
-// Reusable Modern Luxury Button Component
+// Thành phần nút bấm tái sử dụng hiện đại, hỗ trợ nhiều biến thể và trạng thái đang xử lý
 export const CustomButton = ({
   title,
   onPress,
@@ -22,7 +26,7 @@ export const CustomButton = ({
 }) => {
   const { colors } = useTheme();
 
-  // Get button colors based on variant
+  // Xác định màu sắc nút bấm theo biến thể (primary, secondary, danger, success, outline)
   const getButtonStyles = () => {
     switch (variant) {
       case 'secondary':

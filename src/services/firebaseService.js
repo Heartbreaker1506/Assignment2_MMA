@@ -1,10 +1,14 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/services/firebaseService.js - Đồng bộ Wishlist & Đơn hàng Firebase
+// =========================================================================
 
 import { ENV_CONFIG, isFirebaseCloudConfigured } from '../config/env';
 import { STUDENT_INFO } from '../constants/theme';
 import { getStoredItem, setStoredItem, STORAGE_KEYS } from '../utils/storage';
 
-// Build Firestore REST API endpoint for a collection and document
+// Xây dựng endpoint REST API của Google Firestore cho collection và tài liệu
 const getFirestoreEndpoint = (collectionName, documentId = '') => {
   const { projectId, apiKey } = ENV_CONFIG.FIREBASE;
   const docPath = documentId ? `/${encodeURIComponent(documentId)}` : '';
@@ -12,7 +16,7 @@ const getFirestoreEndpoint = (collectionName, documentId = '') => {
   return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${collectionName}${docPath}${keyParam}`;
 };
 
-// Convert data payload into Firestore REST document format
+// Chuyển đổi dữ liệu sang cấu trúc tài liệu của Firestore REST API
 const toFirestoreDocument = (payload) => ({
   fields: {
     studentId: { stringValue: STUDENT_INFO.studentId },
@@ -21,7 +25,7 @@ const toFirestoreDocument = (payload) => ({
   },
 });
 
-// Parse JSON payload from a Firestore REST document
+// Giải mã JSON từ cấu trúc tài liệu của Firestore REST API
 const fromFirestoreDocument = (doc) => {
   try {
     const rawJson = doc?.fields?.payloadJson?.stringValue;
@@ -32,10 +36,11 @@ const fromFirestoreDocument = (doc) => {
   }
 };
 
-// Fetch user's saved wishlist from Firebase with local cache fallback
+// Tải danh sách Yêu thích từ Firebase kèm cơ chế đệm bộ nhớ cục bộ
 export const fetchFirebaseWishlist = async ({ simulateError = false } = {}) => {
   const localCache = await getStoredItem(STORAGE_KEYS.WISHLIST_CACHE, []);
 
+  // Mô phỏng sự cố đọc Firebase (Test Case 10)
   if (simulateError) {
     await new Promise((resolve) => setTimeout(resolve, 400));
     throw new Error(
@@ -64,7 +69,7 @@ export const fetchFirebaseWishlist = async ({ simulateError = false } = {}) => {
       }
     } catch (cloudError) {
       console.warn(
-        '[FirebaseService] Failed to fetch cloud wishlist, using local cache:',
+        '[FirebaseService] Đọc Wishlist từ đám mây thất bại, dùng cache cục bộ:',
         cloudError
       );
     }
@@ -79,14 +84,15 @@ export const fetchFirebaseWishlist = async ({ simulateError = false } = {}) => {
   };
 };
 
-// Save updated wishlist to Firebase and local storage cache
+// Lưu danh sách Yêu thích cập nhật lên Firebase và lưu cache cục bộ
 export const saveFirebaseWishlist = async (
   wishlistItems,
   { simulateError = false } = {}
 ) => {
-  // Always update local cache first to prevent data loss
+  // Luôn lưu cache cục bộ trước để bảo toàn dữ liệu người dùng
   await setStoredItem(STORAGE_KEYS.WISHLIST_CACHE, wishlistItems);
 
+  // Mô phỏng sự cố ghi Firebase (Test Case 10)
   if (simulateError) {
     await new Promise((resolve) => setTimeout(resolve, 350));
     throw new Error(
@@ -111,7 +117,7 @@ export const saveFirebaseWishlist = async (
         syncedAt: new Date().toISOString(),
       };
     } catch (error) {
-      console.warn('[FirebaseService] Failed to write cloud wishlist:', error);
+      console.warn('[FirebaseService] Ghi Wishlist lên đám mây thất bại:', error);
     }
   }
 
@@ -122,10 +128,11 @@ export const saveFirebaseWishlist = async (
   };
 };
 
-// Fetch order history from Firebase with local cache fallback
+// Tải lịch sử đơn hàng từ Firebase kèm cơ chế đệm bộ nhớ cục bộ
 export const fetchFirebaseOrders = async ({ simulateError = false } = {}) => {
   const localOrders = await getStoredItem(STORAGE_KEYS.ORDERS_CACHE, []);
 
+  // Mô phỏng lỗi đọc đơn hàng Firebase (Test Case 10)
   if (simulateError) {
     await new Promise((resolve) => setTimeout(resolve, 400));
     throw new Error(
@@ -153,7 +160,7 @@ export const fetchFirebaseOrders = async ({ simulateError = false } = {}) => {
         }
       }
     } catch (error) {
-      console.warn('[FirebaseService] Failed to fetch cloud orders:', error);
+      console.warn('[FirebaseService] Đọc đơn hàng từ đám mây thất bại:', error);
     }
   }
 
@@ -166,11 +173,12 @@ export const fetchFirebaseOrders = async ({ simulateError = false } = {}) => {
   };
 };
 
-// Create and sync a new order to Firebase and local storage cache
+// Tạo và đồng bộ một đơn hàng mới lên Firebase và bộ nhớ máy
 export const createFirebaseOrder = async (
   orderData,
   { simulateError = false } = {}
 ) => {
+  // Mô phỏng sự cố khi bấm đặt đơn (Test Case 10)
   if (simulateError) {
     await new Promise((resolve) => setTimeout(resolve, 450));
     throw new Error(
@@ -212,7 +220,7 @@ export const createFirebaseOrder = async (
         body: JSON.stringify(toFirestoreDocument(updatedOrders)),
       });
     } catch (error) {
-      console.warn('[FirebaseService] Failed to sync order to cloud:', error);
+      console.warn('[FirebaseService] Đồng bộ đơn hàng lên đám mây thất bại:', error);
     }
   }
 

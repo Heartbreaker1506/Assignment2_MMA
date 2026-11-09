@@ -1,9 +1,13 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/services/notificationService.js - Quản lý quyền & phát thông báo đẩy (R09)
+// =========================================================================
 
 import { Platform } from 'react-native';
 import { getStoredItem, setStoredItem, STORAGE_KEYS } from '../utils/storage';
 
-// Dynamically load expo-notifications if available in the runtime environment
+// Tải linh hoạt expo-notifications khi chạy trong môi trường Expo Go / Native
 let ExpoNotifications = null;
 try {
   // eslint-disable-next-line global-require
@@ -31,7 +35,7 @@ export const DEFAULT_NOTIFICATION_SETTINGS = {
   aiAssistantAlertsEnabled: true,
 };
 
-// Read current notification settings from storage
+// Đọc cài đặt thông báo hiện tại từ bộ nhớ máy
 export const getNotificationSettings = async () => {
   const saved = await getStoredItem(
     STORAGE_KEYS.NOTIFICATION_SETTINGS,
@@ -43,7 +47,7 @@ export const getNotificationSettings = async () => {
   };
 };
 
-// Update notification settings in storage
+// Cập nhật cài đặt thông báo vào bộ nhớ máy
 export const updateNotificationSettings = async (partialSettings) => {
   const current = await getNotificationSettings();
   const updated = {
@@ -54,7 +58,7 @@ export const updateNotificationSettings = async (partialSettings) => {
   return updated;
 };
 
-// Request notification permission from the operating system safely
+// Yêu cầu quyền thông báo từ hệ điều hành một cách an toàn
 export const requestNotificationPermission = async () => {
   try {
     if (
@@ -66,7 +70,7 @@ export const requestNotificationPermission = async () => {
         typeof ExpoNotifications.setNotificationChannelAsync === 'function'
       ) {
         await ExpoNotifications.setNotificationChannelAsync('default', {
-          name: 'SmartShop Business Notifications',
+          name: 'SmartStore Business Notifications',
           importance: ExpoNotifications.AndroidImportance?.MAX || 4,
         });
       }
@@ -80,7 +84,7 @@ export const requestNotificationPermission = async () => {
     }
   } catch (error) {
     console.warn(
-      '[NotificationService] Fallback when requesting OS permission:',
+      '[NotificationService] Fallback khi xin quyền hệ điều hành:',
       error
     );
   }
@@ -91,18 +95,18 @@ export const requestNotificationPermission = async () => {
   return updated;
 };
 
-// Get notification history logs from storage
+// Lấy danh sách nhật ký thông báo từ bộ nhớ máy
 export const getNotificationLogs = async () => {
   return getStoredItem(STORAGE_KEYS.NOTIFICATION_LOGS, []);
 };
 
-// Clear all notification history logs
+// Xóa toàn bộ lịch sử nhật ký thông báo
 export const clearNotificationLogs = async () => {
   await setStoredItem(STORAGE_KEYS.NOTIFICATION_LOGS, []);
   return [];
 };
 
-// Trigger a notification for a business event (e.g., order placed, wishlist updated)
+// Kích hoạt thông báo theo sự kiện nghiệp vụ (Đặt hàng, Yêu thích, Kiểm thử)
 export const triggerBusinessNotification = async ({
   title,
   body,
@@ -111,7 +115,7 @@ export const triggerBusinessNotification = async ({
   const settings = await getNotificationSettings();
   const existingLogs = await getNotificationLogs();
 
-  // Case 1: Permission is denied -> do not send notification, log blocked status safely
+  // Tình huống 1: Quyền bị Từ chối (Test Case 11) -> Không phát popup, ghi nhật ký chặn, không crash app
   if (settings.permissionStatus !== 'granted') {
     const blockedRecord = {
       id: `NOTIF-${Date.now()}`,
@@ -120,7 +124,7 @@ export const triggerBusinessNotification = async ({
       eventType,
       status: 'BLOCKED_PERMISSION_DENIED',
       createdAt: new Date().toISOString(),
-      note: 'Đã chặn phát thông báo do quyền đang ở trạng thái Từ chối (Denied). App vẫn chạy ổn định.',
+      note: 'Đã chặn phát thông báo do quyền đang ở trạng thái Từ chối (Denied). Ứng dụng vẫn chạy ổn định.',
     };
 
     const nextLogs = [blockedRecord, ...existingLogs].slice(0, 25);
@@ -136,7 +140,7 @@ export const triggerBusinessNotification = async ({
     };
   }
 
-  // Check per-event toggle settings
+  // Kiểm tra công tắc riêng của từng loại sự kiện
   if (eventType === 'ORDER_PLACED' && !settings.orderAlertsEnabled) {
     return {
       sent: false,
@@ -155,7 +159,7 @@ export const triggerBusinessNotification = async ({
     };
   }
 
-  // Case 2: Permission is granted -> schedule notification and record delivery
+  // Tình huống 2: Quyền được Cấp (Test Case 12) -> Lên lịch phát thông báo và ghi nhận trạng thái DELIVERED
   if (
     ExpoNotifications &&
     typeof ExpoNotifications.scheduleNotificationAsync === 'function'
@@ -163,23 +167,23 @@ export const triggerBusinessNotification = async ({
     try {
       await ExpoNotifications.scheduleNotificationAsync({
         content: {
-          title: String(title || 'SmartShop MMA301'),
+          title: String(title || 'Thông báo SmartStore'),
           body: String(body || ''),
-          data: { eventType },
+          data: { eventType, timestamp: Date.now() },
         },
-        trigger: null,
+        trigger: null, // Phát ngay lập tức
       });
-    } catch (osError) {
+    } catch (scheduleErr) {
       console.warn(
-        '[NotificationService] OS scheduleNotificationAsync fallback:',
-        osError
+        '[NotificationService] scheduleNotificationAsync fallback:',
+        scheduleErr
       );
     }
   }
 
   const deliveredRecord = {
     id: `NOTIF-${Date.now()}`,
-    title: String(title || 'Thông báo hệ thống'),
+    title: String(title || 'Thông báo SmartStore'),
     body: String(body || ''),
     eventType,
     status: 'DELIVERED',
@@ -192,7 +196,7 @@ export const triggerBusinessNotification = async ({
 
   return {
     sent: true,
-    permissionStatus: 'granted',
+    permissionStatus: settings.permissionStatus,
     record: deliveredRecord,
     logs: nextLogs,
   };

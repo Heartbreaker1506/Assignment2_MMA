@@ -1,4 +1,4 @@
-# MMA301 - Assignment 2: Integrated E-Commerce Mobile App (SmartShop)
+# MMA301 - Assignment 2: Integrated E-Commerce Mobile App (SmartStore)
 
 - **Sinh viên thực hiện:** Nguyễn Minh Quân
 - **Mã số sinh viên (MSSV):** `CE180048`
@@ -10,7 +10,7 @@
 
 ## 1. Mô tả nghiệp vụ ứng dụng
 
-**SmartShop MMA301** là ứng dụng thương mại điện tử tích hợp (Integrated E-Commerce Mobile App) được xây dựng bằng **React Native + Expo (JavaScript)** theo đúng chuẩn kiến trúc phân tách trách nhiệm (**Separation of Concerns**). Ứng dụng giải quyết trọn vẹn hành trình mua sắm thiết bị công nghệ của người dùng trên di động thông qua **6 màn hình chức năng**:
+**SmartStore MMA301** là ứng dụng thương mại điện tử tích hợp (Integrated E-Commerce Mobile App) được xây dựng bằng **React Native + Expo (JavaScript)** theo đúng chuẩn kiến trúc phân tách trách nhiệm (**Separation of Concerns**). Ứng dụng giải quyết trọn vẹn hành trình mua sắm thiết bị công nghệ của người dùng trên di động thông qua **6 màn hình chức năng**:
 
 1. **ProductListScreen (`Danh mục Sản phẩm`):** Tải dữ liệu sản phẩm từ Remote API (`DummyJSON`), hỗ trợ tìm kiếm theo từ khóa, lọc theo danh mục (`smartphones`, `laptops`, `tablets`, `mobile-accessories`, `mens-watches`), phân trang vô hạn (`limit` + `skip`) kèm khóa chống gọi trùng request (`isFetchingMoreRef`), kéo để làm mới (`Pull-to-refresh`), và xử lý đầy đủ trạng thái `Loading / Empty / Error + Retry / Offline Fallback`.
 2. **ProductDetailScreen (`Chi tiết Sản phẩm`):** Hiển thị thông tin chi tiết sản phẩm, tồn kho, đánh giá, chọn số lượng kèm ghi chú để thêm vào giỏ hàng, lưu/bỏ lưu vào danh sách Yêu thích đồng bộ Firebase, và lối tắt nhờ Gemini AI đánh giá sản phẩm.
@@ -78,12 +78,18 @@ assignment2_ce180048/
 │   │   ├── CartItemCard.js                 # Thẻ mặt hàng trong giỏ kèm nút +/-/xóa và ghi chú
 │   │   └── NotificationBanner.js           # Thanh thông báo nổi hiển thị tức thì khi phát sự kiện R09
 │   └── screens/
-│       ├── ProductListScreen.js            # Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc, phân trang
-│       ├── ProductDetailScreen.js          # Màn hình 2: Chi tiết sản phẩm
-│       ├── CartScreen.js                   # Màn hình 3: Giỏ hàng & Thanh toán
-│       ├── SavedOrdersScreen.js            # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
-│       ├── AiAssistantScreen.js            # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
-│       └── NotificationSettingsScreen.js   # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
+│       ├── catalog/
+│       │   ├── ProductListScreen.js        # Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc, phân trang
+│       │   └── ProductDetailScreen.js      # Màn hình 2: Chi tiết sản phẩm
+│       ├── cart/
+│       │   └── CartScreen.js               # Màn hình 3: Giỏ hàng & Thanh toán
+│       ├── orders/
+│       │   └── SavedOrdersScreen.js        # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
+│       ├── ai/
+│       │   └── AiAssistantScreen.js        # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
+│       ├── settings/
+│       │   └── NotificationSettingsScreen.js # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
+│       └── index.js                        # File barrel export tập trung các màn hình
 └── docs/
     ├── RTM_AND_DESIGN_DECISIONS.md         # Bảng RTM (R01-R12), Kiến trúc & 7 Quyết định Thiết kế (DDR)
     ├── TEST_MATRIX_AND_DEBUG_LOGS.md       # Bảng kiểm thử 15 Test Cases & 3 Nhật ký Gỡ lỗi (Debug Logs)
@@ -124,7 +130,7 @@ Toàn bộ **15 Test Cases** bắt buộc trong Mục 5 của đề bài đã đ
 ## 6. Chuẩn bị phát hành Android Release Build (R11)
 
 Dự án đã được cấu hình đầy đủ định danh ứng dụng và hồ sơ đóng gói Android trong [`app.json`](./app.json) và [`eas.json`](./eas.json):
-- **Tên ứng dụng:** `SmartShop MMA301 - CE180048`
+- **Tên ứng dụng:** `SmartStore MMA301 - CE180048`
 - **Android Package ID:** `com.ce180048.assignment2`
 - **Version:** `1.0.0` (`versionCode: 1`)
 - **Lệnh đóng gói APK qua EAS:** `eas build -p android --profile preview`

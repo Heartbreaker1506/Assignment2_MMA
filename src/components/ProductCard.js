@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/components/ProductCard.js - Thẻ hiển thị sản phẩm dạng lưới 2 cột hiện đại
+// =========================================================================
 
 import React from 'react';
 import {
@@ -12,7 +16,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import { formatPrice } from '../utils/storage';
 
-// Modern Luxury 2-Column Vertical Product Card Component
+// Thẻ hiển thị sản phẩm dạng lưới 2 cột dọc (Modern 2-Column Grid Card)
 export const ProductCard = ({
   product,
   inCartQty = 0,
@@ -39,7 +43,7 @@ export const ProductCard = ({
       onPress={() => onPressDetail && onPressDetail(product)}
       activeOpacity={0.88}
     >
-      {/* Top Media Section with Floating Action Badges */}
+      {/* Khu vực hình ảnh với các huy hiệu nổi */}
       <View
         style={[
           styles.imageContainer,
@@ -52,7 +56,7 @@ export const ProductCard = ({
           resizeMode="cover"
         />
 
-        {/* Discount Badge */}
+        {/* Huy hiệu phần trăm giảm giá */}
         {discount > 0 ? (
           <View
             style={[
@@ -64,7 +68,7 @@ export const ProductCard = ({
           </View>
         ) : null}
 
-        {/* Floating Wishlist Heart */}
+        {/* Nút tim lưu vào danh sách Yêu thích */}
         <TouchableOpacity
           style={[
             styles.wishlistBtn,
@@ -81,9 +85,9 @@ export const ProductCard = ({
         </TouchableOpacity>
       </View>
 
-      {/* Information Body */}
+      {/* Thông tin chi tiết sản phẩm */}
       <View style={styles.infoContainer}>
-        {/* Category & Brand Micro-tag */}
+        {/* Nhãn thương hiệu và đánh giá sao */}
         <View style={styles.metaRow}>
           <Text
             style={[styles.brandTag, { color: colors.secondary }]}
@@ -96,7 +100,7 @@ export const ProductCard = ({
           </Text>
         </View>
 
-        {/* Product Title */}
+        {/* Tiêu đề sản phẩm giới hạn 2 dòng */}
         <Text
           style={[styles.title, { color: colors.text }]}
           numberOfLines={2}
@@ -104,7 +108,7 @@ export const ProductCard = ({
           {product.title}
         </Text>
 
-        {/* Price & Stock Line */}
+        {/* Giá tiền nổi bật */}
         <View style={styles.priceRow}>
           <Text style={[styles.priceText, { color: colors.primary }]}>
             {formatPrice(product.price)}
@@ -120,7 +124,7 @@ export const ProductCard = ({
             : 'Tạm hết hàng'}
         </Text>
 
-        {/* Add to Cart Modern Action Button */}
+        {/* Nút thêm vào giỏ hàng hoặc báo đã thêm */}
         <TouchableOpacity
           style={[
             styles.addCartBtn,

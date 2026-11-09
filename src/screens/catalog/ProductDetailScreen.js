@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/catalog/ProductDetailScreen.js - Màn hình 2: Chi tiết sản phẩm & Thêm vào giỏ (R04, R05)
+// =========================================================================
 
 import React, { useState } from 'react';
 import {
@@ -11,12 +15,12 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { formatPrice } from '../utils/storage';
-import { CustomButton } from '../components/CustomButton';
-import { StateFeedback } from '../components/StateFeedback';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { formatPrice } from '../../utils/storage';
+import { CustomButton } from '../../components/CustomButton';
+import { StateFeedback } from '../../components/StateFeedback';
 
 export const ProductDetailScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
@@ -55,7 +59,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     setSelectedQty((prev) => Math.min(maxStock, prev + 1));
   };
 
-  // Add selected quantity and note to shopping cart
+  // Thêm số lượng sản phẩm đã chọn kèm ghi chú vào giỏ hàng
   const handleAddProductToCart = async () => {
     await addToCart(product, selectedQty, customNote);
     setFeedbackMsg({
@@ -65,7 +69,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     setCustomNote('');
   };
 
-  // Toggle product in Firebase-synced wishlist
+  // Thêm hoặc xóa sản phẩm khỏi danh sách Yêu thích Firebase
   const handleToggleWishlist = async () => {
     const res = await toggleWishlistProduct(product);
     if (!res.success && res.error) {
@@ -83,7 +87,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  // Open Gemini AI Assistant pre-populated with this product
+  // Mở Trợ lý Gemini AI với câu hỏi được chuẩn bị sẵn về sản phẩm này
   const handleAskGeminiAboutThis = () => {
     navigation.navigate('AiAssistant', {
       initialPrompt: `Tư vấn chi tiết về ${product.title} (${product.brand}), phân tích ưu nhược điểm và xem có phù hợp với tầm giá ${formatPrice(product.price)} không?`,
@@ -96,7 +100,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Feedback banner */}
+      {/* Thông báo phản hồi thao tác thành công hoặc có lỗi */}
       {feedbackMsg ? (
         <View
           style={[
@@ -129,7 +133,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         </View>
       ) : null}
 
-      {/* Hero Media Showcase Container */}
+      {/* Khu vực ảnh đại diện lớn với huy hiệu giảm giá và nút Yêu thích */}
       <View
         style={[
           styles.mediaShowcase,
@@ -145,14 +149,14 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           resizeMode="contain"
         />
 
-        {/* Floating Discount Tag */}
+        {/* Huy hiệu giảm giá nổi */}
         {discount > 0 ? (
           <View style={[styles.discountTag, { backgroundColor: colors.danger }]}>
             <Text style={styles.discountTagText}>GIẢM {discount}%</Text>
           </View>
         ) : null}
 
-        {/* Floating Wishlist Heart */}
+        {/* Nút tim lưu vào danh sách Yêu thích */}
         <TouchableOpacity
           style={[
             styles.wishlistFloatBtn,
@@ -168,7 +172,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Product Details Main Card */}
+      {/* Thẻ chi tiết sản phẩm chính */}
       <View
         style={[
           styles.detailCard,
@@ -178,7 +182,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           },
         ]}
       >
-        {/* Meta badges row */}
+        {/* Hàng nhãn phân loại, thương hiệu và điểm số */}
         <View style={styles.metaRow}>
           <View
             style={[
@@ -209,12 +213,12 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Product Title */}
+        {/* Tiêu đề sản phẩm */}
         <Text style={[styles.title, { color: colors.text }]}>
           {product.title}
         </Text>
 
-        {/* Price & Stock Line */}
+        {/* Giá tiền và huy hiệu tình trạng còn hàng */}
         <View style={styles.priceStockRow}>
           <Text style={[styles.priceAmount, { color: colors.primary }]}>
             {formatPrice(product.price)}
@@ -241,7 +245,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Description section */}
+        {/* Mô tả chi tiết */}
         <Text style={[styles.sectionHeading, { color: colors.text }]}>
           Mô tả sản phẩm
         </Text>
@@ -249,7 +253,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           {product.description}
         </Text>
 
-        {/* Gemini AI Consultation Shortcut Card */}
+        {/* Thẻ lối tắt kết nối Trợ lý Gemini AI */}
         <TouchableOpacity
           style={[
             styles.aiCard,
@@ -273,7 +277,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </Text>
         </TouchableOpacity>
 
-        {/* Stepper & Note Row */}
+        {/* Bộ đếm chọn số lượng cần mua */}
         <View style={styles.stepperSection}>
           <Text style={[styles.stepperLabel, { color: colors.text }]}>
             Số lượng mua:
@@ -313,7 +317,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        {/* Custom Note input */}
+        {/* Ô nhập ghi chú riêng cho đơn hàng */}
         <TextInput
           style={[
             styles.noteInput,
@@ -329,7 +333,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           onChangeText={setCustomNote}
         />
 
-        {/* Dual Action Buttons */}
+        {/* Hàng 2 nút hành động: Thêm giỏ hàng & Lưu Wishlist */}
         <View style={styles.actionButtonsRow}>
           <CustomButton
             title={
@@ -359,7 +363,7 @@ export const ProductDetailScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Shortcut to Cart if items present */}
+        {/* Lối tắt xem nhanh giỏ hàng nếu đã có sản phẩm bên trong */}
         {inCartQty > 0 ? (
           <TouchableOpacity
             style={styles.viewCartShortcut}
@@ -635,3 +639,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+

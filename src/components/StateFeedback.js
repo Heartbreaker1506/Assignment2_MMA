@@ -1,11 +1,15 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/components/StateFeedback.js - Khối phản hồi trạng thái Loading / Empty / Error (R01, R02)
+// =========================================================================
 
 import React from 'react';
 import { View, Text, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { CustomButton } from './CustomButton';
 
-// Reusable UI component for displaying loading, empty, and error states with retry actions
+// Thành phần giao diện hiển thị các trạng thái hệ thống: Đang tải, Rỗng, hoặc Có lỗi kèm nút Thử lại
 export const StateFeedback = ({
   type = 'empty', // 'loading' | 'empty' | 'error'
   title,
@@ -17,6 +21,7 @@ export const StateFeedback = ({
 }) => {
   const { colors } = useTheme();
 
+  // Trạng thái đang tải dữ liệu (Loading State)
   if (type === 'loading') {
     return (
       <View style={styles.container}>
@@ -35,6 +40,7 @@ export const StateFeedback = ({
 
   const isError = type === 'error';
 
+  // Trạng thái Báo lỗi (Error State) hoặc Trống rỗng (Empty State)
   return (
     <View
       style={[

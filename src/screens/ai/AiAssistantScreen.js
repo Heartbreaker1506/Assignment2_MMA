@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/ai/AiAssistantScreen.js - Màn hình 5: Trợ lý Mua sắm Gemini AI & Chống ảo giác (R10)
+// =========================================================================
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -11,14 +15,14 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { askGeminiProductAssistant } from '../services/aiService';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { formatPrice } from '../utils/storage';
-import { CustomButton } from '../components/CustomButton';
+import { askGeminiProductAssistant } from '../../services/aiService';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { formatPrice } from '../../utils/storage';
+import { CustomButton } from '../../components/CustomButton';
 
-// Preset prompts for quick testing
+// Các mẫu câu hỏi gợi ý nhanh theo nhu cầu thực tế
 const QUICK_PROMPTS = [
   {
     label: '📱 Điện thoại Flagship',
@@ -69,7 +73,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
     }
   }, [route?.params?.initialPrompt, route?.params?.initialBudget]);
 
-  // Send query and catalog context to Gemini AI and validate output
+  // Gửi câu hỏi và ngữ cảnh Catalog sang Gemini AI kèm bộ lọc chống ảo giác
   const handleAskAi = async (overrideFlags = {}) => {
     setIsLoading(true);
     const numericBudget = Number(budgetText) > 0 ? Number(budgetText) : 0;
@@ -102,7 +106,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Catalog context summary banner */}
+      {/* Banner giới thiệu cơ chế bảo vệ chống ảo giác (Anti-Hallucination Guard) */}
       <View
         style={[
           styles.contextBanner,
@@ -126,14 +130,14 @@ export const AiAssistantScreen = ({ route, navigation }) => {
         </Text>
       </View>
 
-      {/* AI prompt and budget input form */}
+      {/* Form nhập câu hỏi, chế độ tư vấn và ngân sách */}
       <View
         style={[
           styles.formCard,
           { backgroundColor: colors.surface, borderColor: colors.border },
         ]}
       >
-        {/* Mode selector: Recommend vs Compare */}
+        {/* Nút chọn chế độ: Tư vấn gợi ý vs So sánh thông minh */}
         <View style={styles.modeRow}>
           <TouchableOpacity
             style={[
@@ -182,7 +186,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* Quick prompt chips */}
+        {/* Các nhãn câu hỏi nhanh */}
         <Text style={[styles.label, { color: colors.textSecondary }]}>
           Gợi ý nhanh theo chủ đề:
         </Text>
@@ -248,7 +252,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
           />
         </View>
 
-        {/* Toggle switch for testing AI hallucination filtering (Case 14) */}
+        {/* Công tắc mô phỏng lỗi sản phẩm ảo giác phục vụ chấm bài (Test Case 14) */}
         <TouchableOpacity
           style={[
             styles.simToggleBox,
@@ -289,10 +293,10 @@ export const AiAssistantScreen = ({ route, navigation }) => {
         />
       </View>
 
-      {/* Validated AI response and recommendations */}
+      {/* Kết quả phản hồi từ Gemini AI sau khi đã qua bộ lọc xác thực */}
       {aiResult ? (
         <View style={styles.resultSection}>
-          {/* Output Validation Report Card */}
+          {/* Thẻ báo cáo kiểm chứng đầu ra (Output Validation Report) */}
           <View
             style={[
               styles.validationCard,
@@ -385,7 +389,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
               </View>
             </View>
 
-            {/* List of rejected hallucinated items */}
+            {/* Danh sách các sản phẩm ảo giác bị phát hiện và chặn lại */}
             {aiResult.rejectedItems && aiResult.rejectedItems.length > 0 ? (
               <View
                 style={[
@@ -412,7 +416,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             ) : null}
           </View>
 
-          {/* AI summary and comparison advice */}
+          {/* Lời khuyên và tóm tắt phân tích từ AI */}
           <View
             style={[
               styles.summaryCard,
@@ -437,7 +441,7 @@ export const AiAssistantScreen = ({ route, navigation }) => {
             ) : null}
           </View>
 
-          {/* List of validated catalog products */}
+          {/* Danh sách các sản phẩm thật được AI đề xuất */}
           <Text style={[styles.recListHeader, { color: colors.text }]}>
             ✅ Sản phẩm Đề xuất Đã kiểm chứng ({aiResult.validRecommendations.length})
           </Text>
@@ -769,3 +773,4 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+

@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/orders/SavedOrdersScreen.js - Màn hình 4: Firebase Wishlist & Đơn hàng đã đặt (R08)
+// =========================================================================
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -10,12 +14,12 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { formatPrice } from '../utils/storage';
-import { CustomButton } from '../components/CustomButton';
-import { StateFeedback } from '../components/StateFeedback';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { formatPrice } from '../../utils/storage';
+import { CustomButton } from '../../components/CustomButton';
+import { StateFeedback } from '../../components/StateFeedback';
 
 export const SavedOrdersScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
@@ -40,7 +44,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
     }
   }, [route?.params?.initialTab]);
 
-  // Trigger manual synchronization with Firebase
+  // Kích hoạt đồng bộ dữ liệu thủ công từ Google Firebase
   const handleManualSync = async () => {
     await syncAllFromFirebase();
   };
@@ -50,7 +54,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Firebase synchronization status card */}
+      {/* Thẻ trạng thái kết nối và đồng bộ đám mây Firebase */}
       <View
         style={[
           styles.firebaseCard,
@@ -109,7 +113,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
           />
         </View>
 
-        {/* Display warning banner when Firebase sync fails or error simulation is active */}
+        {/* Cảnh báo khi đồng bộ Firebase gặp lỗi hoặc công tắc mô phỏng đang bật (Test Case 10) */}
         {firebaseSyncInfo.error || simulationFlags.simulateFirebaseError ? (
           <View
             style={[
@@ -144,7 +148,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
         ) : null}
       </View>
 
-      {/* Tab switcher between Wishlist and Order History */}
+      {/* Thanh chuyển đổi tab dạng Segmented Control giữa Yêu thích và Đơn hàng */}
       <View
         style={[
           styles.tabBar,
@@ -194,7 +198,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Tab 1: Firebase-synced Wishlist items */}
+      {/* Tab 1: Danh sách sản phẩm Yêu thích đã đồng bộ Firebase */}
       {activeTab === 'wishlist' ? (
         wishlist.length === 0 ? (
           <StateFeedback
@@ -237,8 +241,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                   {item.title}
                 </Text>
                 <Text
-                  style={[styles.wishlistPrice, { color: colors.primary }]}
-                >
+                  style={[styles.wishlistPrice, { color: colors.primary }]}>
                   {formatPrice(item.price)}
                 </Text>
                 <Text
@@ -289,7 +292,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
         )
       ) : null}
 
-      {/* Tab 2: Firebase-synced Order History */}
+      {/* Tab 2: Lịch sử đơn hàng đã đặt và đồng bộ Firebase */}
       {activeTab === 'orders' ? (
         orders.length === 0 ? (
           <StateFeedback
@@ -345,7 +348,7 @@ export const SavedOrdersScreen = ({ route, navigation }) => {
                 style={[styles.orderDivider, { backgroundColor: colors.border }]}
               />
 
-              {/* Order line items */}
+              {/* Danh sách từng mặt hàng trong đơn hàng này */}
               {(order.items || []).map((cartLine, idx) => (
                 <View key={`${order.id}-item-${idx}`} style={styles.orderItemRow}>
                   <Text
@@ -623,3 +626,4 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 });
+

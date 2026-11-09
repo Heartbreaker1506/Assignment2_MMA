@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/cart/CartScreen.js - Màn hình 3: Giỏ hàng, Tính tiền & Đặt hàng (R05, R06, R07, R08)
+// =========================================================================
 
 import React, { useState } from 'react';
 import {
@@ -10,14 +14,14 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { SHOP_CONFIG, STUDENT_INFO } from '../constants/theme';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { formatPrice } from '../utils/storage';
-import { CartItemCard } from '../components/CartItemCard';
-import { CustomButton } from '../components/CustomButton';
-import { StateFeedback } from '../components/StateFeedback';
+import { SHOP_CONFIG, STUDENT_INFO } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { formatPrice } from '../../utils/storage';
+import { CartItemCard } from '../../components/CartItemCard';
+import { CustomButton } from '../../components/CustomButton';
+import { StateFeedback } from '../../components/StateFeedback';
 
 export const CartScreen = ({ navigation }) => {
   const { colors } = useTheme();
@@ -42,7 +46,7 @@ export const CartScreen = ({ navigation }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [checkoutStatus, setCheckoutStatus] = useState(null);
 
-  // Calculate free shipping progress percentage
+  // Tính toán phần trăm tiến độ đạt ngưỡng Miễn phí vận chuyển
   const freeShippingProgress = Math.min(
     100,
     Math.round((cartSummary.subtotal / SHOP_CONFIG.FREE_SHIPPING_THRESHOLD) * 100)
@@ -52,7 +56,7 @@ export const CartScreen = ({ navigation }) => {
     SHOP_CONFIG.FREE_SHIPPING_THRESHOLD - cartSummary.subtotal
   );
 
-  // Submit order to Firebase and trigger order confirmation notification
+  // Tiến hành đặt hàng đồng bộ lên Firebase và kích hoạt thông báo đẩy
   const handleCheckout = async () => {
     if (cartItems.length === 0) return;
 
@@ -68,7 +72,7 @@ export const CartScreen = ({ navigation }) => {
     setIsSubmitting(false);
 
     if (!res.success) {
-      // Keep cart items intact if Firebase sync fails
+      // Giữ nguyên giỏ hàng an toàn nếu đồng bộ Firebase gặp sự cố (Test Case 10)
       setCheckoutStatus({
         type: 'error',
         title: 'Đặt hàng thất bại (Lỗi Firebase - Case 10)',
@@ -79,7 +83,7 @@ export const CartScreen = ({ navigation }) => {
       return;
     }
 
-    // Clear cart after successful order placement
+    // Làm sạch giỏ hàng sau khi đặt hàng thành công
     await clearCart();
     const notifNote = res.notificationResult?.sent
       ? '🔔 Đã phát thông báo xác nhận đơn hàng thành công (Case 12).'
@@ -104,7 +108,7 @@ export const CartScreen = ({ navigation }) => {
       style={[styles.screen, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.content}
     >
-      {/* Order checkout status banner */}
+      {/* Khung thông báo trạng thái đặt hàng thành công hoặc báo lỗi */}
       {checkoutStatus ? (
         <View
           style={[
@@ -161,7 +165,7 @@ export const CartScreen = ({ navigation }) => {
         </View>
       ) : null}
 
-      {/* Empty cart state */}
+      {/* Trạng thái giỏ hàng rỗng (Empty State) */}
       {cartItems.length === 0 ? (
         <StateFeedback
           type="empty"
@@ -174,7 +178,7 @@ export const CartScreen = ({ navigation }) => {
         />
       ) : (
         <>
-          {/* Shipping Threshold Progress Bar Card */}
+          {/* Thanh tiến độ ngưỡng Miễn phí vận chuyển */}
           <View
             style={[
               styles.shippingProgressCard,
@@ -211,7 +215,7 @@ export const CartScreen = ({ navigation }) => {
             </View>
           </View>
 
-          {/* Cart items header and clear all button */}
+          {/* Tiêu đề danh sách mặt hàng và nút xóa tất cả */}
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               Mặt hàng trong giỏ ({cartSummary.uniqueItemsCount} sản phẩm •{' '}
@@ -224,7 +228,7 @@ export const CartScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* List of items in the shopping cart */}
+          {/* Danh sách các mặt hàng trong giỏ */}
           {cartItems.map((item) => (
             <CartItemCard
               key={String(item.product.id)}
@@ -239,7 +243,7 @@ export const CartScreen = ({ navigation }) => {
             />
           ))}
 
-          {/* Derived cart totals breakdown card */}
+          {/* Bảng chi tiết tính tiền phái sinh (Derived Totals - R06) */}
           <View
             style={[
               styles.summaryCard,
@@ -340,7 +344,7 @@ export const CartScreen = ({ navigation }) => {
               </Text>
             </View>
 
-            {/* Customer delivery note input */}
+            {/* Ô nhập thông tin và địa chỉ giao hàng */}
             <Text style={[styles.noteHeader, { color: colors.text }]}>
               📍 Thông tin người nhận & Địa chỉ giao hàng:
             </Text>
@@ -360,7 +364,7 @@ export const CartScreen = ({ navigation }) => {
               multiline
             />
 
-            {/* Warning when Firebase error simulation is on */}
+            {/* Cảnh báo khi công tắc mô phỏng lỗi Firebase đang bật */}
             {simulationFlags.simulateFirebaseError ? (
               <View
                 style={[
@@ -380,7 +384,7 @@ export const CartScreen = ({ navigation }) => {
               </View>
             ) : null}
 
-            {/* Checkout Action Button */}
+            {/* Nút bấm xác nhận đặt hàng */}
             <CustomButton
               title={`Xác nhận Đặt hàng • ${formatPrice(cartSummary.finalTotal)}`}
               onPress={handleCheckout}
@@ -587,3 +591,4 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 });
+

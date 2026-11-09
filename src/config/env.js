@@ -1,6 +1,10 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/config/env.js - Quản lý cấu hình biến môi trường an toàn
+// =========================================================================
 
-// Helper to clean environment variable strings and fallback if empty or placeholder
+// Hàm hỗ trợ lọc giá trị biến môi trường, tự động trả về giá trị mặc định nếu rỗng hoặc là chuỗi mẫu
 const cleanEnvValue = (value, defaultValue = '') => {
   if (!value || typeof value !== 'string') return defaultValue;
   const trimmed = value.trim();
@@ -15,13 +19,13 @@ const cleanEnvValue = (value, defaultValue = '') => {
 };
 
 export const ENV_CONFIG = {
-  // Remote Product Catalog API
+  // Đường dẫn máy chủ API danh mục sản phẩm từ xa (Mặc định: DummyJSON)
   API_BASE_URL: cleanEnvValue(
     process.env.EXPO_PUBLIC_API_BASE_URL,
     'https://dummyjson.com'
   ),
 
-  // Firebase Configuration
+  // Cấu hình Google Firebase Cloud Firestore
   FIREBASE: {
     apiKey: cleanEnvValue(process.env.EXPO_PUBLIC_FIREBASE_API_KEY, ''),
     authDomain: cleanEnvValue(
@@ -43,7 +47,7 @@ export const ENV_CONFIG = {
     appId: cleanEnvValue(process.env.EXPO_PUBLIC_FIREBASE_APP_ID, ''),
   },
 
-  // Gemini AI Configuration
+  // Cấu hình Google Gemini AI shopping assistant
   GEMINI: {
     apiKey: cleanEnvValue(process.env.EXPO_PUBLIC_GEMINI_API_KEY, ''),
     model: cleanEnvValue(
@@ -53,18 +57,21 @@ export const ENV_CONFIG = {
   },
 };
 
-// Check if valid Firebase credentials are provided in .env
+// Kiểm tra xem cấu hình Firebase thực tế có sẵn sàng hay không
 export const isFirebaseCloudConfigured = () => {
   return Boolean(
     ENV_CONFIG.FIREBASE.apiKey &&
       ENV_CONFIG.FIREBASE.apiKey.length > 10 &&
-      ENV_CONFIG.FIREBASE.projectId
+      ENV_CONFIG.FIREBASE.projectId &&
+      ENV_CONFIG.FIREBASE.projectId !== 'demo-project'
   );
 };
 
-// Check if a valid Gemini API key is provided in .env
+// Kiểm tra xem khóa API Google Gemini có hợp lệ hay không
 export const isGeminiApiKeyConfigured = () => {
   return Boolean(
-    ENV_CONFIG.GEMINI.apiKey && ENV_CONFIG.GEMINI.apiKey.length > 10
+    ENV_CONFIG.GEMINI.apiKey &&
+      ENV_CONFIG.GEMINI.apiKey.length > 10 &&
+      !ENV_CONFIG.GEMINI.apiKey.includes('your_')
   );
 };

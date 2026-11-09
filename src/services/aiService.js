@@ -1,9 +1,13 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/services/aiService.js - Tích hợp Gemini AI & Bộ lọc chống ảo giác (R10)
+// =========================================================================
 
 import { ENV_CONFIG, isGeminiApiKeyConfigured } from '../config/env';
 import { formatPrice } from '../utils/storage';
 
-// Build structured prompt with real catalog products, cart items, and budget context
+// Xây dựng câu nhắc (prompt) có cấu trúc nạp sản phẩm Catalog thật, giỏ hàng và ngân sách
 export const buildShoppingPrompt = ({
   userPrompt,
   budgetLimit,
@@ -28,7 +32,7 @@ export const buildShoppingPrompt = ({
   }));
 
   return `
-Bạn là Trợ lý Mua sắm Thông minh (SmartShop AI Assistant) cho ứng dụng thương mại điện tử MMA301.
+Bạn là Trợ lý Mua sắm Thông minh (SmartStore AI Assistant) cho ứng dụng thương mại điện tử MMA301.
 Nhiệm vụ: Tư vấn hoặc so sánh sản phẩm bằng tiếng Việt ngắn gọn, trung thực.
 QUY TẮC BẮT BUỘC:
 1. CHỈ ĐƯỢC gợi ý các sản phẩm có thật nằm trong danh sách CATALOG_DATA bên dưới.
@@ -56,7 +60,7 @@ ${JSON.stringify(catalogSnapshot)}
 `.trim();
 };
 
-// Validate AI recommendations against real catalog products and filter out hallucinations
+// Kiểm chứng kết quả AI trả về đối chiếu với Catalog thật để loại bỏ sản phẩm ảo giác (R10)
 export const validateAiOutputAgainstCatalog = (
   rawAiOutput,
   catalogProducts = []
@@ -85,7 +89,7 @@ export const validateAiOutputAgainstCatalog = (
       .trim()
       .toLowerCase();
 
-    // Match by product ID first, then fallback to exact product title
+    // Đối chiếu theo ID sản phẩm trước, sau đó tìm theo tên sản phẩm chính xác
     const matchedProduct =
       catalogMapById.get(candidateId) || catalogMapByTitle.get(candidateTitle);
 
@@ -101,7 +105,7 @@ export const validateAiOutputAgainstCatalog = (
         product: matchedProduct,
       });
     } else if (!matchedProduct) {
-      // Reject hallucinated product that does not exist in the real catalog
+      // Chặn ngay lập tức sản phẩm ảo giác không có thật trong danh mục
       rejectedItems.push({
         productId: rec?.productId ?? 'N/A',
         productTitle: rec?.productTitle || 'Sản phẩm không xác định',
@@ -132,7 +136,7 @@ export const validateAiOutputAgainstCatalog = (
   };
 };
 
-// Context-aware fallback engine when Gemini API key is not configured or network fails
+// Động cơ tư vấn dự phòng an toàn khi chưa nhập khóa Gemini API hoặc mất mạng
 const generateSmartFallbackResponse = ({
   userPrompt,
   budgetLimit,
@@ -172,7 +176,7 @@ const generateSmartFallbackResponse = ({
     }
   }
 
-  // Sort candidates by highest rating
+  // Sắp xếp các ứng cử viên theo điểm đánh giá cao nhất
   candidates.sort((a, b) => b.rating - a.rating);
   const picked = candidates.slice(0, 3);
 
@@ -189,7 +193,7 @@ const generateSmartFallbackResponse = ({
           }★): ${item.description.slice(0, 90)}...`,
   }));
 
-  // Inject a fake product ID when testing hallucination filtering (Case 14)
+  // Chèn một sản phẩm ảo giác giả lập khi kiểm thử bộ lọc (Test Case 14)
   if (simulateHallucination) {
     recommendations.unshift({
       productId: 99999,
@@ -235,7 +239,7 @@ const generateSmartFallbackResponse = ({
   };
 };
 
-// Main entry point to request product advice from Gemini AI with output validation
+// Hàm chính gọi Trợ lý mua sắm Gemini AI kèm bộ lọc xác thực chống ảo giác
 export const askGeminiProductAssistant = async ({
   userPrompt,
   budgetLimit = 0,
@@ -306,14 +310,14 @@ export const askGeminiProductAssistant = async ({
     const data = await response.json();
     const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
-    // Strip markdown code fences if present before parsing JSON
+    // Loại bỏ markdown code fences nếu có trước khi phân giải JSON
     const cleanedJsonText = rawText
       .replace(/```json/gi, '')
       .replace(/```/g, '')
       .trim();
     const parsedOutput = JSON.parse(cleanedJsonText);
 
-    // Validate AI output against real catalog products before returning to UI
+    // Kiểm chứng kết quả AI đối chiếu với sản phẩm thật trước khi trả về giao diện
     const validated = validateAiOutputAgainstCatalog(
       parsedOutput,
       catalogProducts
@@ -325,7 +329,7 @@ export const askGeminiProductAssistant = async ({
     };
   } catch (error) {
     console.warn(
-      '[AiService] Gemini API call failed, using safe fallback engine:',
+      '[AiService] Gọi Gemini API thất bại, chuyển sang động cơ dự phòng:',
       error
     );
 
@@ -347,7 +351,7 @@ export const askGeminiProductAssistant = async ({
       ...validated,
       source: 'Fallback Engine (Tự động khôi phục sau lỗi Gemini API)',
       fallbackWarning:
-        'Không thể kết nối trực tiếp tới Gemini API (hoặc API Key hết hạn). Đã chuyển sang chế độ tư vấn dự phòng dựa trên Catalog thật.',
+        'Không thể kết nối trực tiếp tới Gemini API. Đã chuyển sang chế độ tư vấn dự phòng an toàn dựa trên Catalog thật.',
     };
   }
 };

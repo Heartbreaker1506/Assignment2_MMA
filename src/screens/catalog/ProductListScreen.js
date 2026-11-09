@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/screens/catalog/ProductListScreen.js - Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang (R01, R02, R03)
+// =========================================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
@@ -17,16 +21,16 @@ import {
   PRODUCT_CATEGORIES,
   SHOP_CONFIG,
   STUDENT_INFO,
-} from '../constants/theme';
+} from '../../constants/theme';
 import {
   fetchProductsPage,
   getFallbackProductsPage,
-} from '../services/productService';
-import { useTheme } from '../context/ThemeContext';
-import { useCart } from '../context/CartContext';
-import { useShop } from '../context/ShopContext';
-import { ProductCard } from '../components/ProductCard';
-import { StateFeedback } from '../components/StateFeedback';
+} from '../../services/productService';
+import { useTheme } from '../../context/ThemeContext';
+import { useCart } from '../../context/CartContext';
+import { useShop } from '../../context/ShopContext';
+import { ProductCard } from '../../components/ProductCard';
+import { StateFeedback } from '../../components/StateFeedback';
 
 export const ProductListScreen = ({ navigation }) => {
   const { colors, isDarkMode } = useTheme();
@@ -41,27 +45,27 @@ export const ProductListScreen = ({ navigation }) => {
     toggleSimulationFlag,
   } = useShop();
 
-  // Search query and category filter state
+  // Trạng thái tìm kiếm và lọc theo danh mục
   const [searchText, setSearchText] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // Product list and pagination state
+  // Trạng thái danh sách sản phẩm và phân trang
   const [products, setProducts] = useState([]);
   const [skip, setSkip] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [dataSource, setDataSource] = useState('remote_api');
 
-  // Async loading and error state
+  // Trạng thái tải dữ liệu bất đồng bộ và thông báo lỗi
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Synchronous ref guard to prevent duplicate pagination requests during fast scroll
+  // Khóa tham chiếu đồng bộ ngăn chặn bắn trùng request khi người dùng vuốt nhanh
   const isFetchingMoreRef = useRef(false);
 
-  // Load the first page of products (on mount, filter change, or pull-to-refresh)
+  // Tải trang sản phẩm đầu tiên (khởi động, đổi bộ lọc, hoặc kéo làm mới)
   const loadFirstPage = useCallback(
     async ({ isPullRefresh = false, useFallbackMode = false } = {}) => {
       if (isPullRefresh) {
@@ -97,7 +101,7 @@ export const ProductListScreen = ({ navigation }) => {
         setHasMore(result.hasMore);
         setDataSource(result.source);
 
-        // Share loaded products with ShopContext for Gemini AI context
+        // Đăng ký danh sách sản phẩm vào ShopContext làm ngữ cảnh cho Gemini AI
         registerCatalogProducts(result.products);
       } catch (error) {
         setErrorMessage(
@@ -116,7 +120,7 @@ export const ProductListScreen = ({ navigation }) => {
     ]
   );
 
-  // Reload first page when search query, category, or simulation flag changes
+  // Tự động tải lại trang 1 khi từ khóa, danh mục hoặc cờ mô phỏng thay đổi (Debounce 250ms)
   useEffect(() => {
     const timer = setTimeout(() => {
       loadFirstPage({ isPullRefresh: false, useFallbackMode: false });
@@ -124,7 +128,7 @@ export const ProductListScreen = ({ navigation }) => {
     return () => clearTimeout(timer);
   }, [loadFirstPage]);
 
-  // Load next page when scrolling to the end of FlatList
+  // Tải trang tiếp theo khi cuộn xuống cuối FlatList
   const handleLoadMore = async () => {
     if (
       isFetchingMoreRef.current ||
@@ -159,7 +163,7 @@ export const ProductListScreen = ({ navigation }) => {
         });
       }
 
-      // Append new items and deduplicate by product ID
+      // Nối mảng mới và lọc trùng theo ID sản phẩm qua Set
       setProducts((prevProducts) => {
         const existingIds = new Set(prevProducts.map((item) => Number(item.id)));
         const uniqueNewItems = nextResult.products.filter(
@@ -182,12 +186,12 @@ export const ProductListScreen = ({ navigation }) => {
     }
   };
 
-  // Pull-to-refresh handler: reset pagination to page 1
+  // Xử lý kéo xuống để làm mới danh sách (Pull-to-refresh)
   const handlePullToRefresh = () => {
     loadFirstPage({ isPullRefresh: true, useFallbackMode: false });
   };
 
-  // Clear search query and category filter
+  // Xóa trắng ô tìm kiếm và đặt lại danh mục về Tất cả
   const handleResetFilters = () => {
     setSearchText('');
     setSelectedCategory('all');
@@ -195,7 +199,7 @@ export const ProductListScreen = ({ navigation }) => {
 
   const renderHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Luxury Brand & Author Showcase Card */}
+      {/* Thẻ hiển thị thương hiệu và thông tin sinh viên */}
       <View
         style={[
           styles.brandCard,
@@ -227,7 +231,7 @@ export const ProductListScreen = ({ navigation }) => {
             </Text>
           </View>
 
-          {/* Data source live indicator */}
+          {/* Đèn báo nguồn dữ liệu Online / Offline */}
           <View
             style={[
               styles.sourceBadge,
@@ -255,7 +259,7 @@ export const ProductListScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 4 Quick Nav Shortcut Pills (2x2 Grid) */}
+        {/* 4 nút điều hướng nhanh dạng lưới 2x2 rộng rãi, không bị tràn chữ */}
         <View style={styles.quickNavGrid}>
           <TouchableOpacity
             style={[
@@ -295,7 +299,7 @@ export const ProductListScreen = ({ navigation }) => {
               <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Yêu thích
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.danger }]} numberOfLines={1}>
+              <Text style={[styles.navCardBadge, { color: colors.danger }]}>
                 {wishlist.length} đã lưu
               </Text>
             </View>
@@ -339,7 +343,7 @@ export const ProductListScreen = ({ navigation }) => {
               <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Cài đặt
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.textSecondary }]} numberOfLines={1}>
+              <Text style={[styles.navCardBadge, { color: colors.textSecondary }]}>
                 Test Matrix
               </Text>
             </View>
@@ -347,7 +351,7 @@ export const ProductListScreen = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Warning banner when API error simulation is active */}
+      {/* Cảnh báo khi công tắc mô phỏng lỗi API đang được kích hoạt */}
       {simulationFlags.simulateApiError ? (
         <View
           style={[
@@ -371,7 +375,7 @@ export const ProductListScreen = ({ navigation }) => {
         </View>
       ) : null}
 
-      {/* Floating Modern Search Input */}
+      {/* Khung tìm kiếm sản phẩm với chiều cao co giãn linh hoạt */}
       <View
         style={[
           styles.searchBox,
@@ -403,7 +407,7 @@ export const ProductListScreen = ({ navigation }) => {
         ) : null}
       </View>
 
-      {/* Horizontal Category Carousel Chips */}
+      {/* Thanh cuộn danh mục sản phẩm nằm ngang dạng viên thuốc */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -441,7 +445,7 @@ export const ProductListScreen = ({ navigation }) => {
         })}
       </ScrollView>
 
-      {/* Results Count & Quick Reset Filter Row */}
+      {/* Thông số số lượng kết quả và nút xóa bộ lọc */}
       <View style={styles.resultsInfoRow}>
         <Text style={[styles.resultsCountText, { color: colors.textSecondary }]}>
           Tìm thấy <Text style={{ color: colors.primary, fontWeight: '700' }}>{products.length}</Text> / {totalCount} sản phẩm
@@ -797,3 +801,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 });
+

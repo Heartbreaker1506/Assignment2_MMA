@@ -1,4 +1,8 @@
-// Author: Nguyễn Minh Quân - Student ID: CE180048
+// =========================================================================
+// Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
+// Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
+// Tệp: src/context/ThemeContext.js - Quản lý trạng thái giao diện Sáng / Tối (R07)
+// =========================================================================
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { lightColors, darkColors } from '../constants/theme';
@@ -10,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isThemeLoaded, setIsThemeLoaded] = useState(false);
 
-  // Restore saved theme mode from AsyncStorage on app launch
+  // Khôi phục trạng thái giao diện đã lưu từ AsyncStorage khi mở ứng dụng
   useEffect(() => {
     const loadSavedTheme = async () => {
       const savedMode = await getStoredItem(STORAGE_KEYS.THEME, false);
@@ -20,18 +24,20 @@ export const ThemeProvider = ({ children }) => {
     loadSavedTheme();
   }, []);
 
-  // Toggle between light and dark mode and persist to storage
+  // Chuyển đổi qua lại giữa chế độ Sáng và Tối, đồng thời lưu bền vững vào AsyncStorage
   const toggleTheme = async () => {
     const nextMode = !isDarkMode;
     setIsDarkMode(nextMode);
     await setStoredItem(STORAGE_KEYS.THEME, nextMode);
   };
 
+  // Đặt lại giao diện về mặc định (Chế độ Sáng)
   const resetTheme = async () => {
     setIsDarkMode(false);
     await setStoredItem(STORAGE_KEYS.THEME, false);
   };
 
+  // Lựa chọn bảng màu hiển thị theo trạng thái Dark Mode
   const colors = isDarkMode ? darkColors : lightColors;
 
   return (
@@ -49,10 +55,11 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
+// Hook tiện ích để sử dụng ThemeContext trong toàn bộ ứng dụng
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useTheme phải được sử dụng bên trong ThemeProvider');
   }
   return context;
 };
