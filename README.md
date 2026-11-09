@@ -83,8 +83,7 @@ assignment2_ce180048/
 │       ├── ShoppingCartScreen.js           # Màn hình 3: Giỏ hàng, tính tiền & Đặt hàng
 │       ├── CloudHistoryScreen.js           # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
 │       ├── GeminiAdvisorScreen.js          # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
-│       ├── AppSettingsScreen.js            # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
-│       └── index.js                        # Điểm tập trung xuất (barrel export) các màn hình
+│       └── AppSettingsScreen.js            # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
 └── docs/
     ├── RTM_AND_DESIGN_DECISIONS.md         # Bảng RTM (R01-R12), Kiến trúc & 7 Quyết định Thiết kế (DDR)
     ├── TEST_MATRIX_AND_DEBUG_LOGS.md       # Bảng kiểm thử 15 Test Cases & 3 Nhật ký Gỡ lỗi (Debug Logs)

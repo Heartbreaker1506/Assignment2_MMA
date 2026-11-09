@@ -16,15 +16,13 @@ import { ShopProvider } from './src/context/ShopContext';
 // Thành phần hiển thị thông báo nội bộ ứng dụng (In-app notification banner)
 import { NotificationBanner } from './src/components/NotificationBanner';
 
-// Các màn hình chính của ứng dụng SmartStore (đã đổi tên tệp độc lập, riêng biệt)
-import {
-  ProductCatalogScreen,
-  ProductInfoScreen,
-  ShoppingCartScreen,
-  CloudHistoryScreen,
-  GeminiAdvisorScreen,
-  AppSettingsScreen,
-} from './src/screens';
+// Các màn hình chính của ứng dụng SmartStore (import trực tiếp từng file riêng biệt)
+import { ProductCatalogScreen } from './src/screens/ProductCatalogScreen';
+import { ProductInfoScreen } from './src/screens/ProductInfoScreen';
+import { ShoppingCartScreen } from './src/screens/ShoppingCartScreen';
+import { CloudHistoryScreen } from './src/screens/CloudHistoryScreen';
+import { GeminiAdvisorScreen } from './src/screens/GeminiAdvisorScreen';
+import { AppSettingsScreen } from './src/screens/AppSettingsScreen';
 
 const Stack = createNativeStackNavigator();
 
