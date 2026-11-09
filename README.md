@@ -78,18 +78,13 @@ assignment2_ce180048/
 │   │   ├── CartItemCard.js                 # Thẻ mặt hàng trong giỏ kèm nút +/-/xóa và ghi chú
 │   │   └── NotificationBanner.js           # Thanh thông báo nổi hiển thị tức thì khi phát sự kiện R09
 │   └── screens/
-│       ├── catalog/
-│       │   ├── ProductListScreen.js        # Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc, phân trang
-│       │   └── ProductDetailScreen.js      # Màn hình 2: Chi tiết sản phẩm
-│       ├── cart/
-│       │   └── CartScreen.js               # Màn hình 3: Giỏ hàng & Thanh toán
-│       ├── orders/
-│       │   └── SavedOrdersScreen.js        # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
-│       ├── ai/
-│       │   └── AiAssistantScreen.js        # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
-│       ├── settings/
-│       │   └── NotificationSettingsScreen.js # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
-│       └── index.js                        # File barrel export tập trung các màn hình
+│       ├── ProductCatalogScreen.js         # Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang
+│       ├── ProductInfoScreen.js            # Màn hình 2: Chi tiết thông tin sản phẩm & Thêm vào giỏ
+│       ├── ShoppingCartScreen.js           # Màn hình 3: Giỏ hàng, tính tiền & Đặt hàng
+│       ├── CloudHistoryScreen.js           # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
+│       ├── GeminiAdvisorScreen.js          # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
+│       ├── AppSettingsScreen.js            # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
+│       └── index.js                        # Điểm tập trung xuất (barrel export) các màn hình
 └── docs/
     ├── RTM_AND_DESIGN_DECISIONS.md         # Bảng RTM (R01-R12), Kiến trúc & 7 Quyết định Thiết kế (DDR)
     ├── TEST_MATRIX_AND_DEBUG_LOGS.md       # Bảng kiểm thử 15 Test Cases & 3 Nhật ký Gỡ lỗi (Debug Logs)

@@ -16,14 +16,14 @@ import { ShopProvider } from './src/context/ShopContext';
 // Thành phần hiển thị thông báo nội bộ ứng dụng (In-app notification banner)
 import { NotificationBanner } from './src/components/NotificationBanner';
 
-// Các màn hình được phân loại theo từng phân hệ tính năng (Feature Modules)
+// Các màn hình chính của ứng dụng SmartStore (đã đổi tên tệp độc lập, riêng biệt)
 import {
-  ProductListScreen,
-  ProductDetailScreen,
-  CartScreen,
-  SavedOrdersScreen,
-  AiAssistantScreen,
-  NotificationSettingsScreen,
+  ProductCatalogScreen,
+  ProductInfoScreen,
+  ShoppingCartScreen,
+  CloudHistoryScreen,
+  GeminiAdvisorScreen,
+  AppSettingsScreen,
 } from './src/screens';
 
 const Stack = createNativeStackNavigator();
@@ -58,42 +58,42 @@ const AppNavigator = () => {
           {/* Màn hình 1: Danh mục sản phẩm (Catalog) */}
           <Stack.Screen
             name="ProductList"
-            component={ProductListScreen}
+            component={ProductCatalogScreen}
             options={{ title: 'SmartStore' }}
           />
 
-          {/* Màn hình 2: Chi tiết sản phẩm */}
+          {/* Màn hình 2: Chi tiết thông tin sản phẩm */}
           <Stack.Screen
             name="ProductDetail"
-            component={ProductDetailScreen}
+            component={ProductInfoScreen}
             options={{ title: 'Chi Tiết Sản Phẩm' }}
           />
 
-          {/* Màn hình 3: Giỏ hàng & Tiến trình đặt hàng */}
+          {/* Màn hình 3: Giỏ hàng & Thanh toán đơn hàng */}
           <Stack.Screen
             name="Cart"
-            component={CartScreen}
+            component={ShoppingCartScreen}
             options={{ title: 'Giỏ Hàng & Thanh Toán' }}
           />
 
-          {/* Màn hình 4: Đồng bộ Firebase Cloud (Yêu thích & Đơn hàng đã lưu) */}
+          {/* Màn hình 4: Đồng bộ Firebase Cloud (Yêu thích & Đơn hàng đã đặt) */}
           <Stack.Screen
             name="SavedOrders"
-            component={SavedOrdersScreen}
+            component={CloudHistoryScreen}
             options={{ title: 'Firebase Cloud Storage' }}
           />
 
-          {/* Màn hình 5: Trợ lý tư vấn AI Gemini */}
+          {/* Màn hình 5: Trợ lý mua sắm thông minh Gemini AI */}
           <Stack.Screen
             name="AiAssistant"
-            component={AiAssistantScreen}
+            component={GeminiAdvisorScreen}
             options={{ title: 'Trợ Lý Gemini AI' }}
           />
 
-          {/* Màn hình 6: Cài đặt thông báo & Bảng điều khiển kiểm thử (Test Matrix) */}
+          {/* Màn hình 6: Cài đặt hệ thống, Thông báo & Bảng mô phỏng kiểm thử */}
           <Stack.Screen
             name="NotificationSettings"
-            component={NotificationSettingsScreen}
+            component={AppSettingsScreen}
             options={{ title: 'Cài Đặt & Test Matrix' }}
           />
         </Stack.Navigator>

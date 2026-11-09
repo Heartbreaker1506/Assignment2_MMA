@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/orders/SavedOrdersScreen.js - Màn hình 4: Firebase Wishlist & Đơn hàng đã đặt (R08)
+// Tệp: src/screens/orders/CloudHistoryScreen.js - Màn hình 4: Firebase Wishlist & Đơn hàng đã đặt (R08)
 // =========================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -14,14 +14,14 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useShop } from '../../context/ShopContext';
-import { formatPrice } from '../../utils/storage';
-import { CustomButton } from '../../components/CustomButton';
-import { StateFeedback } from '../../components/StateFeedback';
+import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../utils/storage';
+import { CustomButton } from '../components/CustomButton';
+import { StateFeedback } from '../components/StateFeedback';
 
-export const SavedOrdersScreen = ({ route, navigation }) => {
+export const CloudHistoryScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const { addToCart } = useCart();
   const {

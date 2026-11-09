@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/catalog/ProductDetailScreen.js - Màn hình 2: Chi tiết sản phẩm & Thêm vào giỏ (R04, R05)
+// Tệp: src/screens/catalog/ProductInfoScreen.js - Màn hình 2: Chi tiết sản phẩm & Thêm vào giỏ (R04, R05)
 // =========================================================================
 
 import React, { useState } from 'react';
@@ -15,14 +15,14 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useShop } from '../../context/ShopContext';
-import { formatPrice } from '../../utils/storage';
-import { CustomButton } from '../../components/CustomButton';
-import { StateFeedback } from '../../components/StateFeedback';
+import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../utils/storage';
+import { CustomButton } from '../components/CustomButton';
+import { StateFeedback } from '../components/StateFeedback';
 
-export const ProductDetailScreen = ({ route, navigation }) => {
+export const ProductInfoScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const { addToCart, getProductQuantityInCart } = useCart();
   const { isProductInWishlist, toggleWishlistProduct } = useShop();

@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/ai/AiAssistantScreen.js - Màn hình 5: Trợ lý Mua sắm Gemini AI & Chống ảo giác (R10)
+// Tệp: src/screens/ai/GeminiAdvisorScreen.js - Màn hình 5: Trợ lý Mua sắm Gemini AI & Chống ảo giác (R10)
 // =========================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -15,12 +15,12 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { askGeminiProductAssistant } from '../../services/aiService';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useShop } from '../../context/ShopContext';
-import { formatPrice } from '../../utils/storage';
-import { CustomButton } from '../../components/CustomButton';
+import { askGeminiProductAssistant } from '../services/aiService';
+import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../utils/storage';
+import { CustomButton } from '../components/CustomButton';
 
 // Các mẫu câu hỏi gợi ý nhanh theo nhu cầu thực tế
 const QUICK_PROMPTS = [
@@ -44,7 +44,7 @@ const QUICK_PROMPTS = [
   },
 ];
 
-export const AiAssistantScreen = ({ route, navigation }) => {
+export const GeminiAdvisorScreen = ({ route, navigation }) => {
   const { colors } = useTheme();
   const { cartItems, addToCart } = useCart();
   const {

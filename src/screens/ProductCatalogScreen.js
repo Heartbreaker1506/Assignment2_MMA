@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/catalog/ProductListScreen.js - Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang (R01, R02, R03)
+// Tệp: src/screens/catalog/ProductCatalogScreen.js - Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang (R01, R02, R03)
 // =========================================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -21,18 +21,18 @@ import {
   PRODUCT_CATEGORIES,
   SHOP_CONFIG,
   STUDENT_INFO,
-} from '../../constants/theme';
+} from '../constants/theme';
 import {
   fetchProductsPage,
   getFallbackProductsPage,
-} from '../../services/productService';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useShop } from '../../context/ShopContext';
-import { ProductCard } from '../../components/ProductCard';
-import { StateFeedback } from '../../components/StateFeedback';
+} from '../services/productService';
+import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { ProductCard } from '../components/ProductCard';
+import { StateFeedback } from '../components/StateFeedback';
 
-export const ProductListScreen = ({ navigation }) => {
+export const ProductCatalogScreen = ({ navigation }) => {
   const { colors, isDarkMode } = useTheme();
   const { cartSummary, addToCart, getProductQuantityInCart } = useCart();
   const {

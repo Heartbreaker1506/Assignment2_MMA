@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/cart/CartScreen.js - Màn hình 3: Giỏ hàng, Tính tiền & Đặt hàng (R05, R06, R07, R08)
+// Tệp: src/screens/cart/ShoppingCartScreen.js - Màn hình 3: Giỏ hàng, Tính tiền & Đặt hàng (R05, R06, R07, R08)
 // =========================================================================
 
 import React, { useState } from 'react';
@@ -14,16 +14,16 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { SHOP_CONFIG, STUDENT_INFO } from '../../constants/theme';
-import { useTheme } from '../../context/ThemeContext';
-import { useCart } from '../../context/CartContext';
-import { useShop } from '../../context/ShopContext';
-import { formatPrice } from '../../utils/storage';
-import { CartItemCard } from '../../components/CartItemCard';
-import { CustomButton } from '../../components/CustomButton';
-import { StateFeedback } from '../../components/StateFeedback';
+import { SHOP_CONFIG, STUDENT_INFO } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
+import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../utils/storage';
+import { CartItemCard } from '../components/CartItemCard';
+import { CustomButton } from '../components/CustomButton';
+import { StateFeedback } from '../components/StateFeedback';
 
-export const CartScreen = ({ navigation }) => {
+export const ShoppingCartScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const {
     cartItems,
