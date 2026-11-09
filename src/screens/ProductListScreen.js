@@ -1,405 +1,659 @@
-import React, { useState, useMemo } from 'react';
+// Author: Trần Minh Quân - Student ID: CE181730
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  FlatList,
   TextInput,
-  TouchableOpacity,
-  RefreshControl,
-  ActivityIndicator,
+  FlatList,
   ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+  StyleSheet,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useProducts } from '../context/ProductContext';
+import {
+  PRODUCT_CATEGORIES,
+  SHOP_CONFIG,
+  STUDENT_INFO,
+} from '../constants/theme';
+import {
+  fetchProductsPage,
+  getFallbackProductsPage,
+} from '../services/productService';
+import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
-import { useWishlist } from '../context/WishlistContext';
+import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
-import { LoadingView } from '../components/LoadingView';
-import { ErrorView } from '../components/ErrorView';
-import { EmptyView } from '../components/EmptyView';
-import { COLORS } from '../constants/colors';
+import { StateFeedback } from '../components/StateFeedback';
 
 export const ProductListScreen = ({ navigation }) => {
+  const { colors } = useTheme();
+  const { cartSummary, addToCart, getProductQuantityInCart } = useCart();
   const {
-    products,
-    categories,
-    selectedCategory,
-    loading,
-    isFetchingMore,
-    refreshing,
-    error,
-    hasMore,
-    refreshProducts,
-    loadMoreProducts,
-    handleSearch,
-    handleCategorySelect,
-    retry,
-  } = useProducts();
+    wishlist,
+    orders,
+    isProductInWishlist,
+    toggleWishlistProduct,
+    registerCatalogProducts,
+    simulationFlags,
+    toggleSimulationFlag,
+  } = useShop();
 
-  const { addToCart, itemCount } = useCart();
-  const { isFavorite, toggleWishlist } = useWishlist();
+  // Search query and category filter state
+  const [searchText, setSearchText] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const [inputSearch, setInputSearch] = useState('');
-  const [sortBy, setSortBy] = useState('none'); // 'none' | 'price-asc' | 'price-desc' | 'rating'
+  // Product list and pagination state
+  const [products, setProducts] = useState([]);
+  const [skip, setSkip] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [dataSource, setDataSource] = useState('remote_api');
 
-  // Submit search query
-  const onSubmitSearch = () => {
-    handleSearch(inputSearch);
-  };
+  // Async loading and error state
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  const onClearSearch = () => {
-    setInputSearch('');
-    handleSearch('');
-  };
+  // Synchronous ref guard to prevent duplicate pagination requests during fast scroll
+  const isFetchingMoreRef = useRef(false);
 
-  // Sorting logic (Pre-wired for Transfer Task in PDF Section 8.1)
-  const displayedProducts = useMemo(() => {
-    if (!products) return [];
-    let list = [...products];
-    if (sortBy === 'price-asc') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sortBy === 'price-desc') {
-      list.sort((a, b) => b.price - a.price);
-    } else if (sortBy === 'rating') {
-      list.sort((a, b) => b.rating - a.rating);
+  // Load the first page of products (on mount, filter change, or pull-to-refresh)
+  const loadFirstPage = useCallback(
+    async ({ isPullRefresh = false, useFallbackMode = false } = {}) => {
+      if (isPullRefresh) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoadingInitial(true);
+      }
+      setErrorMessage(null);
+      isFetchingMoreRef.current = false;
+
+      try {
+        let result;
+        if (useFallbackMode) {
+          result = getFallbackProductsPage({
+            limit: SHOP_CONFIG.PAGE_LIMIT,
+            skip: 0,
+            searchQuery: searchText,
+            category: selectedCategory,
+          });
+        } else {
+          result = await fetchProductsPage({
+            limit: SHOP_CONFIG.PAGE_LIMIT,
+            skip: 0,
+            searchQuery: searchText,
+            category: selectedCategory,
+            simulateError: simulationFlags.simulateApiError,
+          });
+        }
+
+        setProducts(result.products);
+        setSkip(result.products.length);
+        setTotalCount(result.total);
+        setHasMore(result.hasMore);
+        setDataSource(result.source);
+
+        // Share loaded products with ShopContext for Gemini AI context
+        registerCatalogProducts(result.products);
+      } catch (error) {
+        setErrorMessage(
+          error.message || 'Không thể tải danh sách sản phẩm từ máy chủ.'
+        );
+      } finally {
+        setIsLoadingInitial(false);
+        setIsRefreshing(false);
+      }
+    },
+    [
+      searchText,
+      selectedCategory,
+      simulationFlags.simulateApiError,
+      registerCatalogProducts,
+    ]
+  );
+
+  // Reload first page when search query, category, or simulation flag changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadFirstPage({ isPullRefresh: false, useFallbackMode: false });
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [loadFirstPage]);
+
+  // Load next page when scrolling to the end of FlatList
+  const handleLoadMore = async () => {
+    if (
+      isFetchingMoreRef.current ||
+      isLoadingInitial ||
+      isRefreshing ||
+      isLoadingMore ||
+      !hasMore ||
+      Boolean(errorMessage)
+    ) {
+      return;
     }
-    return list;
-  }, [products, sortBy]);
 
-  // Cycle through sort options
-  const toggleSort = () => {
-    if (sortBy === 'none') setSortBy('price-asc');
-    else if (sortBy === 'price-asc') setSortBy('price-desc');
-    else if (sortBy === 'price-desc') setSortBy('rating');
-    else setSortBy('none');
+    isFetchingMoreRef.current = true;
+    setIsLoadingMore(true);
+
+    try {
+      let nextResult;
+      if (dataSource === 'offline_fallback') {
+        nextResult = getFallbackProductsPage({
+          limit: SHOP_CONFIG.PAGE_LIMIT,
+          skip,
+          searchQuery: searchText,
+          category: selectedCategory,
+        });
+      } else {
+        nextResult = await fetchProductsPage({
+          limit: SHOP_CONFIG.PAGE_LIMIT,
+          skip,
+          searchQuery: searchText,
+          category: selectedCategory,
+          simulateError: simulationFlags.simulateApiError,
+        });
+      }
+
+      // Append new items and deduplicate by product ID
+      setProducts((prevProducts) => {
+        const existingIds = new Set(prevProducts.map((item) => Number(item.id)));
+        const uniqueNewItems = nextResult.products.filter(
+          (item) => !existingIds.has(Number(item.id))
+        );
+        return [...prevProducts, ...uniqueNewItems];
+      });
+
+      setSkip((prevSkip) => prevSkip + nextResult.products.length);
+      setTotalCount(nextResult.total);
+      setHasMore(nextResult.hasMore);
+      registerCatalogProducts(nextResult.products);
+    } catch (error) {
+      setErrorMessage(
+        `Lỗi tải thêm trang mới: ${error.message || 'Mất kết nối mạng'}`
+      );
+    } finally {
+      setIsLoadingMore(false);
+      isFetchingMoreRef.current = false;
+    }
   };
 
-  const getSortLabel = () => {
-    if (sortBy === 'price-asc') return 'Giá: Thấp -> Cao';
-    if (sortBy === 'price-desc') return 'Giá: Cao -> Thấp';
-    if (sortBy === 'rating') return 'Đánh giá cao';
-    return 'Mặc định';
+  // Pull-to-refresh handler: reset pagination to page 1
+  const handlePullToRefresh = () => {
+    loadFirstPage({ isPullRefresh: true, useFallbackMode: false });
   };
 
-  // Render Footer for Pagination
+  // Clear search query and category filter
+  const handleResetFilters = () => {
+    setSearchText('');
+    setSelectedCategory('all');
+  };
+
+  const renderHeader = () => (
+    <View style={styles.headerContainer}>
+      {/* Student summary and quick navigation shortcuts */}
+      <View
+        style={[
+          styles.heroCard,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <View style={styles.heroTopRow}>
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.appTitle, { color: colors.primary }]}>
+              SmartShop E-Commerce
+            </Text>
+            <Text style={[styles.studentMeta, { color: colors.textSecondary }]}>
+              SV: {STUDENT_INFO.name} • MSSV: {STUDENT_INFO.studentId}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.sourceBadge,
+              {
+                backgroundColor:
+                  dataSource === 'remote_api'
+                    ? colors.successLight
+                    : colors.warningLight,
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.sourceBadgeText,
+                {
+                  color:
+                    dataSource === 'remote_api'
+                      ? colors.success
+                      : colors.warning,
+                },
+              ]}
+            >
+              {dataSource === 'remote_api' ? '🌐 Remote API' : '📦 Offline Mode'}
+            </Text>
+          </View>
+        </View>
+
+        {/* Quick navigation chips to Cart, SavedOrders, AiAssistant, and Settings */}
+        <View style={styles.quickNavRow}>
+          <TouchableOpacity
+            style={[
+              styles.navChip,
+              { backgroundColor: colors.primaryLight },
+            ]}
+            onPress={() => navigation.navigate('Cart')}
+          >
+            <Text style={[styles.navChipText, { color: colors.primary }]}>
+              🛒 Giỏ ({cartSummary.totalItems})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navChip,
+              { backgroundColor: colors.dangerLight },
+            ]}
+            onPress={() => navigation.navigate('SavedOrders')}
+          >
+            <Text style={[styles.navChipText, { color: colors.danger }]}>
+              ❤️ Lưu ({wishlist.length}) • Đơn ({orders.length})
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navChip,
+              { backgroundColor: colors.purpleLight },
+            ]}
+            onPress={() => navigation.navigate('AiAssistant')}
+          >
+            <Text style={[styles.navChipText, { color: colors.purple }]}>
+              🤖 Gemini AI
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navChip,
+              {
+                backgroundColor: colors.background,
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
+            ]}
+            onPress={() => navigation.navigate('NotificationSettings')}
+          >
+            <Text style={[styles.navChipText, { color: colors.text }]}>
+              ⚙️ Cài đặt & Test
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Warning banner when API error simulation is active */}
+      {simulationFlags.simulateApiError ? (
+        <View
+          style={[
+            styles.simAlertBox,
+            {
+              backgroundColor: colors.warningLight,
+              borderColor: colors.warning,
+            },
+          ]}
+        >
+          <Text style={[styles.simAlertText, { color: colors.warning }]}>
+            🧪 Đang bật chế độ Mô phỏng Lỗi API (Test Case 2).
+          </Text>
+          <TouchableOpacity
+            onPress={() => toggleSimulationFlag('simulateApiError')}
+          >
+            <Text style={[styles.simAlertLink, { color: colors.primary }]}>
+              Tắt mô phỏng & Tải lại
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {/* Keyword search bar */}
+      <View
+        style={[
+          styles.searchBar,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.border,
+          },
+        ]}
+      >
+        <Text style={styles.searchIcon}>🔍</Text>
+        <TextInput
+          style={[styles.searchInput, { color: colors.text }]}
+          placeholder="Tìm theo tên sản phẩm, hãng (VD: iPhone, Laptop...)"
+          placeholderTextColor={colors.textSecondary}
+          value={searchText}
+          onChangeText={setSearchText}
+          returnKeyType="search"
+        />
+        {searchText.length > 0 ? (
+          <TouchableOpacity
+            style={styles.clearSearchBtn}
+            onPress={() => setSearchText('')}
+          >
+            <Text style={{ color: colors.textSecondary, fontWeight: '700' }}>
+              ✕
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      {/* Horizontal category filter chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoriesScroll}
+      >
+        {PRODUCT_CATEGORIES.map((cat) => {
+          const isSelected = selectedCategory === cat.id;
+          return (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.categoryChip,
+                {
+                  backgroundColor: isSelected ? colors.primary : colors.surface,
+                  borderColor: isSelected ? colors.primary : colors.border,
+                },
+              ]}
+              onPress={() => setSelectedCategory(cat.id)}
+            >
+              <Text
+                style={[
+                  styles.categoryChipText,
+                  { color: isSelected ? '#FFFFFF' : colors.textSecondary },
+                ]}
+              >
+                {cat.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Pagination statistics and filter reset link */}
+      <View style={styles.statsRow}>
+        <Text style={[styles.statsText, { color: colors.textSecondary }]}>
+          Hiển thị {products.length} / {totalCount} sản phẩm (Trang:{' '}
+          {Math.ceil(products.length / SHOP_CONFIG.PAGE_LIMIT) || 1})
+        </Text>
+        {(searchText.length > 0 || selectedCategory !== 'all') && (
+          <TouchableOpacity onPress={handleResetFilters}>
+            <Text style={[styles.resetFilterLink, { color: colors.primary }]}>
+              Xóa bộ lọc
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
+
   const renderFooter = () => {
-    if (isFetchingMore) {
+    if (isLoadingInitial || products.length === 0) return null;
+
+    if (isLoadingMore) {
       return (
-        <View style={styles.footerLoading}>
-          <ActivityIndicator size="small" color={COLORS.primary} />
-          <Text style={styles.footerLoadingText}>Đang tải thêm sản phẩm...</Text>
+        <View style={styles.footerBox}>
+          <ActivityIndicator size="small" color={colors.primary} />
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+            Đang tải thêm sản phẩm (limit={SHOP_CONFIG.PAGE_LIMIT}, skip={skip}
+            )...
+          </Text>
         </View>
       );
     }
-    if (!hasMore && products.length > 0) {
+
+    if (!hasMore) {
       return (
-        <View style={styles.footerEnd}>
-          <Text style={styles.footerEndText}>Đã hiển thị tất cả sản phẩm ({products.length})</Text>
+        <View style={styles.footerBox}>
+          <Text style={[styles.footerText, { color: colors.textSecondary }]}>
+            ✓ Đã hiển thị toàn bộ {products.length} sản phẩm trong danh mục.
+          </Text>
         </View>
       );
     }
-    return null;
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.loadMoreBtn,
+          {
+            backgroundColor: colors.surface,
+            borderColor: colors.primary,
+          },
+        ]}
+        onPress={handleLoadMore}
+      >
+        <Text style={[styles.loadMoreBtnText, { color: colors.primary }]}>
+          ↓ Tải thêm sản phẩm ({products.length}/{totalCount})
+        </Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Header Bar */}
-      <View style={styles.topBar}>
-        <View>
-          <Text style={styles.brandTitle}>SmartShop</Text>
-          <Text style={styles.brandSubtitle}>Hàng chính hãng • Giao nhanh 2h</Text>
-        </View>
-
-        <View style={styles.headerRight}>
-          {/* Ask AI button shortcut */}
-          <TouchableOpacity
-            style={styles.aiButton}
-            onPress={() => navigation.navigate('AI Advisor')}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="sparkles" size={16} color={COLORS.accent} />
-            <Text style={styles.aiButtonText}>Hỏi AI</Text>
-          </TouchableOpacity>
-
-          {/* Cart Icon with badge */}
-          <TouchableOpacity
-            style={styles.cartBtn}
-            onPress={() => navigation.navigate('CartTab')}
-          >
-            <Ionicons name="cart-outline" size={24} color={COLORS.text} />
-            {itemCount > 0 && (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{itemCount > 99 ? '99+' : itemCount}</Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Search Bar */}
-      <View style={styles.searchRow}>
-        <View style={styles.searchBox}>
-          <Ionicons name="search-outline" size={20} color={COLORS.textMuted} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Tìm theo tên sản phẩm, thương hiệu..."
-            value={inputSearch}
-            onChangeText={setInputSearch}
-            onSubmitEditing={onSubmitSearch}
-            returnKeyType="search"
-            placeholderTextColor={COLORS.textLight}
+    <View style={[styles.screen, { backgroundColor: colors.background }]}>
+      <FlatList
+        data={errorMessage ? [] : products}
+        keyExtractor={(item) => String(item.id)}
+        ListHeaderComponent={renderHeader()}
+        renderItem={({ item }) => (
+          <ProductCard
+            product={item}
+            inCartQty={getProductQuantityInCart(item.id)}
+            isSaved={isProductInWishlist(item.id)}
+            onPressDetail={(prod) =>
+              navigation.navigate('ProductDetail', { product: prod })
+            }
+            onAddToCart={(prod) => addToCart(prod, 1)}
+            onToggleWishlist={(prod) => toggleWishlistProduct(prod)}
           />
-          {inputSearch.length > 0 && (
-            <TouchableOpacity onPress={onClearSearch}>
-              <Ionicons name="close-circle" size={18} color={COLORS.textMuted} />
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Sort Button (Transfer task pre-wired) */}
-        <TouchableOpacity style={styles.sortButton} onPress={toggleSort} activeOpacity={0.8}>
-          <Ionicons name="funnel-outline" size={18} color={sortBy !== 'none' ? COLORS.primary : COLORS.textMuted} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Sort Status Chip if active */}
-      {sortBy !== 'none' && (
-        <View style={styles.activeSortRow}>
-          <Text style={styles.activeSortText}>Sắp xếp: <Text style={{ fontWeight: '700' }}>{getSortLabel()}</Text></Text>
-          <TouchableOpacity onPress={() => setSortBy('none')}>
-            <Ionicons name="close" size={14} color={COLORS.primary} />
-          </TouchableOpacity>
-        </View>
-      )}
-
-      {/* Category Filter Chips */}
-      <View style={styles.categoryContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoryList}>
-          {categories.map((cat) => {
-            const isSelected = selectedCategory === cat;
-            return (
-              <TouchableOpacity
-                key={cat}
-                style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
-                onPress={() => handleCategorySelect(cat)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
-                  {cat === 'all' ? 'Tất cả' : cat}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
-
-      {/* Body States: Loading, Error, Empty, or FlatList */}
-      {loading && products.length === 0 ? (
-        <LoadingView message="Đang tải danh mục sản phẩm..." />
-      ) : error && products.length === 0 ? (
-        <ErrorView message={error} onRetry={retry} />
-      ) : (
-        <FlatList
-          data={displayedProducts}
-          numColumns={2}
-          keyExtractor={(item) => `prod-${item.id}`}
-          renderItem={({ item }) => (
-            <ProductCard
-              product={item}
-              onPress={(prod) => navigation.navigate('ProductDetail', { productId: prod.id, product: prod })}
-              onAddToCart={(prod) => addToCart(prod, 1)}
-              isFavorite={isFavorite(item.id)}
-              onToggleFavorite={toggleWishlist}
+        )}
+        ListEmptyComponent={
+          isLoadingInitial ? (
+            <StateFeedback
+              type="loading"
+              title="Đang tải danh mục sản phẩm từ API..."
+              message="Đang đồng bộ dữ liệu Catalog về thiết bị"
             />
-          )}
-          contentContainerStyle={styles.listContent}
-          onEndReached={loadMoreProducts}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={renderFooter}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={refreshProducts}
-              colors={[COLORS.primary]}
+          ) : errorMessage ? (
+            <StateFeedback
+              type="error"
+              title="Không thể tải danh mục sản phẩm (R01)"
+              message={errorMessage}
+              actionLabel="Thử lại (Retry API)"
+              onAction={() =>
+                loadFirstPage({ isPullRefresh: false, useFallbackMode: false })
+              }
+              secondaryActionLabel="Dùng dữ liệu Offline dự phòng"
+              onSecondaryAction={() =>
+                loadFirstPage({ isPullRefresh: false, useFallbackMode: true })
+              }
             />
-          }
-          ListEmptyComponent={
-            <EmptyView
-              icon="search-outline"
-              title="Không tìm thấy sản phẩm"
-              message="Thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc danh mục."
-              actionLabel="Xem tất cả sản phẩm"
-              onAction={() => {
-                onClearSearch();
-                handleCategorySelect('all');
-              }}
+          ) : (
+            <StateFeedback
+              type="empty"
+              title="Không tìm thấy sản phẩm phù hợp (R02)"
+              message={`Không có sản phẩm nào khớp với từ khóa "${searchText}" trong danh mục đã chọn.`}
+              actionLabel="Xóa bộ lọc tìm kiếm"
+              onAction={handleResetFilters}
             />
-          }
-        />
-      )}
+          )
+        }
+        ListFooterComponent={renderFooter()}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.3}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={handlePullToRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+        contentContainerStyle={styles.listContent}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  topBar: {
+  listContent: {
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 28,
+  },
+  headerContainer: {
+    marginBottom: 10,
+  },
+  heroCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    padding: 12,
+    marginBottom: 10,
+  },
+  heroTopRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-    backgroundColor: COLORS.card,
+    alignItems: 'center',
+    marginBottom: 10,
   },
-  brandTitle: {
-    fontSize: 22,
+  appTitle: {
+    fontSize: 18,
     fontWeight: '800',
-    color: COLORS.primary,
   },
-  brandSubtitle: {
-    fontSize: 11,
-    color: COLORS.textMuted,
+  studentMeta: {
+    fontSize: 12,
     marginTop: 2,
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  sourceBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
   },
-  aiButton: {
+  sourceBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  quickNavRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.accentLight,
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  navChip: {
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
+    paddingVertical: 7,
+    borderRadius: 8,
   },
-  aiButtonText: {
-    color: COLORS.accent,
+  navChipText: {
     fontSize: 12,
     fontWeight: '700',
   },
-  cartBtn: {
-    padding: 6,
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    backgroundColor: COLORS.danger,
-    borderRadius: 10,
-    minWidth: 18,
-    height: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 4,
-  },
-  badgeText: {
-    color: COLORS.white,
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  searchRow: {
+  simAlertBox: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: COLORS.card,
-    gap: 10,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 10,
   },
-  searchBox: {
+  simAlertText: {
+    fontSize: 12,
+    fontWeight: '600',
     flex: 1,
+    marginRight: 8,
+  },
+  simAlertLink: {
+    fontSize: 12,
+    fontWeight: '800',
+    textDecorationLine: 'underline',
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
+    borderWidth: 1,
+    borderRadius: 12,
     paddingHorizontal: 12,
-    height: 42,
+    height: 44,
+    marginBottom: 10,
+  },
+  searchIcon: {
+    fontSize: 15,
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 8,
     fontSize: 14,
-    color: COLORS.text,
-  },
-  sortButton: {
-    width: 42,
-    height: 42,
-    backgroundColor: '#F1F5F9',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  activeSortRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: COLORS.primaryLight,
-    paddingHorizontal: 16,
     paddingVertical: 6,
   },
-  activeSortText: {
-    fontSize: 12,
-    color: COLORS.primaryDark,
+  clearSearchBtn: {
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
-  categoryContainer: {
-    backgroundColor: COLORS.card,
+  categoriesScroll: {
     paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-  },
-  categoryList: {
-    paddingHorizontal: 16,
     gap: 8,
   },
   categoryChip: {
     paddingHorizontal: 14,
-    paddingVertical: 6,
+    paddingVertical: 7,
     borderRadius: 20,
-    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    marginRight: 8,
   },
-  categoryChipSelected: {
-    backgroundColor: COLORS.primary,
-  },
-  categoryText: {
+  categoryChipText: {
     fontSize: 13,
-    fontWeight: '500',
-    color: COLORS.textMuted,
-    textTransform: 'capitalize',
+    fontWeight: '600',
   },
-  categoryTextSelected: {
-    color: COLORS.white,
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  statsText: {
+    fontSize: 12,
+  },
+  resetFilterLink: {
+    fontSize: 12,
     fontWeight: '700',
   },
-  listContent: {
-    padding: 10,
-    paddingBottom: 24,
-  },
-  footerLoading: {
+  footerBox: {
     paddingVertical: 16,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
+    flexDirection: 'row',
     gap: 8,
   },
-  footerLoadingText: {
-    fontSize: 13,
-    color: COLORS.textMuted,
+  footerText: {
+    fontSize: 12,
   },
-  footerEnd: {
-    paddingVertical: 20,
+  loadMoreBtn: {
+    marginVertical: 10,
+    paddingVertical: 11,
+    borderRadius: 10,
+    borderWidth: 1.5,
     alignItems: 'center',
   },
-  footerEndText: {
-    fontSize: 12,
-    color: COLORS.textLight,
+  loadMoreBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
   },
 });
-

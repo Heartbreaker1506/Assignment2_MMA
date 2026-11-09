@@ -1,152 +1,155 @@
-# SMARTSHOP – INTEGRATED E-COMMERCE MOBILE APPLICATION
+# MMA301 - Assignment 2: Integrated E-Commerce Mobile App (SmartShop)
 
-**Học phần:** MMA301 – Multiplatform Mobile App Development  
-**Assignment:** 02 – Integrated E-Commerce Mobile App  
-**Nền tảng:** React Native 0.86 • Expo SDK 57 • JavaScript  
-**Sinh viên thực hiện:** Trần Minh Quân  
-**Mã số sinh viên:** CE181730  
-**Lớp / Học kỳ:** FA26 – MMA301  
-
----
-
-## 1. Tổng quan Dự án (Project Overview & Business Workflow)
-
-SmartShop là ứng dụng thương mại điện tử di động hoàn chỉnh, đáp ứng đầy đủ chuỗi giá trị và 8 tiêu chí năng lực đánh giá của học phần MMA301.
-
-### Luồng nghiệp vụ cốt lõi (Core Business Flow):
-1. **Khởi động (Startup):** Tự động khôi phục dữ liệu Giỏ hàng, Danh sách yêu thích và Cài đặt cá nhân từ `AsyncStorage` trước khi tải danh mục sản phẩm từ DummyJSON REST API.
-2. **Khám phá & Tìm kiếm (Catalog / Search):** Hiển thị danh mục sản phẩm dạng lưới 2 cột qua `FlatList` với cơ chế phân trang vô tận (`skip` & `limit`), tìm kiếm từ khóa thời gian thực, lọc danh mục và kéo để làm mới (`pull-to-refresh`).
-3. **Chi tiết & Giỏ hàng (Detail & Cart):** Xem thông tin chi tiết, hình ảnh, đánh giá và tồn kho. Thêm/sửa/xóa sản phẩm trong giỏ hàng. Tổng tiền và số lượng được tính toán tự động qua **Pure Derived Selectors** (không bị lệch state).
-4. **Đồng bộ Đám mây (Firebase Cloud Integration):** Lưu trữ và đồng bộ hóa đơn hàng đã thanh toán cùng danh sách yêu thích lên **Firebase Firestore Cloud**, tích hợp cơ chế chịu lỗi ngoại tuyến (Offline Resilient Fallback).
-5. **Trợ lý Thông minh (Gemini AI Shopping Advisor):** Tích hợp mô hình Google Gemini 1.5 Flash. Prompt được gắn trực tiếp với dữ liệu kho hàng thực tế (**Grounded in Catalog**). Ứng dụng tích hợp thuật toán **kiểm chứng chống ảo giác (Anti-Hallucination)** bắt buộc trước khi hiển thị sản phẩm đề xuất.
-6. **Hệ thống Thông báo (Notification Workflow):** Quản lý quyền thông báo chặt chẽ (`granted`, `denied`, `undetermined`) và tự động bắn thông báo xác nhận khi đơn hàng được tạo thành công.
+- **Sinh viên thực hiện:** Trần Minh Quân
+- **Mã số sinh viên (MSSV):** `CE181730`
+- **Email:** `minhquan15062004@gmail.com`
+- **Học phần:** MMA301 – Lập trình Di động Đa nền tảng (React Native & Expo)
+- **Trường:** Đại học FPT (FPT University)
 
 ---
 
-## 2. Hướng dẫn Cài đặt & Chạy Ứng dụng (Setup & Running)
+## 1. Mô tả nghiệp vụ ứng dụng
 
-### 2.1 Yêu cầu môi trường
-- **Node.js:** v18.0 trở lên (khuyên dùng Node 20 hoặc Node 24)
-- **NPM:** v9.0 trở lên
-- **Expo Go App:** Cài đặt trên điện thoại Android/iOS (hoặc chạy qua trình giả lập Android Emulator)
+**SmartShop MMA301** là ứng dụng thương mại điện tử tích hợp (Integrated E-Commerce Mobile App) được xây dựng bằng **React Native + Expo (JavaScript)** theo đúng chuẩn kiến trúc phân tách trách nhiệm (**Separation of Concerns**). Ứng dụng giải quyết trọn vẹn hành trình mua sắm thiết bị công nghệ của người dùng trên di động thông qua **6 màn hình chức năng**:
 
-### 2.2 Các bước khởi chạy
+1. **ProductListScreen (`Danh mục Sản phẩm`):** Tải dữ liệu sản phẩm từ Remote API (`DummyJSON`), hỗ trợ tìm kiếm theo từ khóa, lọc theo danh mục (`smartphones`, `laptops`, `tablets`, `mobile-accessories`, `mens-watches`), phân trang vô hạn (`limit` + `skip`) kèm khóa chống gọi trùng request (`isFetchingMoreRef`), kéo để làm mới (`Pull-to-refresh`), và xử lý đầy đủ trạng thái `Loading / Empty / Error + Retry / Offline Fallback`.
+2. **ProductDetailScreen (`Chi tiết Sản phẩm`):** Hiển thị thông tin chi tiết sản phẩm, tồn kho, đánh giá, chọn số lượng kèm ghi chú để thêm vào giỏ hàng, lưu/bỏ lưu vào danh sách Yêu thích đồng bộ Firebase, và lối tắt nhờ Gemini AI đánh giá sản phẩm.
+3. **CartScreen (`Giỏ hàng & Thanh toán`):** Quản lý mặt hàng trong giỏ (tăng/giảm số lượng, xóa tự động khi giảm về 0, ghi chú từng món), tính toán **Derived Cart Totals** (`totalItems`, `subtotal`, `discountAmount`, `shippingFee`, `finalTotal`) qua `useMemo`, tự động lưu bền vững xuống `AsyncStorage`, và đặt hàng đồng bộ lên Firebase kèm phát thông báo xác nhận.
+4. **SavedOrdersScreen (`Firebase Wishlist & Đơn hàng`):** Quản lý 2 nghiệp vụ gắn với **Firebase Firestore** gồm danh sách Sản phẩm Yêu thích (`Wishlist`) và Lịch sử Đơn hàng đã đặt (`Order History`), có nút đồng bộ thủ công và xử lý lỗi khi mất kết nối đám mây.
+5. **AiAssistantScreen (`Trợ lý Mua sắm Gemini AI`):** Nhận ngữ cảnh sản phẩm thật từ Catalog, giỏ hàng hiện tại và ngân sách của người dùng để tư vấn chọn mua hoặc so sánh sản phẩm. Đặc biệt tích hợp bộ lọc **`validateAiOutputAgainstCatalog()`** giúp kiểm tra chéo ID/tên sản phẩm với dữ liệu thật, loại bỏ hoàn toàn các sản phẩm do AI tự bịa (**Hallucination**).
+6. **NotificationSettingsScreen (`Thông báo, Giao diện & Mô phỏng Kiểm thử`):** Quản lý quyền thông báo (`Granted` / `Denied`), phát thông báo theo sự kiện nghiệp vụ (`ORDER_PLACED`, `WISHLIST_UPDATED`, `TEST_EVENT`), đổi giao diện Sáng/Tối (`Dark Mode`), và tích hợp **Bảng Mô phỏng Kiểm thử (Test Matrix Simulator)** giúp tái hiện nhanh các tình huống lỗi mạng API, lỗi Firebase, từ chối quyền Notification, hoặc AI trả về dữ liệu ảo giác ngay tại buổi bảo vệ.
+
+---
+
+## 2. Hướng dẫn cài đặt và chạy dự án
+
+### Yêu cầu môi trường
+- **Node.js:** Phiên bản LTS (`>= 18.x` hoặc `>= 20.x`)
+- **Thiết bị chạy thử:** Ứng dụng **Expo Go** trên điện thoại Android/iOS, máy ảo **Android Emulator**, hoặc trình duyệt Web.
+
+### Các bước cài đặt
 ```bash
-# 1. Di chuyển vào thư mục dự án
-cd Assignment2
+# Bước 1: Di chuyển vào thư mục dự án
+cd assignment2_ce181730
 
-# 2. Cài đặt các gói phụ thuộc (nếu chưa cài)
+# Bước 2: Cài đặt các gói thư viện phụ thuộc
 npm install
 
-# 3. Khởi chạy Expo Metro Bundler
+# Bước 3: Tạo file biến môi trường .env từ file mẫu .env.example
+cp .env.example .env
+
+# Bước 4: Khởi chạy Expo Development Server
 npx expo start
 ```
 
-### 2.3 Cấu hình biến môi trường (Environment Config)
-Tạo file `.env` từ file mẫu `.env.example` (Lưu ý: Không commit file `.env` chứa key thật lên Git):
-```ini
-# Gemini AI API Key (Tùy chọn: có thể nhập trực tiếp trong màn hình Cài đặt của app)
-EXPO_PUBLIC_GEMINI_API_KEY=YOUR_GEMINI_API_KEY_HERE
-
-# Firebase Project Credentials
-EXPO_PUBLIC_FIREBASE_API_KEY=YOUR_FIREBASE_API_KEY
-EXPO_PUBLIC_FIREBASE_PROJECT_ID=your-firebase-project-id
-
-# Product Catalog API (Mặc định: DummyJSON)
-EXPO_PUBLIC_PRODUCT_API_BASE_URL=https://dummyjson.com
-```
-
-> **Ghi chú tiện ích cho buổi chấm:** Nếu không có API Key, ứng dụng đã tích hợp sẵn **Smart Local Fallback Engine** cho cả Gemini và Firebase. Giảng viên có thể chạy thử nghiệm toàn bộ luồng mà ứng dụng không bao giờ bị gián đoạn hay crash!
+> **Lưu ý về Bảo mật (Mục 9.1):** File `.env` chứa khóa cá nhân đã được đưa vào `.gitignore` để tuyệt đối không commit secret lên Git. Ngay cả khi người chấm chưa điền API Key của Firebase hoặc Gemini vào `.env`, ứng dụng vẫn tự động kích hoạt **Safe Local Sync Adapter** và **Catalog Context Fallback Engine** để đảm bảo 100% tính năng chạy ổn định khi demo.
 
 ---
 
-## 3. Kiến trúc State & Dữ liệu (State & Data Architecture)
+## 3. Kiến trúc thư mục và Quản lý State
 
-Dự án áp dụng mô hình **Phân tách trách nhiệm (Separation of Concerns)** theo 4 tầng rõ rệt:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                       Screen UI Layer                       │
-│ (ProductList, ProductDetail, Cart, Checkout, AIScreen...)    │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Dispatches actions / Consumes state
-┌──────────────────────────────▼──────────────────────────────┐
-│                    Context & Hooks Layer                    │
-│   • ProductContext: catalog, search, pagination guards      │
-│   • CartContext: items, memoized derived totals             │
-│   • WishlistContext: favorites toggle & cloud sync          │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Normalizes & calls I/O
-┌──────────────────────────────▼──────────────────────────────┐
-│                    Service & API Layer                      │
-│   • productApi.js: DummyJSON REST API (skip/limit)          │
-│   • firebaseService.js: Firestore sync & offline fallback   │
-│   • geminiService.js: Grounded prompt & ID validation       │
-│   • notificationService.js: Permission & business triggers  │
-│   • storageService.js: AsyncStorage centralized wrapper     │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Read / Write
-┌──────────────────────────────▼──────────────────────────────┐
-│                  Storage & Cloud Backends                   │
-│ (DummyJSON REST, Firebase Cloud, Google Gemini, AsyncStorage)│
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 4. Bằng chứng Tích hợp Tính năng Nâng cao
-
-### 4.1 Firebase Cloud Integration
-- **Nghiệp vụ thực tế:** Khi khách hàng điền form thông tin nhận hàng và bấm "Đặt hàng ngay", đơn hàng được đóng gói thành tài liệu Firestore `orders/{orderId}` chứa: `customerName`, `customerPhone`, `customerAddress`, `totalAmount`, `items`, `createdAt`.
-- **Chịu lỗi ngoại tuyến:** Nếu mất kết nối mạng hoặc quy tắc bảo mật từ chối, đơn hàng tự động lưu vào bộ nhớ nội bộ `storageService`, người dùng nhận thông báo trạng thái mà không gặp crash.
-
-### 4.2 Gemini AI Integration & Anti-Hallucination
-- **Grounded Catalog Prompting:** Đưa danh sách 25 sản phẩm thực tế trong kho vào bối cảnh của prompt.
-- **Thuật toán kiểm chứng:** Hàm `validateAndMatchOutput` phân tích kết quả trả về từ Gemini, kiểm tra từng `recommendedProductIds` xem có tồn tại trong mảng kho hàng không. Nếu AI tự ý bịa ra ID không có thật (ảo giác), hệ thống tự động loại bỏ ID đó và hiển thị thông báo cảnh báo minh bạch cho người dùng.
-
-### 4.3 Notification Workflow
-- **Xử lý quyền (Permission Handling):** Cung cấp giao diện trong màn hình Cài đặt để kiểm tra, cấp quyền, hoặc mô phỏng từ chối quyền (`denied`).
-- **Sự kiện kinh doanh (Business Event):** Tự động bắn thông báo xác nhận kèm mã đơn hàng và tổng tiền ngay khi hoàn tất đặt hàng.
-
----
-
-## 5. Hướng dẫn Đóng gói Release Build (Android APK)
-
-Cấu hình đóng gói được định nghĩa đầy đủ trong `app.json`:
-- **Package Name:** `com.minhquan.ecommerceapp`
-- **Version:** `1.0.0`
-- **Permissions:** `android.permission.INTERNET`, `android.permission.ACCESS_NETWORK_STATE`, `android.permission.POST_NOTIFICATIONS`
-
-### Lệnh tạo file APK độc lập bằng EAS Build:
-```bash
-# 1. Cài đặt EAS CLI (nếu chưa có)
-npm install -g eas-cli
-
-# 2. Đăng nhập tài khoản Expo
-eas login
-
-# 3. Cấu hình build APK
-eas build:configure
-
-# 4. Chạy lệnh build file APK cho Android (Preview Profile)
-eas build -p android --profile preview
+```text
+assignment2_ce181730/
+├── App.js                                  # Cấu hình Providers & Stack Navigator (6 màn hình)
+├── index.js                                # Điểm khởi chạy ứng dụng Expo
+├── app.json                                # Cấu hình ứng dụng & package Android (com.ce181730.assignment2)
+├── eas.json                                # Cấu hình hồ sơ đóng gói Android Release APK (R11)
+├── .env.example                            # Mẫu cấu hình biến môi trường (không chứa secret)
+├── src/
+│   ├── config/
+│   │   └── env.js                          # Đọc và chuẩn hóa biến môi trường EXPO_PUBLIC_*
+│   ├── constants/
+│   │   └── theme.js                        # Bảng màu Light/Dark, quy tắc phí ship/giảm giá & Fallback Catalog
+│   ├── utils/
+│   │   └── storage.js                      # Wrapper đọc/ghi AsyncStorage an toàn (try/catch + fallback)
+│   ├── services/
+│   │   ├── productService.js               # Gọi API sản phẩm, phân trang (limit/skip), chuẩn hóa dữ liệu
+│   │   ├── firebaseService.js              # Đồng bộ Wishlist & Lịch sử Đơn hàng với Firebase + Local Cache
+│   │   ├── notificationService.js          # Xin quyền & phát thông báo theo sự kiện nghiệp vụ (R09)
+│   │   └── aiService.js                    # Gọi Gemini AI, xây dựng ngữ cảnh & validate output (R10)
+│   ├── context/
+│   │   ├── ThemeContext.js                 # Quản lý trạng thái giao diện Sáng / Tối
+│   │   ├── CartContext.js                  # Quản lý Giỏ hàng, lưu AsyncStorage & tính Derived Totals
+│   │   └── ShopContext.js                  # Quản lý Wishlist, Orders, Notification & Cờ mô phỏng Test Matrix
+│   ├── components/
+│   │   ├── CustomButton.js                 # Nút bấm tái sử dụng hỗ trợ trạng thái loading
+│   │   ├── StateFeedback.js                # Khối hiển thị Loading / Empty / Error + nút Retry
+│   │   ├── ProductCard.js                  # Thẻ hiển thị sản phẩm trên FlatList
+│   │   ├── CartItemCard.js                 # Thẻ mặt hàng trong giỏ kèm nút +/-/xóa và ghi chú
+│   │   └── NotificationBanner.js           # Thanh thông báo nổi hiển thị tức thì khi phát sự kiện R09
+│   └── screens/
+│       ├── ProductListScreen.js            # Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc, phân trang
+│       ├── ProductDetailScreen.js          # Màn hình 2: Chi tiết sản phẩm
+│       ├── CartScreen.js                   # Màn hình 3: Giỏ hàng & Thanh toán
+│       ├── SavedOrdersScreen.js            # Màn hình 4: Wishlist & Lịch sử đơn hàng (Firebase)
+│       ├── AiAssistantScreen.js            # Màn hình 5: Trợ lý mua sắm & So sánh sản phẩm Gemini AI
+│       └── NotificationSettingsScreen.js   # Màn hình 6: Cài đặt Thông báo, Theme & Bảng mô phỏng Test
+└── docs/
+    ├── RTM_AND_DESIGN_DECISIONS.md         # Bảng RTM (R01-R12), Kiến trúc & 7 Quyết định Thiết kế (DDR)
+    ├── TEST_MATRIX_AND_DEBUG_LOGS.md       # Bảng kiểm thử 15 Test Cases & 3 Nhật ký Gỡ lỗi (Debug Logs)
+    ├── INTERVIEW_AND_TRANSFER_GUIDE.md     # Giải thích code 5 tầng, Diễn tập 30s & Hướng dẫn mở rộng (Transfer)
+    ├── AI_USAGE_LOG.md                     # Nhật ký sử dụng AI có trách nhiệm & Cam kết sinh viên
+    └── RELEASE_BUILD_EVIDENCE.md           # Hướng dẫn và bằng chứng cấu hình Android Release Build
 ```
 
 ---
 
-## 6. Hồ sơ Tài liệu Kèm theo Dự án
+## 4. Cách cấu hình Firebase, Notification và Gemini AI
 
-1. **[RTM.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/RTM.md):** Ma trận truy vết yêu cầu (Requirement Traceability Matrix từ R01 đến R12).
-2. **[DESIGN_DECISIONS.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/DESIGN_DECISIONS.md):** 7 Quyết định kỹ thuật trọng tâm và phân tích tác động (DDR).
-3. **[TEST_MATRIX.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/TEST_MATRIX.md):** Ma trận kiểm thử chi tiết 15 Test Cases (Normal, Negative, Edge cases) có kết quả thực tế.
-4. **[DEBUG_LOGS.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/DEBUG_LOGS.md):** Phân tích nguyên nhân gốc rễ và bản vá cho 2 bug thực tế (Lặp API cuộn trang & Lệch tính toán tiền giỏ hàng).
-5. **[TRANSFER_TASKS.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/TRANSFER_TASKS.md):** Bảng phân tích tác động và mã nguồn mẫu cho các câu hỏi chuyển giao yêu cầu.
-6. **[AI_USAGE_LOG.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/AI_USAGE_LOG.md):** Nhật ký sử dụng AI minh bạch và bản cam kết trung thực học thuật.
-7. **[INTERVIEW_PREP.md](file:///d:/FA26-MMA-PE/Assignment2_MMA/Assignment2/INTERVIEW_PREP.md):** Cẩm nang trả lời chi tiết toàn bộ các câu hỏi vấn đáp của đề bài.
+1. **Remote Product API (`EXPO_PUBLIC_API_BASE_URL`):** Mặc định kết nối tới `https://dummyjson.com` để tải danh sách sản phẩm phân trang (`/products?limit=8&skip=0`), tìm kiếm (`/products/search?q=...`) và lọc theo danh mục (`/products/category/...`).
+2. **Firebase (`src/services/firebaseService.js`):**
+   - Điền `EXPO_PUBLIC_FIREBASE_API_KEY` và `EXPO_PUBLIC_FIREBASE_PROJECT_ID` trong file `.env`.
+   - Service tự động đồng bộ hai bộ sưu tập `mma301_wishlists` và `mma301_orders` theo mã sinh viên `CE181730`, đồng thời lưu bản sao vào `AsyncStorage` để chống mất dữ liệu khi rớt mạng.
+3. **Notification (`src/services/notificationService.js`):**
+   - Sử dụng `expo-notifications` kết hợp thanh `NotificationBanner` và nhật ký sự kiện trong ứng dụng.
+   - Kiểm tra chặt chẽ `permissionStatus` (`granted` / `denied`) trước khi phát thông báo cho các sự kiện: Đặt hàng thành công (`ORDER_PLACED`), Lưu sản phẩm yêu thích (`WISHLIST_UPDATED`), và Kiểm thử thông báo (`TEST_EVENT`).
+4. **Gemini AI (`src/services/aiService.js`):**
+   - Điền `EXPO_PUBLIC_GEMINI_API_KEY` vào `.env` để gọi trực tiếp model `gemini-2.5-flash`.
+   - Trước khi hiển thị lên UI, toàn bộ kết quả trả về đều bắt buộc đi qua hàm `validateAiOutputAgainstCatalog(rawAiOutput, catalogProducts)` để đối chiếu `productId` với danh sách sản phẩm thật, loại bỏ các gợi ý không tồn tại.
 
 ---
 
-## 7. Giới hạn & Phát triển Tương lai (Limitations)
-- Sử dụng mô phỏng cổng thanh toán (COD / Chuyển khoản VietQR) thay vì tích hợp cổng thanh toán thực tế có thu phí (đúng theo giới hạn đề bài Mục 1.4).
-- Ứng dụng tối ưu hóa giao diện cho điện thoại di động ở cả hai hệ điều hành Android và iOS.
+## 5. Kiểm thử 15 Test Cases và Cách Demo nhanh trên lớp
+
+Toàn bộ **15 Test Cases** bắt buộc trong Mục 5 của đề bài đã được thực hiện và ghi nhận đầy đủ tại file [`docs/TEST_MATRIX_AND_DEBUG_LOGS.md`](./docs/TEST_MATRIX_AND_DEBUG_LOGS.md).
+
+Để thuận tiện cho việc kiểm tra trực tiếp trên lớp, ứng dụng cung cấp **Bảng Mô phỏng Lỗi & Edge Cases** tại màn hình **`⚙️ Cài đặt & Test` (`NotificationSettingsScreen`)**:
+- Bật công tắc **Case 2 (R01):** Tái hiện lỗi mạng khi gọi API sản phẩm -> Kiểm tra màn hình Error, nút `Thử lại (Retry API)` và nút `Dùng dữ liệu Offline dự phòng`.
+- Bật công tắc **Case 10 (R08):** Tái hiện lỗi đọc/ghi Firebase -> Kiểm tra thông báo lỗi khi Đặt hàng hoặc Lưu Wishlist mà không làm mất giỏ hàng.
+- Bật/tắt nút **Case 11 & Case 12 (R09):** Chuyển đổi trạng thái quyền thông báo `DENIED` / `GRANTED` và bấm phát thông báo kiểm thử.
+- Bật công tắc **Case 14 (R10):** Chèn sản phẩm ảo giác `ID #99999 - Quantum Hologram Phone Z99` vào phản hồi AI để chứng minh bộ lọc `validateAiOutputAgainstCatalog()` tự động phát hiện và chặn lại.
+
+---
+
+## 6. Chuẩn bị phát hành Android Release Build (R11)
+
+Dự án đã được cấu hình đầy đủ định danh ứng dụng và hồ sơ đóng gói Android trong [`app.json`](./app.json) và [`eas.json`](./eas.json):
+- **Tên ứng dụng:** `SmartShop MMA301 - CE181730`
+- **Android Package ID:** `com.ce181730.assignment2`
+- **Version:** `1.0.0` (`versionCode: 1`)
+- **Lệnh đóng gói APK qua EAS:** `eas build -p android --profile preview`
+- **Lệnh đóng gói APK cục bộ qua Gradle:** `npx expo prebuild --platform android && cd android && ./gradlew assembleRelease`
+
+Chi tiết quy trình cấu hình ký số và kiểm tra bảo mật trước khi phát hành được trình bày tại [`docs/RELEASE_BUILD_EVIDENCE.md`](./docs/RELEASE_BUILD_EVIDENCE.md).
+
+---
+
+## 7. Hạn chế hiện tại và Hướng cải tiến
+
+- **Hạn chế hiện tại:**
+  - Chức năng thanh toán hiện dừng ở bước xác nhận đơn hàng và đồng bộ lên Firebase Firestore chứ chưa tích hợp cổng thanh toán trực tuyến thật (VNPay/MoMo/Stripe).
+  - Dữ liệu đánh giá sao (`rating`) đang đọc từ catalog chung, chưa tách bảng bình luận chi tiết của từng tài khoản người dùng.
+- **Hướng cải tiến tiếp theo:**
+  - Tích hợp xác thực tài khoản nhiều người dùng với Firebase Authentication (Email/Password & Google Sign-In).
+  - Bổ sung tính năng theo dõi trạng thái vận chuyển đơn hàng theo thời gian thực (Realtime Snapshot Listener).
+
+---
+
+## 8. Hồ sơ Tài liệu Kỹ thuật Chi tiết (`docs/`)
+
+1. [**Bảng RTM, Phân tích Bài toán & 7 Quyết định Thiết kế (DDR)**](./docs/RTM_AND_DESIGN_DECISIONS.md)
+2. [**Ma trận 15 Ca Kiểm thử (Test Matrix) & 3 Nhật ký Gỡ lỗi (Debug Logs)**](./docs/TEST_MATRIX_AND_DEBUG_LOGS.md)
+3. [**Giải thích Code 5 Tầng, Diễn tập Vấn đáp 30s & Bài toán Mở rộng (Transfer Task)**](./docs/INTERVIEW_AND_TRANSFER_GUIDE.md)
+4. [**Nhật ký Sử dụng AI có Trách nhiệm (AI Usage Log) & Cam kết Sinh viên**](./docs/AI_USAGE_LOG.md)
+5. [**Hồ sơ Cấu hình & Bằng chứng Đóng gói Android Release (R11)**](./docs/RELEASE_BUILD_EVIDENCE.md)
 

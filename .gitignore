@@ -1,33 +1,46 @@
-# Dependencies
-node_modules/
-.pnp
-.pnp.js
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# Testing
-coverage/
+# dependencies
+node_modules/
 
 # Expo
 .expo/
 dist/
 web-build/
+expo-env.d.ts
 
-# Native
+# Native & Release signing secrets (R11 / Section 9.1)
+.kotlin/
 *.orig.*
 *.jks
 *.p8
 *.p12
 *.key
+*.keystore
 *.mobileprovision
+google-services.json
+GoogleService-Info.plist
 
 # Metro
 .metro-health-check*
 
-# Environment & Secrets (Rubric: No real secrets committed)
-.env
-.env.local
-.env.*.local
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
-# OS
+# macOS
 .DS_Store
-Thumbs.db
+*.pem
+
+# Environment variables & API keys (Never commit secrets - Section 9.1)
+.env
+.env*.local
+
+# typescript
+*.tsbuildinfo
+
+# generated native folders
+/ios
+/android
 

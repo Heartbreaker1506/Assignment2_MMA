@@ -1,117 +1,87 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../constants/colors';
-import { notificationService } from '../services/notificationService';
+// Author: Trần Minh Quân - Student ID: CE181730
 
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTheme } from '../context/ThemeContext';
+import { useShop } from '../context/ShopContext';
+
+// Floating in-app notification banner displayed when a business event triggers
 export const NotificationBanner = () => {
-  const [activeNotification, setActiveNotification] = useState(null);
-  const [slideAnim] = useState(new Animated.Value(-120));
+  const { colors } = useTheme();
+  const { inAppBanner, dismissBanner } = useShop();
 
-  useEffect(() => {
-    const unsubscribe = notificationService.addListener((notif) => {
-      setActiveNotification(notif);
-      Animated.spring(slideAnim, {
-        toValue: 20,
-        useNativeDriver: true,
-        speed: 12,
-        bounciness: 6,
-      }).start();
-
-      // Auto dismiss after 4 seconds
-      const timer = setTimeout(() => {
-        dismiss();
-      }, 4500);
-
-      return () => clearTimeout(timer);
-    });
-
-    return () => unsubscribe();
-  }, [slideAnim]);
-
-  const dismiss = () => {
-    Animated.timing(slideAnim, {
-      toValue: -120,
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      setActiveNotification(null);
-    });
-  };
-
-  if (!activeNotification) return null;
-
-  const isOrder = activeNotification.type === 'order';
+  if (!inAppBanner) return null;
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateY: slideAnim }] }]}>
-      <TouchableOpacity
-        style={[styles.banner, isOrder ? styles.orderBanner : styles.promoBanner]}
-        onPress={dismiss}
-        activeOpacity={0.9}
-      >
-        <View style={styles.iconContainer}>
-          <Ionicons
-            name={isOrder ? 'checkmark-circle' : 'notifications'}
-            size={24}
-            color={COLORS.white}
-          />
-        </View>
+    <View
+      style={[
+        styles.bannerContainer,
+        {
+          backgroundColor: colors.primary,
+          borderColor: colors.primaryLight,
+        },
+      ]}
+    >
+      <View style={styles.textCol}>
+        <Text style={styles.badgeText}>🔔 THÔNG BÁO HỆ THỐNG (R09)</Text>
+        <Text style={styles.titleText} numberOfLines={1}>
+          {inAppBanner.title}
+        </Text>
+        <Text style={styles.bodyText} numberOfLines={2}>
+          {inAppBanner.body}
+        </Text>
+      </View>
 
-        <View style={styles.content}>
-          <Text style={styles.title} numberOfLines={1}>{activeNotification.title}</Text>
-          <Text style={styles.body} numberOfLines={2}>{activeNotification.body}</Text>
-        </View>
-
-        <TouchableOpacity onPress={dismiss} style={styles.closeBtn}>
-          <Ionicons name="close" size={18} color="rgba(255, 255, 255, 0.8)" />
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.closeBtn} onPress={dismissBanner}>
+        <Text style={styles.closeBtnText}>Đóng</Text>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    top: 40,
-    left: 16,
-    right: 16,
-    zIndex: 9999,
-  },
-  banner: {
+  bannerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    justifyContent: 'space-between',
+    marginHorizontal: 12,
+    marginTop: 6,
+    marginBottom: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
     borderRadius: 12,
-    ...SHADOWS.large,
+    borderWidth: 1,
+    elevation: 4,
   },
-  orderBanner: {
-    backgroundColor: '#059669', // Emerald
-  },
-  promoBanner: {
-    backgroundColor: COLORS.primary,
-  },
-  iconContainer: {
+  textCol: {
+    flex: 1,
     marginRight: 10,
   },
-  content: {
-    flex: 1,
+  badgeText: {
+    color: '#DBEAFE',
+    fontSize: 10,
+    fontWeight: '800',
+    marginBottom: 2,
   },
-  title: {
-    color: COLORS.white,
+  titleText: {
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
-  body: {
-    color: 'rgba(255, 255, 255, 0.95)',
+  bodyText: {
+    color: '#EFF6FF',
     fontSize: 12,
     marginTop: 2,
-    lineHeight: 16,
   },
   closeBtn: {
-    padding: 4,
-    marginLeft: 8,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  closeBtnText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
   },
 });
-

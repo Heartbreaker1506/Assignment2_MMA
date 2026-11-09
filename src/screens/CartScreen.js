@@ -1,271 +1,438 @@
-import React from 'react';
+// Author: Trần Minh Quân - Student ID: CE181730
+
+import React, { useState } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  FlatList,
+  ScrollView,
+  TextInput,
   TouchableOpacity,
-  Alert,
+  StyleSheet,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { SHOP_CONFIG, STUDENT_INFO } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import { useCart } from '../context/CartContext';
+import { useShop } from '../context/ShopContext';
+import { formatPrice } from '../utils/storage';
 import { CartItemCard } from '../components/CartItemCard';
-import { EmptyView } from '../components/EmptyView';
-import { Header } from '../components/Header';
-import { COLORS, SHADOWS } from '../constants/colors';
-import { formatCurrency } from '../utils/formatters';
+import { CustomButton } from '../components/CustomButton';
+import { StateFeedback } from '../components/StateFeedback';
 
 export const CartScreen = ({ navigation }) => {
+  const { colors } = useTheme();
   const {
     cartItems,
-    itemCount,
-    subtotal,
-    discount,
-    shippingFee,
-    totalAmount,
-    updateQuantity,
-    removeFromCart,
+    cartSummary,
+    incrementQuantity,
+    decrementQuantity,
     updateItemNote,
+    removeFromCart,
     clearCart,
   } = useCart();
+  const {
+    submitOrderToFirebase,
+    simulationFlags,
+    toggleSimulationFlag,
+  } = useShop();
 
-  const handleConfirmClear = () => {
-    Alert.alert(
-      'Xóa toàn bộ giỏ hàng',
-      'Bạn có chắc chắn muốn xóa tất cả sản phẩm khỏi giỏ hàng?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        { text: 'Xóa tất cả', style: 'destructive', onPress: clearCart },
-      ]
-    );
+  const [customerNote, setCustomerNote] = useState(
+    `Giao cho ${STUDENT_INFO.name} (${STUDENT_INFO.studentId}) - Đại học FPT`
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [checkoutStatus, setCheckoutStatus] = useState(null);
+
+  // Submit order to Firebase and trigger order confirmation notification
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) return;
+
+    setIsSubmitting(true);
+    setCheckoutStatus(null);
+
+    const res = await submitOrderToFirebase({
+      items: cartItems,
+      cartSummary,
+      customerNote,
+    });
+
+    setIsSubmitting(false);
+
+    if (!res.success) {
+      // Keep cart items intact if Firebase sync fails
+      setCheckoutStatus({
+        type: 'error',
+        title: 'Đặt hàng thất bại (Lỗi đồng bộ Firebase - Case 10)',
+        message:
+          res.error ||
+          'Không thể lưu đơn hàng lên Firebase. Giỏ hàng của bạn vẫn được giữ an toàn.',
+      });
+      return;
+    }
+
+    // Clear cart after successful order placement
+    await clearCart();
+    const notifNote = res.notificationResult?.sent
+      ? '🔔 Đã phát thông báo đẩy xác nhận đơn hàng (Permission Granted - Case 12).'
+      : `🔕 Không phát thông báo đẩy: ${
+          res.notificationResult?.reason ||
+          'Quyền thông báo đang bị từ chối (Case 11).'
+        }`;
+
+    setCheckoutStatus({
+      type: 'success',
+      title: `Đặt hàng thành công! Mã đơn: ${res.order.id}`,
+      message: `Tổng thanh toán: ${formatPrice(
+        res.order.finalTotal
+      )} (${res.order.totalItems} sản phẩm) đã lưu vào Firebase (${
+        res.order.syncSource
+      }).\n${notifNote}`,
+    });
   };
 
-  if (cartItems.length === 0) {
-    return (
-      <View style={styles.container}>
-        <Header title="Giỏ hàng của bạn" />
-        <EmptyView
-          icon="cart-outline"
-          title="Giỏ hàng đang trống"
-          message="Bạn chưa thêm sản phẩm nào. Hãy khám phá danh mục và chọn món đồ yêu thích nhé!"
-          actionLabel="Khám phá ngay"
-          onAction={() => navigation.navigate('CatalogTab')}
-        />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
-      <Header
-        title="Giỏ hàng của bạn"
-        subtitle={`${itemCount} sản phẩm`}
-        rightIcon="trash-outline"
-        onRightPress={handleConfirmClear}
-      />
-
-      <FlatList
-        data={cartItems}
-        keyExtractor={(item) => `cart-${item.product.id}`}
-        renderItem={({ item }) => (
-          <CartItemCard
-            item={item}
-            onIncrement={(id) => updateQuantity(id, 1)}
-            onDecrement={(id) => updateQuantity(id, -1)}
-            onRemove={removeFromCart}
-            onUpdateNote={updateItemNote}
-          />
-        )}
-        contentContainerStyle={styles.listContent}
-        ListFooterComponent={
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Tóm tắt đơn hàng</Text>
-
-            {/* Subtotal */}
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Tạm tính ({itemCount} món)</Text>
-              <Text style={styles.summaryValue}>{formatCurrency(subtotal)}</Text>
-            </View>
-
-            {/* Discount */}
-            <View style={styles.summaryRow}>
-              <View style={styles.labelWithBadge}>
-                <Text style={styles.summaryLabel}>Khuyến mãi giảm giá</Text>
-                {discount > 0 && <Text style={styles.promoTag}>-10%</Text>}
-              </View>
-              <Text style={[styles.summaryValue, discount > 0 && styles.discountValue]}>
-                {discount > 0 ? `-${formatCurrency(discount)}` : '$0.00'}
-              </Text>
-            </View>
-
-            {/* Shipping */}
-            <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Phí vận chuyển</Text>
-              <Text style={styles.summaryValue}>
-                {shippingFee === 0 ? 'Miễn phí' : formatCurrency(shippingFee)}
-              </Text>
-            </View>
-
-            {/* Hint message for promotion */}
-            {subtotal < 100 && (
-              <Text style={styles.promoHint}>
-                💡 Mua thêm {formatCurrency(100 - subtotal)} để nhận ưu đãi giảm 10%!
-              </Text>
-            )}
-
-            <View style={styles.divider} />
-
-            {/* Total */}
-            <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Tổng thanh toán</Text>
-              <Text style={styles.totalValue}>{formatCurrency(totalAmount)}</Text>
-            </View>
-          </View>
-        }
-      />
-
-      {/* Sticky Bottom Checkout Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.bottomPriceCol}>
-          <Text style={styles.bottomTotalLabel}>Tổng cộng:</Text>
-          <Text style={styles.bottomTotalPrice}>{formatCurrency(totalAmount)}</Text>
-        </View>
-
-        <TouchableOpacity
-          style={styles.checkoutBtn}
-          onPress={() => navigation.navigate('Checkout')}
-          activeOpacity={0.85}
+    <ScrollView
+      style={[styles.screen, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.content}
+    >
+      {/* Order checkout status banner */}
+      {checkoutStatus ? (
+        <View
+          style={[
+            styles.statusBanner,
+            {
+              backgroundColor:
+                checkoutStatus.type === 'error'
+                  ? colors.dangerLight
+                  : colors.successLight,
+              borderColor:
+                checkoutStatus.type === 'error'
+                  ? colors.danger
+                  : colors.success,
+            },
+          ]}
         >
-          <Text style={styles.checkoutBtnText}>Thanh toán ngay</Text>
-          <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
-        </TouchableOpacity>
-      </View>
-    </View>
+          <Text
+            style={[
+              styles.statusTitle,
+              {
+                color:
+                  checkoutStatus.type === 'error'
+                    ? colors.danger
+                    : colors.success,
+              },
+            ]}
+          >
+            {checkoutStatus.title}
+          </Text>
+          <Text style={[styles.statusMessage, { color: colors.text }]}>
+            {checkoutStatus.message}
+          </Text>
+
+          <View style={styles.statusActions}>
+            {checkoutStatus.type === 'success' ? (
+              <CustomButton
+                title="Xem Đơn hàng đã lưu (Firebase) →"
+                onPress={() =>
+                  navigation.navigate('SavedOrders', { initialTab: 'orders' })
+                }
+                variant="success"
+              />
+            ) : simulationFlags.simulateFirebaseError ? (
+              <CustomButton
+                title="Tắt mô phỏng lỗi Firebase & Thử lại"
+                onPress={() => {
+                  toggleSimulationFlag('simulateFirebaseError');
+                  setCheckoutStatus(null);
+                }}
+                variant="danger"
+              />
+            ) : null}
+          </View>
+        </View>
+      ) : null}
+
+      {/* Empty cart state */}
+      {cartItems.length === 0 ? (
+        <StateFeedback
+          type="empty"
+          title="Giỏ hàng của bạn đang trống"
+          message="Hãy khám phá danh mục sản phẩm hoặc nhờ Trợ lý Gemini AI gợi ý món đồ phù hợp với ngân sách của bạn nhé!"
+          actionLabel="Khám phá Sản phẩm"
+          onAction={() => navigation.navigate('ProductList')}
+          secondaryActionLabel="Hỏi Gemini AI"
+          onSecondaryAction={() => navigation.navigate('AiAssistant')}
+        />
+      ) : (
+        <>
+          {/* Cart items header and clear all button */}
+          <View style={styles.sectionHeaderRow}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Danh sách sản phẩm ({cartSummary.uniqueItemsCount} loại •{' '}
+              {cartSummary.totalItems} món)
+            </Text>
+            <TouchableOpacity onPress={clearCart}>
+              <Text style={[styles.clearAllText, { color: colors.danger }]}>
+                Xóa tất cả
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* List of items in the shopping cart */}
+          {cartItems.map((item) => (
+            <CartItemCard
+              key={String(item.product.id)}
+              item={item}
+              onIncrement={incrementQuantity}
+              onDecrement={decrementQuantity}
+              onRemove={removeFromCart}
+              onUpdateNote={updateItemNote}
+              onPressProduct={(prod) =>
+                navigation.navigate('ProductDetail', { product: prod })
+              }
+            />
+          ))}
+
+          {/* Derived cart totals breakdown card */}
+          <View
+            style={[
+              styles.summaryCard,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <View style={styles.summaryTitleRow}>
+              <Text style={[styles.summaryTitle, { color: colors.text }]}>
+                Chi tiết Thanh toán (Derived Totals - R06)
+              </Text>
+              <View
+                style={[
+                  styles.persistBadge,
+                  { backgroundColor: colors.primaryLight },
+                ]}
+              >
+                <Text
+                  style={[styles.persistBadgeText, { color: colors.primary }]}
+                >
+                  💾 Tự động lưu AsyncStorage
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
+                Tổng số lượng mặt hàng:
+              </Text>
+              <Text style={[styles.lineValue, { color: colors.text }]}>
+                {cartSummary.totalItems} sản phẩm
+              </Text>
+            </View>
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
+                Tạm tính (Subtotal):
+              </Text>
+              <Text style={[styles.lineValue, { color: colors.text }]}>
+                {formatPrice(cartSummary.subtotal)}
+              </Text>
+            </View>
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
+                Ưu đãi đơn từ ${SHOP_CONFIG.VIP_DISCOUNT_THRESHOLD} (-5%):
+              </Text>
+              <Text
+                style={[
+                  styles.lineValue,
+                  {
+                    color:
+                      cartSummary.discountAmount > 0
+                        ? colors.success
+                        : colors.textSecondary,
+                  },
+                ]}
+              >
+                -{formatPrice(cartSummary.discountAmount)}
+              </Text>
+            </View>
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.lineLabel, { color: colors.textSecondary }]}>
+                Phí vận chuyển (Miễn phí từ ${SHOP_CONFIG.FREE_SHIPPING_THRESHOLD}
+                ):
+              </Text>
+              <Text
+                style={[
+                  styles.lineValue,
+                  {
+                    color:
+                      cartSummary.shippingFee === 0
+                        ? colors.success
+                        : colors.text,
+                  },
+                ]}
+              >
+                {cartSummary.shippingFee === 0
+                  ? 'Miễn phí ($0.00)'
+                  : formatPrice(cartSummary.shippingFee)}
+              </Text>
+            </View>
+
+            <View
+              style={[styles.divider, { backgroundColor: colors.border }]}
+            />
+
+            <View style={styles.lineRow}>
+              <Text style={[styles.totalLabel, { color: colors.text }]}>
+                Tổng cộng thanh toán:
+              </Text>
+              <Text style={[styles.totalValue, { color: colors.primary }]}>
+                {formatPrice(cartSummary.finalTotal)}
+              </Text>
+            </View>
+
+            {/* Customer delivery note input */}
+            <Text style={[styles.noteHeader, { color: colors.text }]}>
+              Thông tin & Ghi chú giao hàng (Lưu lên Firebase Orders):
+            </Text>
+            <TextInput
+              style={[
+                styles.checkoutInput,
+                {
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  borderColor: colors.border,
+                },
+              ]}
+              placeholder="Nhập địa chỉ nhận hàng hoặc ghi chú..."
+              placeholderTextColor={colors.textSecondary}
+              value={customerNote}
+              onChangeText={setCustomerNote}
+            />
+
+            <CustomButton
+              title="✅ Đặt hàng & Đồng bộ Firebase + Gửi Thông báo"
+              onPress={handleCheckout}
+              loading={isSubmitting}
+              variant="primary"
+              style={styles.checkoutBtn}
+            />
+          </View>
+        </>
+      )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: COLORS.background,
   },
-  listContent: {
-    paddingVertical: 10,
-    paddingBottom: 24,
+  content: {
+    padding: 14,
+    paddingBottom: 32,
   },
-  summaryCard: {
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginTop: 12,
-    padding: 16,
+  statusBanner: {
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.small,
+    marginBottom: 14,
   },
-  summaryTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginBottom: 12,
+  statusTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    marginBottom: 6,
   },
-  summaryRow: {
+  statusMessage: {
+    fontSize: 13,
+    lineHeight: 19,
+  },
+  statusActions: {
+    marginTop: 12,
+  },
+  sectionHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 4,
+    marginBottom: 10,
   },
-  labelWithBadge: {
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  clearAllText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  summaryCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 16,
+    marginTop: 4,
+  },
+  summaryTitleRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    marginBottom: 12,
     gap: 6,
   },
-  promoTag: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: COLORS.danger,
-    backgroundColor: COLORS.dangerLight,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+  summaryTitle: {
+    fontSize: 15,
+    fontWeight: '800',
   },
-  summaryLabel: {
-    fontSize: 13,
-    color: COLORS.textMuted,
-  },
-  summaryValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
-  },
-  discountValue: {
-    color: COLORS.danger,
-    fontWeight: '700',
-  },
-  promoHint: {
-    fontSize: 11,
-    color: COLORS.primaryDark,
-    backgroundColor: COLORS.primaryLight,
-    padding: 8,
+  persistBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     borderRadius: 6,
-    marginTop: 8,
+  },
+  persistBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  lineRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  lineLabel: {
+    fontSize: 13,
+    flex: 1,
+    marginRight: 8,
+  },
+  lineValue: {
+    fontSize: 14,
+    fontWeight: '700',
   },
   divider: {
     height: 1,
-    backgroundColor: COLORS.border,
-    marginVertical: 12,
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginVertical: 10,
   },
   totalLabel: {
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontWeight: '800',
   },
   totalValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: COLORS.danger,
   },
-  bottomBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: COLORS.card,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.border,
-    ...SHADOWS.medium,
+  noteHeader: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 12,
+    marginBottom: 6,
   },
-  bottomPriceCol: {
-    justifyContent: 'center',
-  },
-  bottomTotalLabel: {
-    fontSize: 11,
-    color: COLORS.textMuted,
-  },
-  bottomTotalPrice: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: COLORS.danger,
+  checkoutInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13,
+    marginBottom: 14,
   },
   checkoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: 10,
-    gap: 8,
-  },
-  checkoutBtnText: {
-    color: COLORS.white,
-    fontSize: 15,
-    fontWeight: '700',
+    paddingVertical: 13,
   },
 });
-

@@ -1,216 +1,231 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { COLORS, SHADOWS } from '../constants/colors';
-import { formatCurrency } from '../utils/formatters';
+// Author: Trần Minh Quân - Student ID: CE181730
 
+import React from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+} from 'react-native';
+import { useTheme } from '../context/ThemeContext';
+import { formatPrice } from '../utils/storage';
+
+// Cart item card component with quantity increment/decrement, remove button, and custom note input
 export const CartItemCard = ({
   item,
   onIncrement,
   onDecrement,
   onRemove,
   onUpdateNote,
+  onPressProduct,
 }) => {
-  const { product, quantity, note = '' } = item;
-  const [isEditingNote, setIsEditingNote] = useState(false);
-  const [currentNote, setCurrentNote] = useState(note);
+  const { colors } = useTheme();
+  const { product, quantity, note } = item;
 
-  const handleSaveNote = () => {
-    setIsEditingNote(false);
-    if (onUpdateNote) {
-      onUpdateNote(product.id, currentNote);
-    }
-  };
-
-  const itemTotal = (Number(product.price) || 0) * (Number(quantity) || 1);
+  const lineSubtotal = Number(product.price || 0) * Number(quantity || 0);
 
   return (
-    <View style={styles.card}>
-      <View style={styles.mainRow}>
-        {/* Product Image */}
-        <Image source={{ uri: product.thumbnail }} style={styles.image} resizeMode="cover" />
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.card,
+          borderColor: colors.border,
+        },
+      ]}
+    >
+      <View style={styles.topRow}>
+        <TouchableOpacity
+          onPress={() => onPressProduct && onPressProduct(product)}
+          activeOpacity={0.8}
+        >
+          <Image
+            source={{ uri: product.thumbnail }}
+            style={[styles.image, { backgroundColor: colors.background }]}
+          />
+        </TouchableOpacity>
 
-        {/* Info */}
-        <View style={styles.info}>
-          <Text style={styles.title} numberOfLines={2}>{product.title}</Text>
-          <Text style={styles.unitPrice}>{formatCurrency(product.price)} / cái</Text>
+        <View style={styles.detailsCol}>
+          <View style={styles.headerRow}>
+            <Text
+              style={[styles.title, { color: colors.text }]}
+              numberOfLines={2}
+            >
+              {product.title}
+            </Text>
+            <TouchableOpacity
+              style={[
+                styles.removeBtn,
+                { backgroundColor: colors.dangerLight },
+              ]}
+              onPress={() => onRemove(product.id)}
+            >
+              <Text style={[styles.removeBtnText, { color: colors.danger }]}>
+                Xóa
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* Stepper & Total */}
-          <View style={styles.controlsRow}>
-            <View style={styles.stepper}>
+          <Text style={[styles.unitPrice, { color: colors.textSecondary }]}>
+            Đơn giá: {formatPrice(product.price)} / sp
+          </Text>
+
+          <View style={styles.quantityAndSubtotalRow}>
+            {/* Quantity step controls */}
+            <View
+              style={[
+                styles.qtyControls,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.background,
+                },
+              ]}
+            >
               <TouchableOpacity
+                style={styles.qtyBtn}
                 onPress={() => onDecrement(product.id)}
-                style={styles.stepBtn}
-                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
               >
-                <Ionicons name="remove" size={16} color={COLORS.text} />
+                <Text style={[styles.qtyBtnText, { color: colors.text }]}>
+                  {quantity === 1 ? '🗑️' : '−'}
+                </Text>
               </TouchableOpacity>
 
-              <Text style={styles.qtyText}>{quantity}</Text>
+              <Text style={[styles.qtyValue, { color: colors.text }]}>
+                {quantity}
+              </Text>
 
               <TouchableOpacity
+                style={styles.qtyBtn}
                 onPress={() => onIncrement(product.id)}
-                style={styles.stepBtn}
-                hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
               >
-                <Ionicons name="add" size={16} color={COLORS.text} />
+                <Text style={[styles.qtyBtnText, { color: colors.primary }]}>
+                  +
+                </Text>
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.itemTotalText}>{formatCurrency(itemTotal)}</Text>
+            <View style={styles.subtotalCol}>
+              <Text
+                style={[styles.subtotalLabel, { color: colors.textSecondary }]}
+              >
+                Thành tiền
+              </Text>
+              <Text style={[styles.subtotalValue, { color: colors.primary }]}>
+                {formatPrice(lineSubtotal)}
+              </Text>
+            </View>
           </View>
         </View>
-
-        {/* Remove Button */}
-        <TouchableOpacity
-          onPress={() => onRemove(product.id)}
-          style={styles.removeBtn}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="trash-outline" size={20} color={COLORS.danger} />
-        </TouchableOpacity>
       </View>
 
-      {/* Item Note Section (Transfer task readiness) */}
-      <View style={styles.noteContainer}>
-        {isEditingNote ? (
-          <View style={styles.noteEditBox}>
-            <TextInput
-              style={styles.noteInput}
-              value={currentNote}
-              onChangeText={setCurrentNote}
-              placeholder="Ghi chú (màu sắc, size, lời dặn...)"
-              placeholderTextColor={COLORS.textLight}
-            />
-            <TouchableOpacity onPress={handleSaveNote} style={styles.saveNoteBtn}>
-              <Ionicons name="checkmark" size={16} color={COLORS.white} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={styles.noteDisplay}
-            onPress={() => setIsEditingNote(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="document-text-outline" size={14} color={COLORS.primary} />
-            <Text style={styles.noteText} numberOfLines={1}>
-              {currentNote ? `Ghi chú: ${currentNote}` : 'Thêm ghi chú cho sản phẩm...'}
-            </Text>
-            <Ionicons name="pencil-outline" size={12} color={COLORS.textMuted} />
-          </TouchableOpacity>
-        )}
-      </View>
+      {/* Optional note input for this specific cart item */}
+      <TextInput
+        style={[
+          styles.noteInput,
+          {
+            backgroundColor: colors.background,
+            color: colors.text,
+            borderColor: colors.border,
+          },
+        ]}
+        placeholder="Ghi chú cho mặt hàng này (VD: Màu đen, giao giờ hành chính...)"
+        placeholderTextColor={colors.textSecondary}
+        value={note || ''}
+        onChangeText={(text) => onUpdateNote(product.id, text)}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.card,
-    borderRadius: 12,
-    marginHorizontal: 16,
-    marginVertical: 6,
-    padding: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    ...SHADOWS.small,
+    padding: 12,
+    marginBottom: 12,
   },
-  mainRow: {
+  topRow: {
     flexDirection: 'row',
-    alignItems: 'center',
   },
   image: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    backgroundColor: '#F1F5F9',
+    width: 82,
+    height: 82,
+    borderRadius: 10,
+    marginRight: 12,
   },
-  info: {
+  detailsCol: {
     flex: 1,
-    marginLeft: 12,
+  },
+  headerRow: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   title: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  removeBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  removeBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
   },
   unitPrice: {
     fontSize: 12,
-    color: COLORS.textMuted,
-    marginTop: 2,
+    marginTop: 3,
+    marginBottom: 8,
   },
-  controlsRow: {
+  quantityAndSubtotalRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 8,
+    alignItems: 'center',
   },
-  stepper: {
+  qtyControls: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
   },
-  stepBtn: {
-    width: 28,
-    height: 28,
+  qtyBtn: {
+    width: 34,
+    height: 32,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qtyText: {
-    paddingHorizontal: 10,
+  qtyBtnText: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  qtyValue: {
+    minWidth: 28,
+    textAlign: 'center',
     fontSize: 14,
     fontWeight: '700',
-    color: COLORS.text,
   },
-  itemTotalText: {
+  subtotalCol: {
+    alignItems: 'flex-end',
+  },
+  subtotalLabel: {
+    fontSize: 11,
+  },
+  subtotalValue: {
     fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.danger,
-  },
-  removeBtn: {
-    padding: 6,
-    marginLeft: 8,
-  },
-  noteContainer: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-  },
-  noteDisplay: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  noteText: {
-    flex: 1,
-    fontSize: 12,
-    color: COLORS.textMuted,
-    fontStyle: 'italic',
-  },
-  noteEditBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    fontWeight: '800',
   },
   noteInput: {
-    flex: 1,
+    marginTop: 10,
     borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
     fontSize: 12,
-    color: COLORS.text,
-  },
-  saveNoteBtn: {
-    marginLeft: 6,
-    backgroundColor: COLORS.primary,
-    borderRadius: 6,
-    padding: 6,
   },
 });
-

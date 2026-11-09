@@ -1,144 +1,207 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { storageService } from '../services/storageService';
+// Author: Trần Minh Quân - Student ID: CE181730
 
-const CartContext = createContext(null);
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+} from 'react';
+import { SHOP_CONFIG } from '../constants/theme';
+import { getStoredItem, setStoredItem, STORAGE_KEYS } from '../utils/storage';
+
+const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
-  const [isRestored, setIsRestored] = useState(false);
+  const [isCartHydrated, setIsCartHydrated] = useState(false);
 
-  // Restore cart state from AsyncStorage on app launch (R07 requirement)
+  // Restore cart items from AsyncStorage on startup
   useEffect(() => {
-    const restoreCart = async () => {
-      try {
-        const saved = await storageService.getCart();
-        if (Array.isArray(saved)) {
-          setCartItems(saved);
-        }
-      } catch (err) {
-        console.error('[CartContext] Failed to restore cart:', err);
-      } finally {
-        setIsRestored(true);
+    const loadCartFromStorage = async () => {
+      const savedCart = await getStoredItem(STORAGE_KEYS.CART, []);
+      if (Array.isArray(savedCart)) {
+        const validItems = savedCart.filter(
+          (item) =>
+            item &&
+            item.product &&
+            item.product.id !== undefined &&
+            Number(item.quantity) > 0
+        );
+        setCartItems(validItems);
       }
+      setIsCartHydrated(true);
     };
-    restoreCart();
+    loadCartFromStorage();
   }, []);
 
-  // Save cart state to AsyncStorage whenever cartItems change
-  useEffect(() => {
-    if (isRestored) {
-      storageService.saveCart(cartItems);
-    }
-  }, [cartItems, isRestored]);
+  // Update cart state and save to AsyncStorage
+  const persistCart = async (nextItems) => {
+    setCartItems(nextItems);
+    await setStoredItem(STORAGE_KEYS.CART, nextItems);
+  };
 
-  /**
-   * Add product to cart with quantity and optional note
-   */
-  const addToCart = useCallback((product, quantity = 1, note = '') => {
-    if (!product || !product.id) return;
-    const qty = Math.max(1, Number(quantity) || 1);
+  // Add a product to cart or increment quantity if it already exists
+  const addToCart = async (product, quantityToAdd = 1, note = '') => {
+    if (!product || product.id === undefined) return;
+    const safeQty = Math.max(1, Number(quantityToAdd) || 1);
 
-    setCartItems((prev) => {
-      const existingIndex = prev.findIndex((item) => item.product.id === product.id);
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        const currentQty = Number(updated[existingIndex].quantity) || 1;
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          quantity: currentQty + qty,
-          note: note || updated[existingIndex].note || '',
-        };
-        return updated;
-      }
-      return [...prev, { product, quantity: qty, note: note || '' }];
-    });
-  }, []);
-
-  /**
-   * Update quantity by delta (+1 or -1)
-   */
-  const updateQuantity = useCallback((productId, delta) => {
-    setCartItems((prev) => {
-      return prev
-        .map((item) => {
-          if (item.product.id === productId) {
-            const newQty = (Number(item.quantity) || 1) + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean); // removes items when quantity drops to 0
-    });
-  }, []);
-
-  /**
-   * Remove specific item from cart
-   */
-  const removeFromCart = useCallback((productId) => {
-    setCartItems((prev) => prev.filter((item) => item.product.id !== productId));
-  }, []);
-
-  /**
-   * Update custom note for a cart item (Transfer task friendly)
-   */
-  const updateItemNote = useCallback((productId, note) => {
-    setCartItems((prev) =>
-      prev.map((item) => (item.product.id === productId ? { ...item, note } : item))
+    const existingIndex = cartItems.findIndex(
+      (item) => Number(item.product.id) === Number(product.id)
     );
-  }, []);
 
-  /**
-   * Clear entire cart after successful checkout
-   */
-  const clearCart = useCallback(() => {
-    setCartItems([]);
-  }, []);
+    let updatedList = [];
+    if (existingIndex >= 0) {
+      updatedList = cartItems.map((item, idx) => {
+        if (idx !== existingIndex) return item;
+        return {
+          ...item,
+          quantity: item.quantity + safeQty,
+          note: note ? String(note).trim() : item.note,
+        };
+      });
+    } else {
+      updatedList = [
+        ...cartItems,
+        {
+          product,
+          quantity: safeQty,
+          note: String(note || '').trim(),
+          addedAt: new Date().toISOString(),
+        },
+      ];
+    }
 
-  /**
-   * DERIVED TOTALS (R06 - Cart selector / logic)
-   * Computed synchronously from cartItems state to prevent out-of-sync or calculation bugs
-   */
-  const totals = useMemo(() => {
-    const itemCount = cartItems.reduce((acc, item) => acc + (Number(item.quantity) || 0), 0);
+    await persistCart(updatedList);
+  };
 
-    const subtotal = cartItems.reduce((acc, item) => {
-      const price = Number(item.product?.price) || 0;
-      const qty = Number(item.quantity) || 0;
-      return acc + price * qty;
-    }, 0);
+  // Update item quantity; automatically remove item if quantity is <= 0
+  const updateQuantity = async (productId, newQuantity) => {
+    const numericQty = Number(newQuantity);
+    if (Number.isNaN(numericQty) || numericQty <= 0) {
+      await removeFromCart(productId);
+      return;
+    }
 
-    // Promotion rule: 10% off for carts over $100
-    const discount = subtotal >= 100 ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
+    const updatedList = cartItems.map((item) =>
+      Number(item.product.id) === Number(productId)
+        ? { ...item, quantity: Math.floor(numericQty) }
+        : item
+    );
+    await persistCart(updatedList);
+  };
 
-    // Shipping rule: $5 flat rate, free above $150
-    const shippingFee = subtotal > 0 && subtotal < 150 ? 5.0 : 0.0;
+  const incrementQuantity = async (productId) => {
+    const found = cartItems.find(
+      (item) => Number(item.product.id) === Number(productId)
+    );
+    if (found) {
+      await updateQuantity(productId, found.quantity + 1);
+    }
+  };
 
-    const totalAmount = Math.max(0, Math.round((subtotal - discount + shippingFee) * 100) / 100);
+  const decrementQuantity = async (productId) => {
+    const found = cartItems.find(
+      (item) => Number(item.product.id) === Number(productId)
+    );
+    if (found) {
+      await updateQuantity(productId, found.quantity - 1);
+    }
+  };
+
+  // Update custom note for a specific cart item
+  const updateItemNote = async (productId, note) => {
+    const updatedList = cartItems.map((item) =>
+      Number(item.product.id) === Number(productId)
+        ? { ...item, note: String(note || '') }
+        : item
+    );
+    await persistCart(updatedList);
+  };
+
+  // Remove a single product from cart
+  const removeFromCart = async (productId) => {
+    const updatedList = cartItems.filter(
+      (item) => Number(item.product.id) !== Number(productId)
+    );
+    await persistCart(updatedList);
+  };
+
+  // Clear all items from cart
+  const clearCart = async () => {
+    await persistCart([]);
+  };
+
+  // Get current quantity of a product in cart
+  const getProductQuantityInCart = (productId) => {
+    const found = cartItems.find(
+      (item) => Number(item.product.id) === Number(productId)
+    );
+    return found ? found.quantity : 0;
+  };
+
+  // Compute derived cart totals from cartItems using useMemo (Single Source of Truth)
+  const cartSummary = useMemo(() => {
+    const totalItems = cartItems.reduce(
+      (sum, item) => sum + Number(item.quantity || 0),
+      0
+    );
+
+    const uniqueItemsCount = cartItems.length;
+
+    const subtotal = cartItems.reduce(
+      (sum, item) =>
+        sum + Number(item.product?.price || 0) * Number(item.quantity || 0),
+      0
+    );
+
+    const discountAmount =
+      subtotal >= SHOP_CONFIG.VIP_DISCOUNT_THRESHOLD
+        ? Number((subtotal * SHOP_CONFIG.VIP_DISCOUNT_RATE).toFixed(2))
+        : 0;
+
+    const shippingFee =
+      subtotal === 0 || subtotal >= SHOP_CONFIG.FREE_SHIPPING_THRESHOLD
+        ? 0
+        : SHOP_CONFIG.STANDARD_SHIPPING_FEE;
+
+    const finalTotal = Math.max(
+      0,
+      Number((subtotal - discountAmount + shippingFee).toFixed(2))
+    );
 
     return {
-      itemCount,
-      subtotal: Math.round(subtotal * 100) / 100,
-      discount,
+      totalItems,
+      uniqueItemsCount,
+      subtotal: Number(subtotal.toFixed(2)),
+      discountAmount,
       shippingFee,
-      totalAmount,
+      finalTotal,
+      qualifiesForFreeShipping:
+        subtotal >= SHOP_CONFIG.FREE_SHIPPING_THRESHOLD,
+      qualifiesForVipDiscount: subtotal >= SHOP_CONFIG.VIP_DISCOUNT_THRESHOLD,
     };
   }, [cartItems]);
 
-  const value = useMemo(
-    () => ({
-      cartItems,
-      isRestored,
-      addToCart,
-      updateQuantity,
-      removeFromCart,
-      updateItemNote,
-      clearCart,
-      ...totals,
-    }),
-    [cartItems, isRestored, addToCart, updateQuantity, removeFromCart, updateItemNote, clearCart, totals]
+  return (
+    <CartContext.Provider
+      value={{
+        cartItems,
+        isCartHydrated,
+        cartSummary,
+        addToCart,
+        updateQuantity,
+        incrementQuantity,
+        decrementQuantity,
+        updateItemNote,
+        removeFromCart,
+        clearCart,
+        getProductQuantityInCart,
+      }}
+    >
+      {children}
+    </CartContext.Provider>
   );
-
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 };
 
 export const useCart = () => {
@@ -148,4 +211,3 @@ export const useCart = () => {
   }
   return context;
 };
-
