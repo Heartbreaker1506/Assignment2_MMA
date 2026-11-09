@@ -89,7 +89,7 @@ export const ProductCard = ({
             style={[styles.brandTag, { color: colors.secondary }]}
             numberOfLines={1}
           >
-            {(product.brand || product.category || 'NEXUS').toUpperCase()}
+            {(product.brand || product.category || 'SMARTSTORE').toUpperCase()}
           </Text>
           <Text style={[styles.ratingBadge, { color: colors.accent }]}>
             ★ {Number(product.rating || 4.8).toFixed(1)}

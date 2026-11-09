@@ -56,7 +56,7 @@ const AppNavigator = () => {
           <Stack.Screen
             name="ProductList"
             component={ProductListScreen}
-            options={{ title: 'NEXUS LUXE • Tech Store' }}
+            options={{ title: 'SmartStore' }}
           />
 
           {/* Screen 2: Product Detail */}

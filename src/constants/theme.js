@@ -62,7 +62,7 @@ export const STUDENT_INFO = {
   studentId: 'CE180048',
   email: 'QuanNMCE180048@fpt.edu.vn',
   course: 'MMA301 - Integrated E-Commerce App (Assignment 2)',
-  brandName: 'NEXUS LUXE',
+  brandName: 'SmartStore',
 };
 
 // Pricing and Shipping Rules

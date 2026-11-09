@@ -609,10 +609,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 10,
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: Platform.OS === 'android' ? 4 : 6,
+    minHeight: 38,
     fontSize: 13,
     width: 130,
     textAlign: 'right',
+    textAlignVertical: 'center',
   },
   simToggleBox: {
     borderWidth: 1,

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SmartShop MMA301 - CE180048",
+    "name": "SmartStore",
     "slug": "assignment2-ce180048",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -40,4 +40,3 @@
     }
   }
 }
-

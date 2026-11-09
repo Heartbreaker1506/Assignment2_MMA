@@ -604,8 +604,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 12,
-    paddingVertical: 10,
+    paddingVertical: Platform.OS === 'android' ? 6 : 10,
+    minHeight: 44,
     fontSize: 13,
+    textAlignVertical: 'center',
     marginBottom: 14,
   },
   actionButtonsRow: {

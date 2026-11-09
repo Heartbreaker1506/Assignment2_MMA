@@ -254,7 +254,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     marginTop: 10,
-    height: 36,
+    minHeight: 38,
+    paddingVertical: Platform.OS === 'android' ? 2 : 4,
   },
   noteIcon: {
     fontSize: 12,
@@ -263,6 +264,9 @@ const styles = StyleSheet.create({
   noteInput: {
     flex: 1,
     fontSize: 12,
-    paddingVertical: 4,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
+    textAlignVertical: 'center',
   },
 });

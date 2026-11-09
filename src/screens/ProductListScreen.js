@@ -222,8 +222,8 @@ export const ProductListScreen = ({ navigation }) => {
                 </Text>
               </View>
             </View>
-            <Text style={[styles.brandSubtitle, { color: colors.textSecondary }]}>
-              {STUDENT_INFO.name} • {STUDENT_INFO.course}
+            <Text style={[styles.brandSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+              SV: {STUDENT_INFO.name} • {STUDENT_INFO.studentId}
             </Text>
           </View>
 
@@ -255,7 +255,7 @@ export const ProductListScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 4 Quick Nav Shortcut Pills */}
+        {/* 4 Quick Nav Shortcut Pills (2x2 Grid) */}
         <View style={styles.quickNavGrid}>
           <TouchableOpacity
             style={[
@@ -269,12 +269,12 @@ export const ProductListScreen = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={styles.navCardIcon}>🛍️</Text>
-            <View>
-              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+            <View style={styles.navCardTextCol}>
+              <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Giỏ hàng
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.primary }]}>
-                {cartSummary.totalItems} món
+              <Text style={[styles.navCardBadge, { color: colors.primary }]} numberOfLines={1}>
+                {cartSummary.totalItems} sản phẩm
               </Text>
             </View>
           </TouchableOpacity>
@@ -291,11 +291,11 @@ export const ProductListScreen = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={styles.navCardIcon}>❤️</Text>
-            <View>
-              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+            <View style={styles.navCardTextCol}>
+              <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Yêu thích
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.danger }]}>
+              <Text style={[styles.navCardBadge, { color: colors.danger }]} numberOfLines={1}>
                 {wishlist.length} đã lưu
               </Text>
             </View>
@@ -313,12 +313,12 @@ export const ProductListScreen = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={styles.navCardIcon}>🤖</Text>
-            <View>
-              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+            <View style={styles.navCardTextCol}>
+              <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Gemini AI
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.purple }]}>
-                Tư vấn VIP
+              <Text style={[styles.navCardBadge, { color: colors.purple }]} numberOfLines={1}>
+                Tư vấn chọn mua
               </Text>
             </View>
           </TouchableOpacity>
@@ -334,12 +334,12 @@ export const ProductListScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('NotificationSettings')}
             activeOpacity={0.7}
           >
-            <Text style={styles.navCardIcon}>⚡</Text>
-            <View>
-              <Text style={[styles.navCardTitle, { color: colors.text }]}>
+            <Text style={styles.navCardIcon}>⚙️</Text>
+            <View style={styles.navCardTextCol}>
+              <Text style={[styles.navCardTitle, { color: colors.text }]} numberOfLines={1}>
                 Cài đặt
               </Text>
-              <Text style={[styles.navCardBadge, { color: colors.textSecondary }]}>
+              <Text style={[styles.navCardBadge, { color: colors.textSecondary }]} numberOfLines={1}>
                 Test Matrix
               </Text>
             </View>
@@ -384,11 +384,12 @@ export const ProductListScreen = ({ navigation }) => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
           style={[styles.searchInput, { color: colors.text }]}
-          placeholder="Tìm sản phẩm, thương hiệu (iPhone, Laptop, Watch...)"
+          placeholder="Tìm theo tên sản phẩm, hãng..."
           placeholderTextColor={colors.textSecondary}
           value={searchText}
           onChangeText={setSearchText}
           returnKeyType="search"
+          autoCorrect={false}
         />
         {searchText.length > 0 ? (
           <TouchableOpacity
@@ -645,28 +646,34 @@ const styles = StyleSheet.create({
   },
   quickNavGrid: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 8,
   },
   navCardBtn: {
-    flex: 1,
+    width: '48.5%',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
     borderRadius: 12,
     borderWidth: 1,
-    gap: 6,
+    gap: 8,
   },
   navCardIcon: {
-    fontSize: 16,
+    fontSize: 18,
+  },
+  navCardTextCol: {
+    flex: 1,
   },
   navCardTitle: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
   },
   navCardBadge: {
     fontSize: 10,
     fontWeight: '600',
+    marginTop: 1,
   },
   simAlertBox: {
     flexDirection: 'row',
@@ -694,7 +701,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 14,
     paddingHorizontal: 12,
-    height: 46,
+    minHeight: 46,
+    paddingVertical: Platform.OS === 'android' ? 2 : 6,
     marginBottom: 10,
   },
   searchIcon: {
@@ -704,7 +712,10 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 13,
-    paddingVertical: 8,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
+    margin: 0,
+    textAlignVertical: 'center',
   },
   clearSearchBtn: {
     padding: 6,
