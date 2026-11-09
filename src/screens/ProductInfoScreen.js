@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/catalog/ProductInfoScreen.js - Màn hình 2: Chi tiết sản phẩm & Thêm vào giỏ (R04, R05)
+//Màn hình 2: Chi tiết sản phẩm & Thêm vào giỏ (R04, R05)
 // =========================================================================
 
 import React, { useState } from 'react';

@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/settings/AppSettingsScreen.js - Màn hình 6: Quyền Thông báo, Theme & Mô phỏng Test Matrix (R07, R09)
+// Màn hình 6: Quyền Thông báo, Theme & Mô phỏng Test Matrix (R07, R09)
 // =========================================================================
 
 import React, { useState } from 'react';

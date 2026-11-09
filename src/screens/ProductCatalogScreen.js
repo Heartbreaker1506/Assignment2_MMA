@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/catalog/ProductCatalogScreen.js - Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang (R01, R02, R03)
+// Màn hình 1: Danh mục sản phẩm, tìm kiếm, lọc & phân trang (R01, R02, R03)
 // =========================================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';

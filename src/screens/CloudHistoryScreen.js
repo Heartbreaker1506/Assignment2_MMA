@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/orders/CloudHistoryScreen.js - Màn hình 4: Firebase Wishlist & Đơn hàng đã đặt (R08)
+// Màn hình 4: Firebase Wishlist & Đơn hàng đã đặt (R08)
 // =========================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -365,7 +365,7 @@ export const CloudHistoryScreen = ({ route, navigation }) => {
                   >
                     {formatPrice(
                       Number(cartLine.product?.price || 0) *
-                        Number(cartLine.quantity || 1)
+                      Number(cartLine.quantity || 1)
                     )}
                   </Text>
                 </View>

@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/ai/GeminiAdvisorScreen.js - Màn hình 5: Trợ lý Mua sắm Gemini AI & Chống ảo giác (R10)
+// Màn hình 5: Trợ lý Mua sắm Gemini AI & Chống ảo giác (R10)
 // =========================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -56,7 +56,7 @@ export const GeminiAdvisorScreen = ({ route, navigation }) => {
   const [mode, setMode] = useState('recommend'); // 'recommend' | 'compare'
   const [userPrompt, setUserPrompt] = useState(
     route?.params?.initialPrompt ||
-      'Tư vấn cho tôi sản phẩm công nghệ có đánh giá cao và đáng tiền nhất trong cửa hàng.'
+    'Tư vấn cho tôi sản phẩm công nghệ có đánh giá cao và đáng tiền nhất trong cửa hàng.'
   );
   const [budgetText, setBudgetText] = useState(
     route?.params?.initialBudget ? String(route.params.initialBudget) : ''

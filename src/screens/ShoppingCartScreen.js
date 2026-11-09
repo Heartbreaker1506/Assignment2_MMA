@@ -1,7 +1,7 @@
 // =========================================================================
 // Dự án: SmartStore - Ứng dụng Thương mại Điện tử Tích hợp (MMA301 Assignment 2)
 // Sinh viên thực hiện: Nguyễn Minh Quân - MSSV: CE180048
-// Tệp: src/screens/cart/ShoppingCartScreen.js - Màn hình 3: Giỏ hàng, Tính tiền & Đặt hàng (R05, R06, R07, R08)
+// Màn hình 3: Giỏ hàng, Tính tiền & Đặt hàng (R05, R06, R07, R08)
 // =========================================================================
 
 import React, { useState } from 'react';
@@ -87,19 +87,17 @@ export const ShoppingCartScreen = ({ navigation }) => {
     await clearCart();
     const notifNote = res.notificationResult?.sent
       ? '🔔 Đã phát thông báo xác nhận đơn hàng thành công (Case 12).'
-      : `🔕 Không phát thông báo: ${
-          res.notificationResult?.reason ||
-          'Quyền thông báo đang bị từ chối (Case 11).'
-        }`;
+      : `🔕 Không phát thông báo: ${res.notificationResult?.reason ||
+      'Quyền thông báo đang bị từ chối (Case 11).'
+      }`;
 
     setCheckoutStatus({
       type: 'success',
       title: `Đặt hàng thành công! Mã đơn: ${res.order.id}`,
       message: `Tổng thanh toán: ${formatPrice(
         res.order.finalTotal
-      )} (${res.order.totalItems} sản phẩm) đã lưu vào Firebase (${
-        res.order.syncSource
-      }).\n${notifNote}`,
+      )} (${res.order.totalItems} sản phẩm) đã lưu vào Firebase (${res.order.syncSource
+        }).\n${notifNote}`,
     });
   };
 
