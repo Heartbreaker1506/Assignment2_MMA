@@ -52,3 +52,4 @@ flowchart TD
     FirebaseSync --> NotifTrigger[8. Bắn thông báo Đặt hàng thành công]
     NotifTrigger --> SuccessScreen([9. Màn hình hoàn tất & Lịch sử đơn hàng])
 ```
+

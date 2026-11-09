@@ -34,3 +34,4 @@
 - **Tổng số ca kiểm thử:** 15/15
 - **Tỷ lệ Pass:** 100%
 - **Tiêu chuẩn đạt được:** Thỏa mãn toàn bộ tiêu chí Rubric Mục 4 (Testing & Verification - 1.5/1.5 điểm).
+

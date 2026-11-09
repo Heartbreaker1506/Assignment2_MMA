@@ -87,3 +87,4 @@
   - Tầng State: `ProductContext` quản lý đồng thời cả `searchQuery` và `selectedCategory`.
   - Tầng UI: `ProductListScreen` gắn sự kiện `onPress` của category chips và ô search.
   - Tầng Test: Cần test 3 trường hợp: (1) Chỉ search; (2) Chỉ lọc danh mục; (3) Vừa chọn danh mục vừa search từ khóa.
+

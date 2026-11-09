@@ -35,3 +35,4 @@ export const calculateDiscountPrice = (price, discountPercentage) => {
   const discounted = p * (1 - d / 100);
   return Math.round(discounted * 100) / 100;
 };
+

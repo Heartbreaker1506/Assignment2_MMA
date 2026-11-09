@@ -99,12 +99,16 @@ export const productApi = {
    * Fetches product categories list
    */
   async fetchCategories() {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/products/categories`);
+      const response = await fetch(`${CONFIG.API_BASE_URL}/products/categories`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!response.ok) throw new Error('Categories fetch failed');
       const data = await response.json();
       return data.map((item) => (typeof item === 'string' ? item : item.slug || item.name));
     } catch (error) {
+      clearTimeout(timeoutId);
       // Fallback categories
       return ['all', 'smartphones', 'laptops', 'fragrances', 'furniture', 'groceries'];
     }

@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { productApi } from '../api/productApi';
 import { CONFIG } from '../constants/config';
+import { MOCK_PRODUCTS } from '../constants/mockProducts';
 
 const ProductContext = createContext(null);
 
 export const ProductProvider = ({ children }) => {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  // Pre-seed with mock catalog so UI renders instantaneously without waiting for network
+  const [products, setProducts] = useState(MOCK_PRODUCTS.slice(0, 10));
+  const [categories, setCategories] = useState(['all', 'smartphones', 'laptops', 'fragrances', 'furniture', 'groceries']);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   
@@ -17,14 +19,18 @@ export const ProductProvider = ({ children }) => {
   const [error, setError] = useState(null);
   
   // Pagination tracking
-  const [skip, setSkip] = useState(0);
-  const [total, setTotal] = useState(0);
+  const [skip, setSkip] = useState(10);
+  const [total, setTotal] = useState(MOCK_PRODUCTS.length);
   const [hasMore, setHasMore] = useState(true);
 
   // Load category list on mount
   useEffect(() => {
     productApi.fetchCategories()
-      .then((cats) => setCategories(['all', ...cats]))
+      .then((cats) => {
+        if (Array.isArray(cats) && cats.length > 0) {
+          setCategories(['all', ...cats.filter((c) => c !== 'all')]);
+        }
+      })
       .catch((err) => console.warn('Failed to load categories:', err.message));
   }, []);
 
@@ -32,7 +38,10 @@ export const ProductProvider = ({ children }) => {
    * Main fetch function (Page 0)
    */
   const loadProducts = useCallback(async ({ search = searchQuery, category = selectedCategory } = {}) => {
-    setLoading(true);
+    // Only show full loading spinner if we have 0 products
+    if (products.length === 0) {
+      setLoading(true);
+    }
     setError(null);
     setSkip(0);
 
@@ -50,11 +59,14 @@ export const ProductProvider = ({ children }) => {
       setHasMore(result.hasMore);
     } catch (err) {
       console.error('[ProductContext] Load products error:', err.message);
-      setError(err.message || 'Lỗi kết nối khi tải danh sách sản phẩm');
+      // Keep existing products if available, only set error if completely empty
+      if (products.length === 0) {
+        setError(err.message || 'Lỗi kết nối khi tải danh sách sản phẩm');
+      }
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, products.length]);
 
   /**
    * Pull-to-refresh handler
@@ -112,7 +124,6 @@ export const ProductProvider = ({ children }) => {
       setHasMore(result.hasMore);
     } catch (err) {
       console.warn('[ProductContext] Load more error:', err.message);
-      // We don't crash or erase existing items on loadMore failure
     } finally {
       setIsFetchingMore(false);
     }
@@ -133,7 +144,6 @@ export const ProductProvider = ({ children }) => {
 
   const handleCategorySelect = useCallback((cat) => {
     setSelectedCategory(cat);
-    // category change triggers useEffect
   }, []);
 
   const retry = useCallback(() => {

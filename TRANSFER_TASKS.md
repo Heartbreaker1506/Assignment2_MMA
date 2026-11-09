@@ -66,3 +66,4 @@ const toggleWishlist = useCallback(async (product) => {
   });
 }, []);
 ```
+

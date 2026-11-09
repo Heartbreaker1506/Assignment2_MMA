@@ -156,3 +156,4 @@ export const MOCK_PRODUCTS = [
     images: ['https://cdn.dummyjson.com/products/images/laptops/Apple%20MacBook%20Pro%2014%20Inch%20Space%20Grey/1.png'],
   },
 ];
+

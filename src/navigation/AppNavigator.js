@@ -26,3 +26,4 @@ export const AppNavigator = () => {
     </Stack.Navigator>
   );
 };
+

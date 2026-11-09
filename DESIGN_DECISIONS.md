@@ -37,3 +37,4 @@
       ▼   │
 [External Providers & Persistence] (DummyJSON API, Firebase Cloud, AsyncStorage, Gemini API)
 ```
+

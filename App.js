@@ -2,7 +2,7 @@ import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import { ProductProvider } from './src/context/ProductContext';
 import { CartProvider } from './src/context/CartContext';
@@ -20,11 +20,9 @@ export default function App() {
           <CartProvider>
             <WishlistProvider>
               <NavigationContainer>
-                <View style={styles.container}>
-                  <AppNavigator />
-                  <NotificationBanner />
-                </View>
+                <AppNavigator />
               </NavigationContainer>
+              <NotificationBanner />
             </WishlistProvider>
           </CartProvider>
         </ProductProvider>
@@ -37,9 +35,5 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.card,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
   },
 });

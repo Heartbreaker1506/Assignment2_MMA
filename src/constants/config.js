@@ -2,7 +2,7 @@ export const CONFIG = {
   // Remote Product Catalog API (DummyJSON)
   API_BASE_URL: process.env.EXPO_PUBLIC_PRODUCT_API_BASE_URL || 'https://dummyjson.com',
   DEFAULT_PAGE_SIZE: 10,
-  REQUEST_TIMEOUT_MS: 10000,
+  REQUEST_TIMEOUT_MS: 3500,
 
   // Firebase Configuration (supports environment variables or local fallback)
   FIREBASE: {
@@ -31,3 +31,4 @@ export const CONFIG = {
     CLASS_CODE: 'MMA301',
   },
 };
+

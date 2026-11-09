@@ -135,3 +135,4 @@ Khi thêm 2 sản phẩm có giá lẻ vào giỏ hàng (ví dụ: sản phẩm 
 ### 2.6 Kiểm thử lại & Hồi quy (Retest & Regression)
 - **Thực hiện:** Thêm 0 sản phẩm, 1 sản phẩm, và 5 sản phẩm có giá số thập phân vào giỏ hàng. Thử tăng giảm số lượng và xóa từng món.
 - **Kết quả:** Tổng tiền luôn tự động cập nhật chính xác tuyệt đối theo thời gian thực (ví dụ `$164.99`). Khi giỏ trống, tổng tiền lập tức về `$0.00`. Không bao giờ xảy ra lỗi nối chuỗi. **Pass 100%.**
+

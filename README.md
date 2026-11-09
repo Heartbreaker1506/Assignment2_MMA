@@ -149,3 +149,4 @@ eas build -p android --profile preview
 ## 7. Giới hạn & Phát triển Tương lai (Limitations)
 - Sử dụng mô phỏng cổng thanh toán (COD / Chuyển khoản VietQR) thay vì tích hợp cổng thanh toán thực tế có thu phí (đúng theo giới hạn đề bài Mục 1.4).
 - Ứng dụng tối ưu hóa giao diện cho điện thoại di động ở cả hai hệ điều hành Android và iOS.
+
